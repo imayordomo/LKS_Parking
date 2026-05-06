@@ -1,0 +1,165 @@
+package com.lksnext.ParkingIMayordomo
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.core.text.color
+import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
+import com.lksnext.ParkingIMayordomo.data.model.User
+import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepositoryImpl
+import com.lksnext.ParkingIMayordomo.ui.pages.*
+import com.lksnext.ParkingIMayordomo.ui.theme.LKS_ParkingTheme
+import com.lksnext.ParkingIMayordomo.ui.viewmodel.*
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.PARAM_SHOW_VEHICLE_ALERT
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_EDIT_RESERVATION
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_FORGOT_PASSWORD
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HELP
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_LANDING
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_LOGIN
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_NEW_RESERVATION
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_NOTIFICATIONS
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_PROFILE
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_REGISTER
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_REPORT
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_VIEW_PARKING
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.setBackgroundDrawableResource(android.R.color.transparent)
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            LKS_ParkingTheme {
+                AppNavigation()
+            }
+        }
+    }
+}
+
+@Composable
+fun ProtectedRoute(
+    user: User?,
+    navController: NavHostController,
+    content: @Composable () -> Unit
+) {
+    if (user == null) {
+        LaunchedEffect(Unit) {
+            navController.navigate(ROUTE_LANDING) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    } else {
+        content()
+    }
+}
+
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+    val repository = remember { ParkingRepositoryImpl() }
+    val factory = remember { ViewModelFactory(repository) }
+    val currentUser by repository.user.collectAsState()
+
+    NavHost(
+        navController = navController,
+        startDestination = ROUTE_LANDING,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        // Public Routes
+        composable(ROUTE_LANDING) {
+            Landing(viewModel = viewModel(factory = factory), 
+                onLoginClick = { navController.navigate(ROUTE_LOGIN) }, 
+                onRegisterClick = { navController.navigate(ROUTE_REGISTER) })
+        }
+        composable(ROUTE_LOGIN) {
+            Login(viewModel = viewModel(factory = factory),
+                onRegisterClick = { navController.navigate(ROUTE_REGISTER) },
+                onForgotPasswordClick = { navController.navigate(ROUTE_FORGOT_PASSWORD) },
+                onLoginSuccess = { navController.navigate(ROUTE_DASHBOARD) { popUpTo(ROUTE_LANDING) { inclusive = true } } })
+        }
+        composable(ROUTE_REGISTER) {
+            Register(viewModel = viewModel(factory = factory),
+                onBackToLogin = { navController.navigate(ROUTE_LOGIN) },
+                onRegisterSuccess = { navController.navigate(ROUTE_DASHBOARD) { popUpTo(ROUTE_LANDING) { inclusive = true } } })
+        }
+        composable(ROUTE_FORGOT_PASSWORD) {
+            ForgotPassword(viewModel = viewModel(factory = factory), onBackToLogin = { navController.popBackStack() })
+        }
+        
+        // Private Routes Protected by Auth Guard
+        composable(ROUTE_DASHBOARD) {
+            ProtectedRoute(currentUser, navController) {
+                Dashboard(viewModel = viewModel(factory = factory), onNavigate = { navController.navigate(it) })
+            }
+        }
+        composable(ROUTE_HISTORY) {
+            ProtectedRoute(currentUser, navController) {
+                History(viewModel = viewModel(factory = factory), onNavigate = { navController.navigate(it) })
+            }
+        }
+        composable("${ROUTE_PROFILE}?${PARAM_SHOW_VEHICLE_ALERT}={showVehicleAlert}",
+            arguments = listOf(navArgument("showVehicleAlert") { type = NavType.BoolType; defaultValue = false })
+        ) { backStackEntry ->
+            ProtectedRoute(currentUser, navController) {
+                Profile(viewModel = viewModel(factory = factory), 
+                    onNavigate = { navController.navigate(it) }, 
+                    showVehicleAlertInit = backStackEntry.arguments?.getBoolean("showVehicleAlert") ?: false)
+            }
+        }
+        composable(ROUTE_VIEW_PARKING) {
+            ProtectedRoute(currentUser, navController) {
+                ViewParking(viewModel = viewModel(factory = factory), onNavigate = { navController.navigate(it) })
+            }
+        }
+        composable(ROUTE_NOTIFICATIONS) {
+            ProtectedRoute(currentUser, navController) {
+                Notifications(viewModel = viewModel(factory = factory), onNavigate = { navController.navigate(it) })
+            }
+        }
+        composable(ROUTE_REPORT) {
+            ProtectedRoute(currentUser, navController) {
+                Report(viewModel = viewModel(factory = factory), onNavigate = { navController.navigate(it) })
+            }
+        }
+        composable(ROUTE_HELP) {
+            ProtectedRoute(currentUser, navController) {
+                Help(viewModel = viewModel(factory = factory), onNavigate = { navController.navigate(it) })
+            }
+        }
+        composable("${ROUTE_NEW_RESERVATION}?spot={spot}&date={date}",
+            arguments = listOf(
+                navArgument("spot") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("date") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) { backStackEntry ->
+            ProtectedRoute(currentUser, navController) {
+                NewReservation(viewModel = viewModel(factory = factory), onNavigate = { navController.navigate(it) },
+                    prefilledSpot = backStackEntry.arguments?.getInt("spot")?.takeIf { it != -1 },
+                    prefilledDate = backStackEntry.arguments?.getString("date")?.takeIf { it.isNotEmpty() })
+            }
+        }
+        composable("${ROUTE_EDIT_RESERVATION}/{reservationId}",
+            arguments = listOf(navArgument("reservationId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            ProtectedRoute(currentUser, navController) {
+                EditReservation(viewModel = viewModel(factory = factory), 
+                    reservationId = backStackEntry.arguments?.getString("reservationId") ?: "", 
+                    onNavigate = { navController.navigate(it) })
+            }
+        }
+    }
+}

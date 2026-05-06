@@ -1,0 +1,31 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Grupo para reducir el tamaño y centrar la P -->
+    <group
+        android:translateX="16.2"
+        android:translateY="16.2"
+        android:scaleX="0.7"
+        android:scaleY="0.7">
+        <path
+            android:fillColor="#FF6D00"
+            android:pathData="M28,16
+                h34
+                c14,0 22,12 22,26
+                c0,14 -8,26 -22,26
+                H44
+                v24
+                H28
+                V16
+                z
+                M44,30
+                v24
+                h18
+                c6,0 10,-4 10,-12
+                c0,-8 -4,-12 -10,-12
+                H44
+                z" />
+    </group>
+</vector>
