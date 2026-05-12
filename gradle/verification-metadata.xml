@@ -7,7 +7,7 @@
       <trusted-artifacts>
          <trust regex="true" file=".*-sources\.jar" />
          <trust regex="true" file=".*-javadoc\.jar" />
-
+         <trust group="org.codehaus.groovy" />
          <trust group="^com\.google($|(\..*))" regex="true" />
          <trust group="^org\.apache($|(\..*))" regex="true" />
          <trust group="^org\.sonarsource($|(\..*))" regex="true" />
