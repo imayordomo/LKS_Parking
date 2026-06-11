@@ -12,7 +12,7 @@
     <string name="create_account">Crear Cuenta</string>
     <string name="full_name_label">Nombre completo *</string>
     <string name="confirm_password_label">Confirmar contraseña *</string>
-    <string name="corporate_email_hint">Usa tu correo corporativo (@lks.com)</string>
+    <string name="corporate_email_hint">Usa tu correo corporativo (@lksnext.com)</string>
     <string name="already_have_account">¿Ya tienes cuenta?</string>
     <string name="login_link">Inicia sesión</string>
 
@@ -20,23 +20,19 @@
     <string name="login_loading">Iniciando sesión…</string>
     <string name="error_required_fields">Todos los campos son obligatorios</string>
     <string name="error_invalid_credentials">Email o contraseña incorrectos</string>
-    <string name="corporate_suffix"> (@lks.com)</string>
-    <string name="email_label_with_corporate">Email * (@lks.com)</string>
+    <string name="corporate_suffix"> (@lksnext.com)</string>
+    <string name="email_label_with_corporate">Email * (@lksnext.com)</string>
 
     <!-- Forgot Password -->
     <string name="recover_password_title">Recuperar Contraseña</string>
-    <string name="recover_password_subtitle">Ingresa tu email y te enviaremos un código de recuperación</string>
-    <string name="send_code_button">Enviar Código</string>
+    <string name="recover_password_subtitle">Ingresa tu email y te enviaremos un enlace de recuperación</string>
+    <string name="send_email_button">Enviar Enlace</string>
     <string name="back_to_login">Volver al inicio de sesión</string>
-    <string name="verify_code_subtitle">Ingresa el código enviado a tu correo</string>
-    <string name="code_sent_success">Código enviado a tu correo electrónico</string>
-    <string name="recovery_code_label">Código de recuperación *</string>
-    <string name="demo_code_hint">Usa el código 123456 para este demo</string>
-    <string name="verify_code_button">Verificar Código</string>
-    <string name="resend_code">Volver a enviar código</string>
+    <string name="email_sent_instructions">Revisa tu bandeja de entrada para restablecer tu contraseña</string>
+    <string name="reset_email_sent_success">Enlace de recuperación enviado</string>
+    <string name="check_inbox_hint">Si no recibes el correo en unos minutos, revisa tu carpeta de spam.</string>
     <string name="error_enter_email">Por favor, introduce tu email</string>
-    <string name="error_corporate_only">Solo se aceptan correos corporativos @lks.com</string>
-    <string name="error_invalid_code">Código incorrecto</string>
+    <string name="error_corporate_only">Solo se aceptan correos corporativos @lksnext.com</string>
     <string name="error_invalid_email_format">Formato de email no válido</string>
 
     <!-- Home Screen (Dashboard) -->
@@ -163,13 +159,13 @@
     <string name="faq_q6">¿Cómo añado un vehículo?</string>
     <string name="faq_a6">Ve a \"Perfil y Vehículos\" y pulsa el botón \"Añadir Vehículo\". Selecciona el tipo de vehículo (coche, eléctrico, moto o discapacitado) e introduce la matrícula. Debes tener al menos un vehículo registrado para poder hacer reservas.</string>
     <string name="faq_q7">¿Cómo reporto un problema?</string>
-    <string name="faq_a7">Utiliza la sección \"Reportar\" del menú. Selecciona el tipo de problema (limpieza, daños, iluminación, seguridad u otro), indica el número de plaza si aplica, y describe el problema con el máximo detalle posible.</string>
+    <string name="faq_a7">Utiliza la sección \"Reportar\" del menú. Selecciona el tipo de problema (limpieza, daños, iluminación, seguridad u otro), indica el número de plaza si aplica, y describe el problema con el mayor detalle posible.</string>
     <string name="faq_q8">¿Cómo funcionan las notificaciones?</string>
     <string name="faq_a8">La aplicación te mantiene informado con notificaciones sobre tus reservas próximas, recordatorios y confirmaciones. Puedes ver todas tus notificaciones haciendo clic en el icono de campana en la barra superior.</string>
     <string name="faq_q9">¿Puedo cancelar una reserva?</string>
     <string name="faq_a9">Sí, puedes cancelar tus reservas desde \"Mis Reservas\". Simplemente expande la reserva que quieres cancelar y pulsa el botón de eliminar. Ten en cuenta que esta acción no se puede deshacer.</string>
-    <string name="faq_q10">¿Qué hago si mi correo no es @lks.com?</string>
-    <string name="faq_a10">Solo los empleados con correo corporativo @lks.com pueden registrarse en el sistema. Si necesitas acceso y no tienes este correo, contacta con el departamento de facilities.</string>
+    <string name="faq_q10">¿Qué hago si mi correo no es @lksnext.com?</string>
+    <string name="faq_a10">Solo los empleados con correo corporativo @lksnext.com pueden registrarse en el sistema. Si necesitas acceso y no tienes este correo, contacta con el departamento de facilities.</string>
     <string name="more_help_title">¿Necesitas más ayuda?</string>
     <string name="more_help_desc">Contacta con el departamento de facilities en facilities@empresa.com o llama al ext. 1234</string>
 

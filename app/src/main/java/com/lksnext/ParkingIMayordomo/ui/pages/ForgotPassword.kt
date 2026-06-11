@@ -8,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,8 +28,7 @@ fun ForgotPassword(
     modifier: Modifier = Modifier
 ) {
     val email by viewModel.email.collectAsState()
-    val code by viewModel.code.collectAsState()
-    val isCodeSent by viewModel.isCodeSent.collectAsState()
+    val isEmailSent by viewModel.isEmailSent.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorResId by viewModel.errorResId.collectAsState()
 
@@ -75,8 +73,8 @@ fun ForgotPassword(
             )
 
             Text(
-                text = if (!isCodeSent) stringResource(R.string.recover_password_subtitle) 
-                       else stringResource(R.string.verify_code_subtitle),
+                text = if (!isEmailSent) stringResource(R.string.recover_password_subtitle) 
+                       else stringResource(R.string.email_sent_instructions),
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.padding(top = 8.dp)
@@ -100,7 +98,7 @@ fun ForgotPassword(
                 }
             }
 
-            if (!isCodeSent) {
+            if (!isEmailSent) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Email,
@@ -129,7 +127,7 @@ fun ForgotPassword(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
-                    onClick = { viewModel.sendCode() },
+                    onClick = { viewModel.sendResetEmail() },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     shape = RoundedCornerShape(12.dp),
@@ -138,7 +136,7 @@ fun ForgotPassword(
                     if (isLoading) {
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
                     } else {
-                        Text(stringResource(R.string.send_code_button), fontSize = 16.sp)
+                        Text(stringResource(R.string.send_email_button), fontSize = 16.sp)
                     }
                 }
             } else {
@@ -155,62 +153,17 @@ fun ForgotPassword(
                         tint = SuccessGreen
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.code_sent_success), color = SuccessGreen, fontSize = 14.sp)
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.VpnKey,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        OutlinedTextField(
-                            value = code,
-                            onValueChange = { viewModel.onCodeChange(it) },
-                            label = { Text(stringResource(R.string.recovery_code_label)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                focusedLabelColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                            ),
-                            singleLine = true,
-                            enabled = !isLoading
-                        )
-                        Text(
-                            stringResource(R.string.demo_code_hint),
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.padding(start = 8.dp, top = 4.dp)
-                        )
-                    }
+                    Text(stringResource(R.string.reset_email_sent_success), color = SuccessGreen, fontSize = 14.sp)
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
-
-                Button(
-                    onClick = { viewModel.verifyCode(onSuccess = onBackToLogin) },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    shape = RoundedCornerShape(12.dp),
-                    enabled = !isLoading
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
-                    } else {
-                        Text(stringResource(R.string.verify_code_button), fontSize = 16.sp)
-                    }
-                }
-
-                TextButton(onClick = { viewModel.resetState() }, enabled = !isLoading) {
-                    Text(stringResource(R.string.resend_code), color = MaterialTheme.colorScheme.primary)
-                }
+                
+                Text(
+                    text = stringResource(R.string.check_inbox_hint),
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))

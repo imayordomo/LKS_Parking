@@ -200,7 +200,7 @@ fun Register(
                     
                     if (trimmedName.isBlank() || trimmedEmail.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
                         validationErrorResId = R.string.error_required_fields
-                    } else if (!trimmedEmail.endsWith("@lks.com")) {
+                    } else if (!trimmedEmail.endsWith("@lksnext.com")) {
                         validationErrorResId = R.string.error_corporate_only
                     } else if (password != confirmPassword) {
                         validationErrorResId = R.string.error_passwords_dont_match
