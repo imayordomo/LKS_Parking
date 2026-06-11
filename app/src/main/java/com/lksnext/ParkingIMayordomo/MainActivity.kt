@@ -7,7 +7,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.core.text.color
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -16,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
+import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepositoryImpl
 import com.lksnext.ParkingIMayordomo.ui.pages.*
@@ -73,10 +73,15 @@ fun AppNavigation() {
     val repository = remember { ParkingRepositoryImpl() }
     val factory = remember { ViewModelFactory(repository) }
     val currentUser by repository.user.collectAsState()
+    
+    // Decidimos el punto de inicio basándonos en si ya hay un usuario logueado
+    val startRoute = remember { 
+        if (AuthManager.user != null) ROUTE_DASHBOARD else ROUTE_LANDING 
+    }
 
     NavHost(
         navController = navController,
-        startDestination = ROUTE_LANDING,
+        startDestination = startRoute,
         modifier = Modifier.fillMaxSize()
     ) {
         // Public Routes

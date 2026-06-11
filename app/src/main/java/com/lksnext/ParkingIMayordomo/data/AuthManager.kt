@@ -3,178 +3,106 @@ package com.lksnext.ParkingIMayordomo.data
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.userProfileChangeRequest
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.data.model.*
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
 
 object AuthManager {
+    private val auth = FirebaseAuth.getInstance()
+    private const val CORPORATE_DOMAIN = "@lksnext.com"
+    private const val TESTER_EMAIL = "imayordomo004@ikasle.ehu.eus"
+    private const val DEFAULT_DATE = "2026-05-06"
+    
     var user by mutableStateOf<User?>(null)
     var reservations by mutableStateOf<List<Reservation>>(emptyList())
     var vehicles by mutableStateOf<List<Vehicle>>(emptyList())
     var notifications by mutableStateOf<List<Notification>>(emptyList())
 
+    // Patrón que permite el dominio corporativo o el email de tester
     private val EMAIL_PATTERN = Pattern.compile(
-        "[a-zA-Z0-9+._%+-]{1,256}" +
-                "@" +
-                "[a-zA-Z0-9][a-zA-Z0-9-]{0,64}" +
-                "(" +
-                "\\." +
-                "[a-zA-Z0-9][a-zA-Z0-9-]{0,25}" +
-                ")+"
-    )
-
-    private val mockUsers = mutableListOf(
-        mutableMapOf("id" to "user@lks.com", "email" to "user@lks.com", "password" to "123456Aa", "name" to "Usuario Demo", "profileImage" to ""),
-        mutableMapOf("id" to "juan.perez@lks.com", "email" to "juan.perez@lks.com", "password" to "123456Aa", "name" to "Juan Pérez", "profileImage" to ""),
-        mutableMapOf("id" to "maria.garcia@lks.com", "email" to "maria.garcia@lks.com", "password" to "123456Aa", "name" to "María García", "profileImage" to ""),
-        mutableMapOf("id" to "aimar@lks.com", "email" to "aimar@lks.com", "password" to "123456Aa", "name" to "Aimar", "profileImage" to ""),
-        mutableMapOf("id" to "iker@lks.com", "email" to "iker@lks.com", "password" to "123456Aa", "name" to "Iker", "profileImage" to "")
-    )
-
-    private val allMockReservations = listOf(
-        // === SEMANA DEL 06 AL 15 DE MAYO 2026 ===
-
-        // Miércoles 06 de Mayo
-        Reservation("m06-1", 12, "2026-05-06", "08:00", "17:00", "user@lks.com", "user-v1", "Usuario Demo", "ABC-1234"),
-        Reservation("m06-2", 3, "2026-05-06", "09:00", "14:00", "aimar@lks.com", "aimar-v1", "Aimar", "1234-ABC"),
-        Reservation("m06-3", 8, "2026-05-06", "08:30", "16:30", "maria.garcia@lks.com", "maria-v2", "María García", "4444-MGR"),
-        Reservation("m06-4", 25, "2026-05-06", "07:00", "15:00", "juan.perez@lks.com", "juan-v1", "Juan Pérez", "1111-JPN"),
-        Reservation("m06-5", 7, "2026-05-06", "10:00", "18:00", "iker@lks.com", "iker-v3", "Iker", "6666-DIS"),
-        Reservation("m06-6", 1, "2026-05-06", "08:00", "18:00", "ext1@lks.com", "ext-1", "Paco", "1000-EXT"),
-        Reservation("m06-7", 15, "2026-05-06", "09:00", "19:00", "ext2@lks.com", "ext-2", "Lucía", "2000-EXT"),
-        Reservation("m06-8", 40, "2026-05-06", "08:00", "14:00", "ext3@lks.com", "ext-3", "Rafa", "3000-EXT"),
-        Reservation("m06-9", 22, "2026-05-06", "08:30", "17:30", "ext4@lks.com", "ext-4", "Elena", "4000-EXT"),
-        Reservation("m06-10", 35, "2026-05-06", "09:00", "18:00", "ext5@lks.com", "ext-5", "Mikel", "5000-EXT"),
-
-        // Jueves 07 de Mayo
-        Reservation("m07-1", 20, "2026-05-07", "08:00", "18:00", "aimar@lks.com", "aimar-v3", "Aimar", "9999-DEF"),
-        Reservation("m07-2", 5, "2026-05-07", "09:30", "13:30", "user@lks.com", "user-v1", "Usuario Demo", "ABC-1234"),
-        Reservation("m07-3", 18, "2026-05-07", "08:00", "16:00", "maria.garcia@lks.com", "maria-v1", "María García", "3333-MGR"),
-        Reservation("m07-4", 24, "2026-05-07", "10:00", "19:00", "iker@lks.com", "iker-v1", "Iker", "7777-IKR"),
-        Reservation("m07-5", 30, "2026-05-07", "07:30", "15:30", "juan.perez@lks.com", "juan-v2", "Juan Pérez", "2222-JPN"),
-        Reservation("m07-6", 2, "2026-05-07", "08:00", "20:00", "ext6@lks.com", "ext-6", "Elena", "6000-EXT"),
-        Reservation("m07-7", 11, "2026-05-07", "09:00", "18:00", "ext7@lks.com", "ext-7", "Mikel", "7000-EXT"),
-        Reservation("m07-8", 42, "2026-05-07", "08:30", "14:30", "ext8@lks.com", "ext-8", "Ane", "8000-EXT"),
-
-        // Viernes 08 de Mayo
-        Reservation("m08-1", 4, "2026-05-08", "08:00", "15:00", "aimar@lks.com", "aimar-v2", "Aimar", "5678-XYZ"),
-        Reservation("m08-2", 31, "2026-05-08", "09:00", "17:00", "iker@lks.com", "iker-v3", "Iker", "6666-DIS"),
-        Reservation("m08-3", 9, "2026-05-08", "08:30", "18:30", "user@lks.com", "user-v2", "Usuario Demo", "XYZ-5678"),
-        Reservation("m08-4", 45, "2026-05-08", "07:00", "14:00", "ext1@lks.com", "ext-1", "Paco", "1000-EXT"),
-        Reservation("m08-5", 22, "2026-05-08", "10:00", "19:00", "juan.perez@lks.com", "juan-v1", "Juan Pérez", "1111-JPN"),
-        Reservation("m08-6", 1, "2026-05-08", "08:00", "13:00", "ext2@lks.com", "ext-2", "Lucía", "2000-EXT"),
-        Reservation("m08-7", 15, "2026-05-08", "14:00", "20:00", "ext3@lks.com", "ext-3", "Rafa", "3000-EXT"),
-
-        // Sábado 09 de Mayo
-        Reservation("m09-1", 12, "2026-05-09", "10:00", "22:00", "user@lks.com", "user-v1", "Usuario Demo", "ABC-1234"),
-        Reservation("m09-2", 2, "2026-05-09", "09:00", "14:00", "ext4@lks.com", "ext-4", "Elena", "4000-EXT"),
-        Reservation("m09-3", 44, "2026-05-09", "11:00", "16:00", "ext5@lks.com", "ext-5", "Mikel", "5000-EXT"),
-
-        // Domingo 10 de Mayo
-        Reservation("m10-1", 8, "2026-05-10", "10:00", "14:00", "maria.garcia@lks.com", "maria-v2", "María García", "4444-MGR"),
-        Reservation("m10-2", 25, "2026-05-10", "16:00", "20:00", "juan.perez@lks.com", "juan-v2", "Juan Pérez", "2222-JPN"),
-        Reservation("m10-3", 1, "2026-05-10", "08:00", "20:00", "ext6@lks.com", "ext-6", "Elena", "6000-EXT"),
-
-        // Lunes 11 de Mayo
-        Reservation("m11-1", 10, "2026-05-11", "08:00", "18:00", "user@lks.com", "user-v1", "Usuario Demo", "ABC-1234"),
-        Reservation("m11-2", 33, "2026-05-11", "09:00", "16:00", "maria.garcia@lks.com", "maria-v1", "María García", "3333-MGR"),
-        Reservation("m11-3", 2, "2026-05-11", "08:30", "14:30", "aimar@lks.com", "aimar-v1", "Aimar", "1234-ABC"),
-        Reservation("m11-4", 16, "2026-05-11", "07:30", "15:30", "iker@lks.com", "iker-v2", "Iker", "8888-ELC"),
-        Reservation("m11-5", 48, "2026-05-11", "10:00", "19:00", "juan.perez@lks.com", "juan-v1", "Juan Pérez", "1111-JPN"),
-        Reservation("m11-6", 5, "2026-05-11", "08:00", "18:00", "ext7@lks.com", "ext-7", "Mikel", "7000-EXT"),
-        Reservation("m11-7", 21, "2026-05-11", "09:00", "18:00", "ext8@lks.com", "ext-8", "Ane", "8000-EXT"),
-        Reservation("m11-8", 41, "2026-05-11", "08:00", "12:00", "ext9@lks.com", "ext-9", "Julen", "9000-EXT"),
-        Reservation("m11-9", 3, "2026-05-11", "08:00", "18:00", "ext1@lks.com", "ext-1", "Paco", "1000-EXT"),
-        Reservation("m11-10", 13, "2026-05-11", "09:00", "17:00", "ext2@lks.com", "ext-2", "Lucía", "2000-EXT"),
-
-        // Martes 12 de Mayo
-        Reservation("m12-1", 14, "2026-05-12", "08:00", "17:00", "aimar@lks.com", "aimar-v3", "Aimar", "9999-DEF"),
-        Reservation("m12-2", 23, "2026-05-12", "09:30", "18:30", "user@lks.com", "user-v2", "Usuario Demo", "XYZ-5678"),
-        Reservation("m12-3", 1, "2026-05-12", "08:00", "16:00", "maria.garcia@lks.com", "maria-v1", "María García", "3333-MGR"),
-        Reservation("m12-4", 7, "2026-05-12", "10:00", "19:00", "iker@lks.com", "iker-v3", "Iker", "6666-DIS"),
-        Reservation("m12-5", 12, "2026-05-12", "07:30", "15:30", "ext3@lks.com", "ext-3", "Rafa", "3000-EXT"),
-        Reservation("m12-6", 50, "2026-05-12", "08:00", "18:00", "ext4@lks.com", "ext-4", "Elena", "4000-EXT"),
-        Reservation("m12-7", 32, "2026-05-12", "09:00", "18:00", "ext5@lks.com", "ext-5", "Mikel", "5000-EXT"),
-        Reservation("m12-8", 22, "2026-05-12", "08:00", "14:00", "ext6@lks.com", "ext-6", "Ane", "6000-EXT"),
-
-        // Miércoles 13 de Mayo
-        Reservation("m13-1", 42, "2026-05-13", "08:00", "18:00", "maria.garcia@lks.com", "maria-v2", "María García", "4444-MGR"),
-        Reservation("m13-2", 3, "2026-05-13", "09:00", "15:00", "juan.perez@lks.com", "juan-v2", "Juan Pérez", "2222-JPN"),
-        Reservation("m13-3", 27, "2026-05-13", "08:30", "16:30", "aimar@lks.com", "aimar-v3", "Aimar", "9999-DEF"),
-        Reservation("m13-4", 15, "2026-05-13", "07:00", "14:00", "user@lks.com", "user-v1", "Usuario Demo", "ABC-1234"),
-        Reservation("m13-5", 11, "2026-05-13", "10:00", "19:00", "ext7@lks.com", "ext-7", "Elena", "7000-EXT"),
-        Reservation("m13-6", 21, "2026-05-13", "08:00", "18:00", "ext8@lks.com", "ext-8", "Mikel", "8000-EXT"),
-        Reservation("m13-7", 31, "2026-05-13", "09:00", "18:00", "ext9@lks.com", "ext-9", "Ane", "9000-EXT"),
-        Reservation("m13-8", 41, "2026-05-13", "08:00", "12:00", "ext1@lks.com", "ext-1", "Julen", "1000-EXT"),
-
-        // Jueves 14 de Mayo
-        Reservation("m14-1", 5, "2026-05-14", "08:00", "18:00", "ext2@lks.com", "ext-2", "Elena", "2000-EXT"),
-        Reservation("m14-2", 15, "2026-05-14", "09:00", "17:00", "ext3@lks.com", "ext-3", "Mikel", "3000-EXT"),
-        Reservation("m14-3", 25, "2026-05-14", "08:30", "16:30", "ext4@lks.com", "ext-4", "Ane", "4000-EXT"),
-        Reservation("m14-4", 35, "2026-05-14", "07:30", "15:30", "user@lks.com", "user-v1", "Usuario Demo", "ABC-1234"),
-        Reservation("m14-5", 2, "2026-05-14", "10:00", "19:00", "juan.perez@lks.com", "juan-v2", "Juan Pérez", "2222-JPN"),
-        Reservation("m14-6", 11, "2026-05-14", "08:00", "14:00", "aimar@lks.com", "aimar-v1", "Aimar", "1234-ABC"),
-        Reservation("m14-7", 21, "2026-05-14", "09:00", "18:00", "iker@lks.com", "iker-v1", "Iker", "7777-IKR"),
-
-        // Viernes 15 de Mayo (Ocupación Máxima)
-        Reservation("m15-1", 8, "2026-05-15", "08:00", "18:00", "aimar@lks.com", "aimar-v2", "Aimar", "5678-XYZ"),
-        Reservation("m15-2", 21, "2026-05-15", "09:30", "17:30", "iker@lks.com", "iker-v1", "Iker", "7777-IKR"),
-        Reservation("m15-3", 10, "2026-05-15", "08:30", "15:30", "user@lks.com", "user-v2", "Usuario Demo", "XYZ-5678"),
-        Reservation("m15-4", 43, "2026-05-15", "07:00", "14:00", "ext5@lks.com", "ext-5", "Lucía", "5000-EXT"),
-        Reservation("m15-5", 33, "2026-05-15", "10:00", "19:00", "ext6@lks.com", "ext-6", "Rafa", "6000-EXT"),
-        Reservation("m15-6", 13, "2026-05-15", "08:00", "18:00", "ext7@lks.com", "ext-7", "Elena", "7000-EXT"),
-        Reservation("m15-7", 23, "2026-05-15", "09:00", "18:00", "ext8@lks.com", "ext-8", "Mikel", "8000-EXT"),
-        Reservation("m15-8", 3, "2026-05-15", "08:00", "12:00", "ext9@lks.com", "ext-9", "Ane", "9000-EXT"),
-        Reservation("m15-9", 9, "2026-05-15", "08:30", "16:30", "maria.garcia@lks.com", "maria-v2", "María García", "4444-MGR"),
-        Reservation("m15-10", 1, "2026-05-15", "07:00", "15:00", "ext1@lks.com", "ext-1", "Paco", "1000-EXT"),
-        Reservation("m15-11", 15, "2026-05-15", "08:00", "18:00", "ext2@lks.com", "ext-2", "Lucía", "2000-EXT"),
-        Reservation("m15-12", 25, "2026-05-15", "09:00", "17:00", "ext3@lks.com", "ext-3", "Rafa", "3000-EXT"),
-        Reservation("m15-13", 35, "2026-05-15", "08:30", "16:30", "ext4@lks.com", "ext-4", "Elena", "4000-EXT"),
-        Reservation("m15-14", 45, "2026-05-15", "07:30", "15:30", "ext5@lks.com", "ext-5", "Mikel", "5000-EXT")
+        "[a-zA-Z0-9._%+-]{1,256}(?:${Pattern.quote(CORPORATE_DOMAIN)}|${Pattern.quote(TESTER_EMAIL)})"
     )
 
     private val mockVehiclesByUser = mutableMapOf(
-        "user@lks.com" to mutableListOf(Vehicle("user-v1", VehicleType.CAR, "ABC-1234"), Vehicle("user-v2", VehicleType.ELECTRIC, "XYZ-5678")),
-        "juan.perez@lks.com" to mutableListOf(Vehicle("juan-v1", VehicleType.CAR, "1111-JPN"), Vehicle("juan-v2", VehicleType.CAR, "2222-JPN")),
-        "maria.garcia@lks.com" to mutableListOf(Vehicle("maria-v1", VehicleType.CAR, "3333-MGR"), Vehicle("maria-v2", VehicleType.ELECTRIC, "4444-MGR")),
-        "aimar@lks.com" to mutableListOf(
+        "user$CORPORATE_DOMAIN" to mutableListOf(Vehicle("user-v1", VehicleType.CAR, "ABC-1234"), Vehicle("user-v2", VehicleType.ELECTRIC, "XYZ-5678")),
+        "imayordomo$CORPORATE_DOMAIN" to mutableListOf(Vehicle("juan-v1", VehicleType.CAR, "1111-JPN"), Vehicle("juan-v2", VehicleType.CAR, "2222-JPN")),
+        "maria.garcia$CORPORATE_DOMAIN" to mutableListOf(Vehicle("maria-v1", VehicleType.CAR, "3333-MGR"), Vehicle("maria-v2", VehicleType.ELECTRIC, "4444-MGR")),
+        "aimar$CORPORATE_DOMAIN" to mutableListOf(
             Vehicle("aimar-v1", VehicleType.MOTORCYCLE, "1234-ABC"), 
             Vehicle("aimar-v2", VehicleType.ELECTRIC, "5678-XYZ"),
             Vehicle("aimar-v3", VehicleType.CAR, "9999-DEF")
         ),
-        "iker@lks.com" to mutableListOf(
+        "iker$CORPORATE_DOMAIN" to mutableListOf(
             Vehicle("iker-v1", VehicleType.CAR, "7777-IKR"), 
             Vehicle("iker-v2", VehicleType.ELECTRIC, "8888-ELC"),
             Vehicle("iker-v3", VehicleType.DISABLED, "6666-DIS")
         )
     )
 
-    private val mockNotificationsByUser = mutableMapOf<String, MutableList<Notification>>()
+    private val mockNotificationsByUser = mutableMapOf<String, List<Notification>>()
 
     init {
-        reservations = allMockReservations
-    }
+        reservations = listOf(
+            Reservation("m06-1", 12, DEFAULT_DATE, "08:00", "17:00", "user$CORPORATE_DOMAIN", "user-v1", "Usuario Demo", "ABC-1234"),
+            Reservation("m06-2", 3, DEFAULT_DATE, "09:00", "14:00", "aimar$CORPORATE_DOMAIN", "aimar-v1", "Aimar", "1234-ABC"),
+            Reservation("m06-3", 8, DEFAULT_DATE, "08:30", "16:30", "maria.garcia$CORPORATE_DOMAIN", "maria-v2", "María García", "4444-MGR")
+        )
 
-    suspend fun login(email: String, password: String) {
-        val normalizedEmail = email.trim().lowercase()
-        if (!normalizedEmail.endsWith("@lks.com")) {
-            throw Exception("error_corporate_only")
-        }
-        delay(500)
-        val found = mockUsers.find { it["email"] == normalizedEmail && it["password"] == password }
-        if (found != null) {
-            val userId = found["id"]!!
-            user = User(userId, found["email"]!!, found["name"]!!, found["profileImage"])
-            vehicles = mockVehiclesByUser[userId] ?: emptyList()
+        auth.currentUser?.let { firebaseUser ->
+            val userId = firebaseUser.uid
+            val email = firebaseUser.email ?: ""
+            user = User(
+                id = userId,
+                email = email,
+                name = firebaseUser.displayName ?: email.substringBefore("@"),
+                profileImage = firebaseUser.photoUrl?.toString()
+            )
             
+            val normalizedEmail = email.lowercase()
+            vehicles = mockVehiclesByUser[normalizedEmail] ?: emptyList()
             if (!mockNotificationsByUser.containsKey(userId)) {
                 generateInitialNotifications(userId)
             }
             notifications = mockNotificationsByUser[userId] ?: emptyList()
-        } else {
+        }
+    }
+
+    fun isEmailAuthorized(email: String): Boolean {
+        val normalized = email.trim().lowercase()
+        return normalized == TESTER_EMAIL || normalized.endsWith(CORPORATE_DOMAIN)
+    }
+
+    suspend fun login(email: String, password: String) {
+        val normalizedEmail = email.trim().lowercase()
+        
+        if (!isEmailAuthorized(normalizedEmail)) {
+            throw Exception("error_corporate_only")
+        }
+
+        try {
+            val result = auth.signInWithEmailAndPassword(normalizedEmail, password).await()
+            val firebaseUser = result.user ?: throw Exception("error_invalid_credentials")
+            
+            val userId = firebaseUser.uid
+            user = User(
+                id = userId,
+                email = normalizedEmail,
+                name = firebaseUser.displayName ?: normalizedEmail.substringBefore("@"),
+                profileImage = firebaseUser.photoUrl?.toString()
+            )
+
+            vehicles = mockVehiclesByUser[normalizedEmail] ?: emptyList()
+            if (!mockNotificationsByUser.containsKey(userId)) {
+                generateInitialNotifications(userId)
+            }
+            notifications = mockNotificationsByUser[userId] ?: emptyList()
+            
+        } catch (_: Exception) {
             throw Exception("error_invalid_credentials")
         }
     }
@@ -182,15 +110,13 @@ object AuthManager {
     suspend fun register(name: String, email: String, password: String) {
         val normalizedEmail = email.trim().lowercase()
         
-        // Validaciones:
         if (!EMAIL_PATTERN.matcher(normalizedEmail).matches()) {
-            throw Exception("error_invalid_email_format")
+            if (isEmailAuthorized(normalizedEmail)) {
+                throw Exception("error_invalid_email_format")
+            } else {
+                throw Exception("error_corporate_only")
+            }
         }
-
-        if (!normalizedEmail.endsWith("@lks.com")) {
-            throw Exception("error_corporate_only")
-        }
-
         if (password.length < 8) {
             throw Exception("error_password_too_short")
         }
@@ -198,29 +124,44 @@ object AuthManager {
             throw Exception("error_password_complexity")
         }
 
-        delay(500)
+        try {
+            val result = auth.createUserWithEmailAndPassword(normalizedEmail, password).await()
+            val firebaseUser = result.user ?: throw Exception("Registration failed")
 
-        if (mockUsers.any { it["email"] == normalizedEmail }) {
-            throw Exception("error_email_already_in_use")
+            val profileUpdates = userProfileChangeRequest {
+                displayName = name.trim()
+            }
+            firebaseUser.updateProfile(profileUpdates).await()
+
+            val userId = firebaseUser.uid
+            user = User(id = userId, email = normalizedEmail, name = name.trim())
+            
+            vehicles = emptyList()
+            notifications = emptyList()
+            mockNotificationsByUser[userId] = emptyList()
+            mockVehiclesByUser[normalizedEmail] = mutableListOf()
+            
+            generateInitialNotifications(userId)
+            
+        } catch (e: Exception) {
+            throw Exception(e.message ?: "Registration failed")
         }
+    }
 
-        val newUserMap = mutableMapOf(
-            "id" to normalizedEmail,
-            "email" to normalizedEmail,
-            "password" to password,
-            "name" to name.trim(),
-            "profileImage" to ""
-        )
-        mockUsers.add(newUserMap)
-        
-        user = User(normalizedEmail, normalizedEmail, name.trim())
-        vehicles = emptyList()
-        notifications = emptyList()
-        mockNotificationsByUser[normalizedEmail] = mutableListOf()
-        mockVehiclesByUser[normalizedEmail] = mutableListOf()
+    suspend fun sendPasswordResetEmail(email: String) {
+        val normalizedEmail = email.trim().lowercase()
+        if (!isEmailAuthorized(normalizedEmail)) {
+            throw Exception("error_corporate_only")
+        }
+        try {
+            auth.sendPasswordResetEmail(normalizedEmail).await()
+        } catch (e: Exception) {
+            throw Exception(e.message ?: "error_unknown")
+        }
     }
 
     fun logout() {
+        auth.signOut()
         user = null
         vehicles = emptyList()
         notifications = emptyList()
@@ -228,7 +169,7 @@ object AuthManager {
 
     private fun generateInitialNotifications(userId: String) {
         val now = System.currentTimeMillis()
-        val initial = mutableListOf(
+        val initial = listOf(
             Notification(
                 id = "init-$userId",
                 type = NotificationType.SUCCESS,
@@ -239,6 +180,7 @@ object AuthManager {
             )
         )
         mockNotificationsByUser[userId] = initial
+        if (user?.id == userId) notifications = initial
     }
 
     private fun addInternalNotification(type: NotificationType, titleResId: Int, messageResId: Int, messageArgs: List<Any> = emptyList()) {
@@ -252,39 +194,40 @@ object AuthManager {
             time = Date(),
             read = false
         )
-        val userNotifs = (mockNotificationsByUser[userId] ?: mutableListOf()).toMutableList()
+        val userNotifs = (mockNotificationsByUser[userId] ?: emptyList()).toMutableList()
         userNotifs.add(0, newNotif)
-        mockNotificationsByUser[userId] = userNotifs
-        notifications = userNotifs.toList()
+        val updatedList = userNotifs.toList()
+        mockNotificationsByUser[userId] = updatedList
+        notifications = updatedList
     }
 
     fun markAsRead(id: String) {
         val userId = user?.id ?: return
         val userNotifs = mockNotificationsByUser[userId] ?: return
-        val updated = userNotifs.map { if (it.id == id) it.copy(read = true) else it }.toMutableList()
-        mockNotificationsByUser[userId] = updated
-        notifications = updated
+        val updatedList = userNotifs.map { if (it.id == id) it.copy(read = true) else it }
+        mockNotificationsByUser[userId] = updatedList
+        notifications = updatedList
     }
 
     fun markAllAsRead() {
         val userId = user?.id ?: return
         val userNotifs = mockNotificationsByUser[userId] ?: return
-        val updated = userNotifs.map { it.copy(read = true) }.toMutableList()
-        mockNotificationsByUser[userId] = updated
-        notifications = updated
+        val updatedList = userNotifs.map { it.copy(read = true) }
+        mockNotificationsByUser[userId] = updatedList
+        notifications = updatedList
     }
 
     fun deleteNotification(id: String) {
         val userId = user?.id ?: return
         val userNotifs = mockNotificationsByUser[userId] ?: return
-        val updated = userNotifs.filter { it.id != id }.toMutableList()
-        mockNotificationsByUser[userId] = updated
-        notifications = updated
+        val updatedList = userNotifs.filter { it.id != id }
+        mockNotificationsByUser[userId] = updatedList
+        notifications = updatedList
     }
 
     private fun isToday(dateStr: String): Boolean {
         val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return dateStr == sdf.format(Date())
+        return try { dateStr == sdf.format(Date()) } catch (_: Exception) { false }
     }
 
     private fun isWithinMinutes(timeStr: String, minutes: Int = 30): Boolean {
@@ -325,15 +268,13 @@ object AuthManager {
             listOf(spotNumber, date, startTime)
         )
         
-        if (isToday(date)) {
-            if (isWithinMinutes(startTime)) {
-                addInternalNotification(
-                    NotificationType.INFO,
-                    R.string.notif_start_soon_title,
-                    R.string.notif_start_soon_msg,
-                    listOf(spotNumber)
-                )
-            }
+        if (isToday(date) && isWithinMinutes(startTime)) {
+            addInternalNotification(
+                NotificationType.INFO,
+                R.string.notif_start_soon_title,
+                R.string.notif_start_soon_msg,
+                listOf(spotNumber)
+            )
         }
     }
 
@@ -385,29 +326,23 @@ object AuthManager {
 
     fun addVehicle(type: VehicleType, licensePlate: String) {
         val newVehicle = Vehicle(System.currentTimeMillis().toString(), type, licensePlate)
-        val userId = user?.id ?: return
+        val userEmail = user?.email ?: return
         
         vehicles = vehicles + newVehicle
-        val existing = mockVehiclesByUser[userId] ?: mutableListOf()
+        val existing = (mockVehiclesByUser[userEmail] ?: mutableListOf()).toMutableList()
         existing.add(newVehicle)
-        mockVehiclesByUser[userId] = existing
+        mockVehiclesByUser[userEmail] = existing
     }
 
     fun removeVehicle(id: String) {
-        val userId = user?.id ?: return
+        val userEmail = user?.email ?: return
         vehicles = vehicles.filter { it.id != id }
-        val existing = mockVehiclesByUser[userId] ?: mutableListOf()
+        val existing = (mockVehiclesByUser[userEmail] ?: mutableListOf()).toMutableList()
         existing.removeAll { it.id == id }
-        mockVehiclesByUser[userId] = existing
+        mockVehiclesByUser[userEmail] = existing
     }
 
     fun updateProfile(name: String, profileImage: String? = null) {
-        val userId = user?.id ?: return
         user = user?.copy(name = name, profileImage = profileImage)
-        
-        mockUsers.find { it["id"] == userId }?.apply {
-            put("name", name)
-            if (profileImage != null) put("profileImage", profileImage)
-        }
     }
 }

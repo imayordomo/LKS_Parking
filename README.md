@@ -29,8 +29,7 @@ Actualmente el proyecto es un prototipo funcional con datos en memoria (mock). L
 
 *   **Persistencia Real**: Migración del `ParkingRepository` para conectar con Firebase (Firestore/Realtime Database).
 *   **Notificaciones Cloud**: Integración con Firebase Cloud Messaging (FCM).
-*   **Calidad de Código**: Implementación de SonarCloud para análisis estático.
-*   **Testing**: Implementación de tests funcionales en Android con Espresso y UIAutomator.
+*   **Testing**: Implementación de tests funcionales en Android.
 *   **Automatización**: Configuración de un pipeline de CI/CD (GitHub Actions) para ejecución de tests unitarios y generación automática de `.apk`.
 
 ## Información para Desarrolladores

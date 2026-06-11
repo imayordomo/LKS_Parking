@@ -30,6 +30,10 @@ class ParkingRepositoryImpl : ParkingRepository {
         syncState()
     }
 
+    override suspend fun resetPassword(email: String) {
+        AuthManager.sendPasswordResetEmail(email)
+    }
+
     override fun logout() {
         AuthManager.logout()
         syncState()

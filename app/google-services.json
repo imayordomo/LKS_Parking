@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "354475009069",
+    "project_id": "lks-parking-a4cee",
+    "storage_bucket": "lks-parking-a4cee.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:354475009069:android:ae7921bccdf820b4cc44a4",
+        "android_client_info": {
+          "package_name": "com.lksnext.ParkingIMayordomo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCU7KPNQgpc9ZY8-739wckd1a0-VG8Mvbc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
