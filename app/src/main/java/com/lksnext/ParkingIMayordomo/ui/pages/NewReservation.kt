@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -65,37 +66,52 @@ fun NewReservation(
     val sdfTime = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
     val sdfDate = remember { SimpleDateFormat(ParkingUtils.DATE_FORMAT, Locale.getDefault()) }
 
-    var selectedDate by remember { 
-        mutableStateOf(Calendar.getInstance().apply {
+    var selectedDateMillis by rememberSaveable(prefilledDate) { 
+        mutableLongStateOf(Calendar.getInstance().apply {
             prefilledDate?.let { dateStr ->
                 try {
                     sdfDate.parse(dateStr)?.let { time = it }
                 } catch (_: Exception) {}
             }
             set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-        })
+        }.timeInMillis)
     }
-    var startTime by remember { mutableStateOf<Calendar?>(null) }
-    var endTime by remember { mutableStateOf<Calendar?>(null) }
-    
-    var selectedSpot by remember(prefilledSpot) { mutableStateOf(prefilledSpot) }
-    var viewMode by remember { mutableStateOf("grid") } 
-    var spotTypeFilter by remember { mutableStateOf<SpotType?>(null) }
-    var spotsExpanded by remember { mutableStateOf(true) }
-    
-    var showDatePicker by remember { mutableStateOf(false) }
-    var showStartTimePicker by remember { mutableStateOf(false) }
-    var showEndTimePicker by remember { mutableStateOf(false) }
-    
-    var showVehicleDialog by remember { mutableStateOf(false) }
-    var showNoVehicleDialog by remember { mutableStateOf(false) }
-    var showIncompatibleVehicleDialog by remember { mutableStateOf(false) }
-    var showPrefilledInfo by remember { mutableStateOf(prefilledDate != null || prefilledSpot != null) }
-    var showDiscardDialog by remember { mutableStateOf(false) }
+    val selectedDate = remember(selectedDateMillis) {
+        Calendar.getInstance().apply { timeInMillis = selectedDateMillis }
+    }
 
-    val hasChanges by remember(startTime, endTime, selectedSpot) {
+    var startTimeMillis by rememberSaveable { mutableLongStateOf(-1L) }
+    val startTime = remember(startTimeMillis) {
+        if (startTimeMillis == -1L) null 
+        else Calendar.getInstance().apply { timeInMillis = startTimeMillis }
+    }
+
+    var endTimeMillis by rememberSaveable { mutableLongStateOf(-1L) }
+    val endTime = remember(endTimeMillis) {
+        if (endTimeMillis == -1L) null 
+        else Calendar.getInstance().apply { timeInMillis = endTimeMillis }
+    }
+    
+    var selectedSpot by rememberSaveable(prefilledSpot) { mutableStateOf(prefilledSpot) }
+    var viewMode by rememberSaveable { mutableStateOf("grid") } 
+    var spotTypeFilter by rememberSaveable { mutableStateOf<SpotType?>(null) }
+    var spotsExpanded by rememberSaveable { mutableStateOf(true) }
+    
+    var showDatePicker by rememberSaveable { mutableStateOf(false) }
+    var showStartTimePicker by rememberSaveable { mutableStateOf(false) }
+    var showEndTimePicker by rememberSaveable { mutableStateOf(false) }
+    
+    var showVehicleDialog by rememberSaveable { mutableStateOf(false) }
+    var showNoVehicleDialog by rememberSaveable { mutableStateOf(false) }
+    var showIncompatibleVehicleDialog by rememberSaveable { mutableStateOf(false) }
+    var showPrefilledInfo by rememberSaveable(prefilledDate, prefilledSpot) { 
+        mutableStateOf(prefilledDate != null || prefilledSpot != null) 
+    }
+    var showDiscardDialog by rememberSaveable { mutableStateOf(false) }
+
+    val hasChanges by remember(startTimeMillis, endTimeMillis, selectedSpot) {
         derivedStateOf {
-            startTime != null || endTime != null || (selectedSpot != null && selectedSpot != prefilledSpot)
+            startTimeMillis != -1L || endTimeMillis != -1L || (selectedSpot != null && selectedSpot != prefilledSpot)
         }
     }
 
@@ -103,15 +119,15 @@ fun NewReservation(
         showDiscardDialog = true
     }
     
-    val occupiedSpots by remember(selectedDate, startTime, endTime) {
+    val occupiedSpots by remember(selectedDateMillis, startTimeMillis, endTimeMillis) {
         viewModel.getOccupiedSpots(selectedDate, startTime, endTime) 
     }.collectAsState(initial = emptyList())
     
-    val hasExistingUserReservation by remember(selectedDate, startTime, endTime) { 
+    val hasExistingUserReservation by remember(selectedDateMillis, startTimeMillis, endTimeMillis) { 
         viewModel.hasExistingUserReservation(selectedDate, startTime, endTime) 
     }.collectAsState(initial = false)
 
-    val validationErrorResId by remember(selectedDate, startTime, endTime, selectedSpot, hasExistingUserReservation, occupiedSpots) {
+    val validationErrorResId by remember(selectedDateMillis, startTimeMillis, endTimeMillis, selectedSpot, hasExistingUserReservation, occupiedSpots) {
         derivedStateOf {
             viewModel.getValidationErrorResId(
                 selectedDate,
@@ -137,7 +153,7 @@ fun NewReservation(
     }
 
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = selectedDate.timeInMillis,
+        initialSelectedDateMillis = selectedDateMillis,
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                 val today = Calendar.getInstance().apply {
@@ -495,7 +511,7 @@ fun NewReservation(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let {
-                        selectedDate = Calendar.getInstance().apply { timeInMillis = it }
+                        selectedDateMillis = it
                     }
                     showDatePicker = false
                 }) { Text(stringResource(R.string.save)) }
@@ -513,11 +529,12 @@ fun NewReservation(
             onDismissRequest = { showStartTimePicker = false },
             confirmButton = {
                 TextButton(onClick = {
-                    startTime = Calendar.getInstance().apply {
+                    val cal = Calendar.getInstance().apply {
                         set(Calendar.HOUR_OF_DAY, startTimePickerState.hour)
                         set(Calendar.MINUTE, startTimePickerState.minute)
                         set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
                     }
+                    startTimeMillis = cal.timeInMillis
                     showStartTimePicker = false
                 }) { Text(stringResource(R.string.save)) }
             },
@@ -533,11 +550,12 @@ fun NewReservation(
             onDismissRequest = { showEndTimePicker = false },
             confirmButton = {
                 TextButton(onClick = {
-                    endTime = Calendar.getInstance().apply {
+                    val cal = Calendar.getInstance().apply {
                         set(Calendar.HOUR_OF_DAY, endTimePickerState.hour)
                         set(Calendar.MINUTE, endTimePickerState.minute)
                         set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
                     }
+                    endTimeMillis = cal.timeInMillis
                     showEndTimePicker = false
                 }) { Text(stringResource(R.string.save)) }
             },
@@ -689,7 +707,7 @@ fun ParkingFilterChip(selected: Boolean, onClick: () -> Unit, label: String, ico
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpotDropdown(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, occupiedSpots: List<Int>, spotTypeFilter: SpotType?) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
     val availableSpots = (1..50).filter { !occupiedSpots.contains(it) && (spotTypeFilter == null || ParkingUtils.getSpotType(it) == spotTypeFilter) }
 
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {

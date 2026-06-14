@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,7 +56,7 @@ fun Dashboard(
     val vehicles by viewModel.vehicles.collectAsState()
     val userReservations by viewModel.userReservations.collectAsState()
 
-    var reservationToDelete by remember { mutableStateOf<Reservation?>(null) }
+    var reservationToDeleteId by rememberSaveable { mutableStateOf<String?>(null) }
 
     val navigateToNewReservation = remember(vehicles, onNavigate) {
         {
@@ -207,7 +208,7 @@ fun Dashboard(
                             reservation = reservation,
                             vehicle = vehicle,
                             onEdit = { onNavigate("${ROUTE_EDIT_RESERVATION}/${reservation.id}") },
-                            onDelete = { reservationToDelete = reservation }
+                            onDelete = { reservationToDeleteId = reservation.id }
                         )
                     }
                 }
@@ -217,18 +218,16 @@ fun Dashboard(
         }
     }
 
-    // Using a stable local reference for the dialog
-    val toDelete = reservationToDelete
-    if (toDelete != null) {
+    if (reservationToDeleteId != null) {
         AlertDialog(
-            onDismissRequest = { reservationToDelete = null },
+            onDismissRequest = { reservationToDeleteId = null },
             title = { Text(stringResource(R.string.delete_reservation_title)) },
             text = { Text(stringResource(R.string.delete_reservation_msg)) },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        viewModel.deleteReservation(toDelete.id)
-                        reservationToDelete = null
+                        reservationToDeleteId?.let { viewModel.deleteReservation(it) }
+                        reservationToDeleteId = null
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
@@ -236,7 +235,7 @@ fun Dashboard(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { reservationToDelete = null }) {
+                TextButton(onClick = { reservationToDeleteId = null }) {
                     Text(stringResource(R.string.cancel))
                 }
             },
@@ -255,7 +254,7 @@ fun ReservationItem(
     val todayStr = remember { ParkingUtils.formatDate(Date()) }
     val isToday = reservation.date == todayStr
     
-    var expanded by remember { mutableStateOf(isToday) }
+    var expanded by rememberSaveable { mutableStateOf(isToday) }
     
     val fullDateFormatStr = stringResource(R.string.full_date_format)
     val displayDateSdf = remember(fullDateFormatStr) { SimpleDateFormat(fullDateFormatStr, Locale.getDefault()) }
@@ -380,7 +379,6 @@ fun ReservationItem(
                     }
 
                     if (reservation.licensePlate != null) {
-                        // Use vehicle specific icon if available, otherwise fallback to spot type
                         val vehicleType = vehicle?.type ?: run {
                             val spotType = ParkingUtils.getSpotType(reservation.spotNumber)
                             when (spotType) {

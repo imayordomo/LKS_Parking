@@ -1,23 +1,52 @@
 package com.lksnext.ParkingIMayordomo.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.data.model.VehicleType
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class ProfileViewModel(private val repository: ParkingRepository) : ViewModel() {
     val user = repository.user
     val vehicles = repository.vehicles
+    val reservations = repository.reservations
 
-    fun updateProfile(name: String, profileImage: String? = null) {
-        repository.updateProfile(name, profileImage)
+    private val _errorResId = MutableStateFlow<Int?>(null)
+    val errorResId: StateFlow<Int?> = _errorResId.asStateFlow()
+
+    fun clearError() {
+        _errorResId.value = null
     }
 
-    fun addVehicle(type: VehicleType, licensePlate: String) {
-        repository.addVehicle(type, licensePlate)
+    fun updateProfile(name: String, profileImage: String? = null) {
+        viewModelScope.launch {
+            repository.updateProfile(name, profileImage)
+        }
+    }
+
+    fun addVehicle(type: VehicleType, licensePlate: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            _errorResId.value = null
+            try {
+                repository.addVehicle(type, licensePlate)
+                onSuccess()
+            } catch (e: Exception) {
+                _errorResId.value = when(e.message) {
+                    "error_license_plate_exists" -> R.string.error_license_plate_exists
+                    else -> R.string.error_unknown
+                }
+            }
+        }
     }
 
     fun removeVehicle(id: String) {
-        repository.removeVehicle(id)
+        viewModelScope.launch {
+            repository.removeVehicle(id)
+        }
     }
 
     fun logout() {

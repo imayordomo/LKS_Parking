@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -69,43 +70,55 @@ fun EditReservation(
     val displayDateFormat = stringResource(R.string.date_display_format)
     val displayDate = remember(displayDateFormat) { SimpleDateFormat(displayDateFormat, Locale.getDefault()) }
 
-    var selectedDate by remember { 
-        mutableStateOf(Calendar.getInstance().apply { 
+    var selectedDateMillis by rememberSaveable(reservation) {
+        mutableLongStateOf(Calendar.getInstance().apply { 
             time = ParkingUtils.parseDate(reservation!!.date) ?: Date() 
             set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-        }) 
+        }.timeInMillis)
     }
-    var startTime by remember { 
-        mutableStateOf(Calendar.getInstance().apply { 
+    
+    var startTimeMillis by rememberSaveable(reservation) {
+        mutableLongStateOf(Calendar.getInstance().apply { 
             val timeDate = ParkingUtils.parseTime(reservation!!.startTime) ?: Date()
             val cal = Calendar.getInstance().apply { time = timeDate }
             set(Calendar.HOUR_OF_DAY, cal.get(Calendar.HOUR_OF_DAY))
             set(Calendar.MINUTE, cal.get(Calendar.MINUTE))
             set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-        }) 
+        }.timeInMillis)
     }
-    var endTime by remember { 
-        mutableStateOf(Calendar.getInstance().apply { 
+    
+    var endTimeMillis by rememberSaveable(reservation) {
+        mutableLongStateOf(Calendar.getInstance().apply { 
             val timeDate = ParkingUtils.parseTime(reservation!!.endTime) ?: Date()
             val cal = Calendar.getInstance().apply { time = timeDate }
             set(Calendar.HOUR_OF_DAY, cal.get(Calendar.HOUR_OF_DAY))
             set(Calendar.MINUTE, cal.get(Calendar.MINUTE))
             set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-        }) 
+        }.timeInMillis)
+    }
+
+    val selectedDate = remember(selectedDateMillis) {
+        Calendar.getInstance().apply { timeInMillis = selectedDateMillis }
+    }
+    val startTime = remember(startTimeMillis) {
+        Calendar.getInstance().apply { timeInMillis = startTimeMillis }
+    }
+    val endTime = remember(endTimeMillis) {
+        Calendar.getInstance().apply { timeInMillis = endTimeMillis }
     }
     
-    var selectedVehicleId by remember { mutableStateOf(reservation!!.vehicleId ?: "") }
+    var selectedVehicleId by rememberSaveable(reservation) { mutableStateOf(reservation!!.vehicleId) }
     
     val vehicles by viewModel.vehicles.collectAsState()
     val currentUser by viewModel.user.collectAsState()
     val allReservations by viewModel.reservations.collectAsState()
 
-    var showDatePicker by remember { mutableStateOf(false) }
-    var showStartTimePicker by remember { mutableStateOf(false) }
-    var showEndTimePicker by remember { mutableStateOf(false) }
-    var showDiscardDialog by remember { mutableStateOf(false) }
+    var showDatePicker by rememberSaveable { mutableStateOf(false) }
+    var showStartTimePicker by rememberSaveable { mutableStateOf(false) }
+    var showEndTimePicker by rememberSaveable { mutableStateOf(false) }
+    var showDiscardDialog by rememberSaveable { mutableStateOf(false) }
 
-    val hasChanges by remember(selectedDate, startTime, endTime, selectedVehicleId, reservation) {
+    val hasChanges by remember(selectedDateMillis, startTimeMillis, endTimeMillis, selectedVehicleId, reservation) {
         derivedStateOf {
             reservation?.let { res ->
                 val currentDateStr = ParkingUtils.formatDate(selectedDate.time)
@@ -124,14 +137,16 @@ fun EditReservation(
         showDiscardDialog = true
     }
 
-    val compatibleVehicles = remember(reservation!!.spotNumber, vehicles) {
-        vehicles.filter { ParkingUtils.isVehicleAllowedInSpot(reservation!!.spotNumber, it.type) }
+    val compatibleVehicles = remember(reservation?.spotNumber, vehicles) {
+        reservation?.let { res ->
+            vehicles.filter { ParkingUtils.isVehicleAllowedInSpot(res.spotNumber, it.type) }
+        } ?: emptyList()
     }
     
-    var vehicleExpanded by remember { mutableStateOf(false) }
-    var loading by remember { mutableStateOf(false) }
+    var vehicleExpanded by rememberSaveable { mutableStateOf(false) }
+    var loading by rememberSaveable { mutableStateOf(false) }
 
-    val validationErrorResId by remember(selectedDate, startTime, endTime, allReservations, selectedVehicleId) {
+    val validationErrorResId by remember(selectedDateMillis, startTimeMillis, endTimeMillis, allReservations, selectedVehicleId) {
         derivedStateOf {
             viewModel.getValidationErrorResId(
                 selectedDate = selectedDate,
@@ -148,7 +163,7 @@ fun EditReservation(
 
     // Material 3 Picker States
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = selectedDate.timeInMillis,
+        initialSelectedDateMillis = selectedDateMillis,
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                 val today = Calendar.getInstance().apply {
@@ -492,7 +507,7 @@ fun EditReservation(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let {
-                        selectedDate = Calendar.getInstance().apply { timeInMillis = it }
+                        selectedDateMillis = it
                     }
                     showDatePicker = false
                 }) { Text(stringResource(R.string.save)) }
@@ -510,11 +525,12 @@ fun EditReservation(
             onDismissRequest = { showStartTimePicker = false },
             confirmButton = {
                 TextButton(onClick = {
-                    startTime = Calendar.getInstance().apply {
+                    val cal = Calendar.getInstance().apply {
                         set(Calendar.HOUR_OF_DAY, startTimePickerState.hour)
                         set(Calendar.MINUTE, startTimePickerState.minute)
                         set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
                     }
+                    startTimeMillis = cal.timeInMillis
                     showStartTimePicker = false
                 }) { Text(stringResource(R.string.save)) }
             },
@@ -530,11 +546,12 @@ fun EditReservation(
             onDismissRequest = { showEndTimePicker = false },
             confirmButton = {
                 TextButton(onClick = {
-                    endTime = Calendar.getInstance().apply {
+                    val cal = Calendar.getInstance().apply {
                         set(Calendar.HOUR_OF_DAY, endTimePickerState.hour)
                         set(Calendar.MINUTE, endTimePickerState.minute)
                         set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
                     }
+                    endTimeMillis = cal.timeInMillis
                     showEndTimePicker = false
                 }) { Text(stringResource(R.string.save)) }
             },

@@ -1,11 +1,13 @@
 package com.lksnext.ParkingIMayordomo.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepository
 import com.lksnext.ParkingIMayordomo.data.model.Reservation
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -30,14 +32,22 @@ class EditReservationViewModel(private val repository: ParkingRepository) : View
         vehicleId: String,
         licensePlate: String?
     ) {
-        repository.updateReservation(
-            id = id,
-            date = sdfDate.format(date.time),
-            startTime = sdfTime.format(startTime.time),
-            endTime = sdfTime.format(endTime.time),
-            vehicleId = vehicleId,
-            licensePlate = licensePlate
-        )
+        viewModelScope.launch {
+            repository.updateReservation(
+                id = id,
+                date = sdfDate.format(date.time),
+                startTime = sdfTime.format(startTime.time),
+                endTime = sdfTime.format(endTime.time),
+                vehicleId = vehicleId,
+                licensePlate = licensePlate
+            )
+        }
+    }
+
+    fun deleteReservation(id: String) {
+        viewModelScope.launch {
+            repository.deleteReservation(id)
+        }
     }
 
     fun getValidationErrorResId(

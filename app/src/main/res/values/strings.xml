@@ -85,6 +85,10 @@
     <string name="report_type_cleaning">Necesita limpieza</string>
     <string name="report_type_other">Otro</string>
     <string name="error_invalid_spot_number">Número de plaza inválido (1–50)</string>
+    <string name="my_reports_title">Mis Reportes</string>
+    <string name="status_pending">PENDIENTE</string>
+    <string name="status_in_review">EN REVISIÓN</string>
+    <string name="status_resolved">RESUELTO</string>
 
     <!-- Notifications Screen -->
     <string name="notifications_title">Notificaciones</string>
@@ -105,6 +109,8 @@
     <string name="notif_modified_msg">Plaza #%1$d actualizada para el %2$s a las %3$s</string>
     <string name="notif_cancelled_title">Reserva cancelada</string>
     <string name="notif_cancelled_msg">Se ha cancelado la reserva de la plaza #%1$d para el día %2$s.</string>
+    <string name="notif_report_sent_title">Reporte enviado</string>
+    <string name="notif_report_sent_msg">Hemos recibido tu reporte. Gracias por ayudarnos a mejorar.</string>
 
     <!-- Profile Screen -->
     <string name="profile_title">Mi Perfil</string>
@@ -123,7 +129,10 @@
     <string name="save_profile">Guardar</string>
     <string name="license_plate_placeholder">ABC-1234</string>
     <string name="delete_vehicle_title">¿Eliminar vehículo?</string>
-    <string name="delete_vehicle_msg">¿Estás seguro de que quieres eliminar el vehículo con matrícula %1$s? Esto no afectará a las reservas ya realizadas.</string>
+    <string name="delete_vehicle_msg">¿Estás seguro de que quieres eliminar el vehículo con matrícula %1$s?</string>
+    <string name="delete_vehicle_error_title">No se puede eliminar</string>
+    <string name="delete_vehicle_error_msg">Este vehículo tiene una reserva activa o futura. Debes esperar a que termine la reserva o eliminarla antes de poder borrar el vehículo.</string>
+    <string name="error_license_plate_exists">Esta matrícula ya está registrada por otro usuario o en tu perfil.</string>
 
     <!-- History Screen -->
     <string name="history_title">Historial</string>
@@ -167,7 +176,7 @@
     <string name="faq_q10">¿Qué hago si mi correo no es @lksnext.com?</string>
     <string name="faq_a10">Solo los empleados con correo corporativo @lksnext.com pueden registrarse en el sistema. Si necesitas acceso y no tienes este correo, contacta con el departamento de facilities.</string>
     <string name="more_help_title">¿Necesitas más ayuda?</string>
-    <string name="more_help_desc">Contacta con el departamento de facilities en facilities@empresa.com o llama al ext. 1234</string>
+    <string name="more_help_desc">Contacta con el departamento de facilities en example@lksnext.com o llama al ext. 1234</string>
 
     <!-- Reservations & View Parking -->
     <string name="new_reservation_title">Nueva Reserva</string>

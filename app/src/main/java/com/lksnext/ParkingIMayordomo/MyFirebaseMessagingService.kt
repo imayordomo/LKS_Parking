@@ -11,6 +11,9 @@ import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.lksnext.ParkingIMayordomo.data.AuthManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -21,16 +24,30 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "Aviso de Parking"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: "Tienes una nueva actualización."
 
-        // Sincronizar con la base de datos local/UI de la app
-        AuthManager.addExternalNotification(title, body)
+        // Sync with local/UI DB of the app
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                AuthManager.addExternalNotification(title, body)
+            } catch (e: Exception) {
+                Log.e("FCM_SERVICE", "Error saving external notification", e)
+            }
+        }
 
-        // Mostrar la notificación en el sistema
+        // Show system notifications
         mostrarNotificacion(title, body)
     }
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d("FCM_TOKEN", "Nuevo token generado: $token")
+        // update the token on AuthManager if user is logged
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                AuthManager.updateFcmToken(token)
+            } catch (e: Exception) {
+                Log.e("FCM_TOKEN", "Error updating FCM token", e)
+            }
+        }
     }
 
     private fun mostrarNotificacion(title: String, body: String) {
@@ -38,7 +55,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val context: Context = this.applicationContext
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // Crear canal para Android 8.0+
+        // Create a channel for Android 8.0+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
@@ -49,7 +66,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        // Configurar el Intent para abrir la app al pulsar
+        // Conf the Intent to open the app touching it
         val intent = Intent(context, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
@@ -58,7 +75,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Construir la notificación
+        // Build the notification
         val builder = NotificationCompat.Builder(context, channelId)
         builder.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
         builder.setContentTitle(title)
@@ -67,7 +84,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         builder.setPriority(NotificationCompat.PRIORITY_HIGH)
         builder.setContentIntent(pendingIntent)
 
-        // Lanzar notificación con un ID único basado en el tiempo
+        // Throw a notification with a unique ID based on time
         notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
     }
 }

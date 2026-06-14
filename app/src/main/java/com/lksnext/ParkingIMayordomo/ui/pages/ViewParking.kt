@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,23 +60,35 @@ fun ViewParking(
     val currentUser by viewModel.user.collectAsState()
     val reservations by viewModel.reservations.collectAsState()
 
-    var selectedDate by remember { mutableStateOf(Calendar.getInstance()) }
-    var selectedSpot by remember { mutableStateOf<Int?>(null) }
-    var spotTypeFilter by remember { mutableStateOf<SpotType?>(null) }
-    var spotsExpanded by remember { mutableStateOf(true) }
-    var viewMode by remember { mutableStateOf("grid") }
+    // Use Long to preserve state across rotation
+    var selectedDateMillis by rememberSaveable { 
+        mutableLongStateOf(Calendar.getInstance().timeInMillis) 
+    }
+    val selectedDate = remember(selectedDateMillis) {
+        Calendar.getInstance().apply { timeInMillis = selectedDateMillis }
+    }
+
+    var selectedSpot by rememberSaveable { mutableStateOf<Int?>(null) }
+    var spotTypeFilter by rememberSaveable { mutableStateOf<SpotType?>(null) }
+    var spotsExpanded by rememberSaveable { mutableStateOf(true) }
+    var viewMode by rememberSaveable { mutableStateOf("grid") }
     
-    var showDatePicker by remember { mutableStateOf(false) }
+    var showDatePicker by rememberSaveable { mutableStateOf(false) }
 
     val sdfDate = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
     val displayDate = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
 
     val dateStr = sdfDate.format(selectedDate.time)
     
-    val occupiedSpots by remember(selectedDate) { viewModel.getOccupiedSpots(selectedDate) }.collectAsState(initial = emptyList())
-    val userSpots by remember(selectedDate) { viewModel.getUserSpots(selectedDate) }.collectAsState(initial = emptyList())
+    val occupiedSpots by remember(selectedDateMillis) { 
+        viewModel.getOccupiedSpots(selectedDate) 
+    }.collectAsState(initial = emptyList())
+    
+    val userSpots by remember(selectedDateMillis) { 
+        viewModel.getUserSpots(selectedDate) 
+    }.collectAsState(initial = emptyList())
 
-    val isDateInReservationRange = remember(selectedDate) {
+    val isDateInReservationRange = remember(selectedDateMillis) {
         val today = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
@@ -86,7 +99,7 @@ fun ViewParking(
             set(Calendar.HOUR_OF_DAY, 23); set(Calendar.MINUTE, 59)
         }
         val checkDate = Calendar.getInstance().apply {
-            time = selectedDate.time
+            timeInMillis = selectedDateMillis
         }
         !checkDate.before(today) && !checkDate.after(maxDate)
     }
@@ -98,7 +111,7 @@ fun ViewParking(
     }
 
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = selectedDate.timeInMillis
+        initialSelectedDateMillis = selectedDateMillis
     )
 
     ModalNavigationDrawer(
@@ -351,7 +364,7 @@ fun ViewParking(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let {
-                        selectedDate = Calendar.getInstance().apply { timeInMillis = it }
+                        selectedDateMillis = it
                         selectedSpot = null
                     }
                     showDatePicker = false
@@ -401,7 +414,7 @@ fun ViewParkingFilterChip(selected: Boolean, onClick: () -> Unit, label: String,
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewSpotDropdown(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, occupiedSpots: List<Int>, userSpots: List<Int>, spotTypeFilter: SpotType?) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
     val spots = (1..50).filter { spotTypeFilter == null || ParkingUtils.getSpotType(it) == spotTypeFilter }
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
         OutlinedTextField(

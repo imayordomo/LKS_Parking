@@ -41,15 +41,16 @@ import android.os.Build
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import android.util.Log
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.launch
+
 class MainActivity : ComponentActivity() {
 
-    // Declare the launcher at the top of your Activity/Fragment:
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { isGranted: Boolean ->
         if (isGranted) {
-            // FCM SDK (and your app) can post notifications.
             obtenerFCMToken()
         } else {
             android.widget.Toast.makeText(
@@ -80,21 +81,15 @@ class MainActivity : ComponentActivity() {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
-                // Si ya tenía el permiso de antes, también buscamos el Token
                 obtenerFCMToken()
-            } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-                // ... Tu diálogo explicativo anterior
             } else {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         } else {
-            // Para versiones antiguas de Android no hace falta pedir permiso en pantalla,
-            // así que buscamos el token directamente.
             obtenerFCMToken()
         }
     }
 
-    // Obtiene el token y lo imprime en el Logcat de Android Studio
     private fun obtenerFCMToken() {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (!task.isSuccessful) {
@@ -104,6 +99,10 @@ class MainActivity : ComponentActivity() {
 
             val token = task.result
             Log.d("FCM_PARKING", "TU TOKEN DE PRUEBA ES: $token")
+            
+            lifecycleScope.launch {
+                AuthManager.updateFcmToken(token)
+            }
         }
     }
 }
@@ -132,7 +131,6 @@ fun AppNavigation() {
     val factory = remember { ViewModelFactory(repository) }
     val currentUser by repository.user.collectAsState()
     
-    // Decidimos el punto de inicio basándonos en si ya hay un usuario logueado
     val startRoute = remember { 
         if (AuthManager.user != null) ROUTE_DASHBOARD else ROUTE_LANDING 
     }
@@ -142,7 +140,6 @@ fun AppNavigation() {
         startDestination = startRoute,
         modifier = Modifier.fillMaxSize()
     ) {
-        // Public Routes
         composable(ROUTE_LANDING) {
             Landing(viewModel = viewModel(factory = factory), 
                 onLoginClick = { navController.navigate(ROUTE_LOGIN) }, 
@@ -163,7 +160,6 @@ fun AppNavigation() {
             ForgotPassword(viewModel = viewModel(factory = factory), onBackToLogin = { navController.popBackStack() })
         }
         
-        // Private Routes Protected by Auth Guard
         composable(ROUTE_DASHBOARD) {
             ProtectedRoute(currentUser, navController) {
                 Dashboard(viewModel = viewModel(factory = factory), onNavigate = { navController.navigate(it) })
