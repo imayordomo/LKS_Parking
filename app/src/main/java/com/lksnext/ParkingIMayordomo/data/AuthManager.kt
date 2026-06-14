@@ -201,6 +201,23 @@ object AuthManager {
         notifications = updatedList
     }
 
+    fun addExternalNotification(title: String, message: String) {
+        val userId = user?.id ?: return
+        val newNotif = Notification(
+            id = "notif-${System.currentTimeMillis()}",
+            type = NotificationType.INFO,
+            title = title,
+            message = message,
+            time = Date(),
+            read = false
+        )
+        val userNotifs = (mockNotificationsByUser[userId] ?: emptyList()).toMutableList()
+        userNotifs.add(0, newNotif)
+        val updatedList = userNotifs.toList()
+        mockNotificationsByUser[userId] = updatedList
+        notifications = updatedList
+    }
+
     fun markAsRead(id: String) {
         val userId = user?.id ?: return
         val userNotifs = mockNotificationsByUser[userId] ?: return

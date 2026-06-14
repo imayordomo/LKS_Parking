@@ -35,17 +35,75 @@ import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_PROFILE
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_REGISTER
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_REPORT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_VIEW_PARKING
-
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import android.util.Log
+import com.google.firebase.messaging.FirebaseMessaging
 class MainActivity : ComponentActivity() {
+
+    // Declare the launcher at the top of your Activity/Fragment:
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // FCM SDK (and your app) can post notifications.
+            obtenerFCMToken()
+        } else {
+            android.widget.Toast.makeText(
+                this,
+                "No recibirás avisos de tus turnos.",
+                android.widget.Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setBackgroundDrawableResource(android.R.color.transparent)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        askNotificationPermission()
+
         setContent {
             LKS_ParkingTheme {
                 AppNavigation()
             }
+        }
+    }
+
+    private fun askNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                // Si ya tenía el permiso de antes, también buscamos el Token
+                obtenerFCMToken()
+            } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+                // ... Tu diálogo explicativo anterior
+            } else {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        } else {
+            // Para versiones antiguas de Android no hace falta pedir permiso en pantalla,
+            // así que buscamos el token directamente.
+            obtenerFCMToken()
+        }
+    }
+
+    // Obtiene el token y lo imprime en el Logcat de Android Studio
+    private fun obtenerFCMToken() {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("FCM_PARKING", "Error al obtener el token de Firebase", task.exception)
+                return@addOnCompleteListener
+            }
+
+            val token = task.result
+            Log.d("FCM_PARKING", "TU TOKEN DE PRUEBA ES: $token")
         }
     }
 }
