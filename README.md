@@ -11,7 +11,7 @@ Aplicación móvil para la gestión de reservas de plazas de parking en las ofic
 <br>
 
 > [!WARNING]
-> Proyecto todavía **en desarrollo**. Siguiente implementación: Integración continua CI/CD, SonarCloud y test unitarios. 
+> Proyecto todavía **en desarrollo**. Siguiente implementación: Testing y Analíticas. 
 
 ## Características Principales
 - **Autenticación**: Registro e inicio de sesión con validación de correo corporativo (@lks.com).
@@ -25,12 +25,11 @@ Aplicación móvil para la gestión de reservas de plazas de parking en las ofic
 **[Prototipo interactivo en Figma](https://ardent-harp-31107545.figma.site)**
 
 ## Roadmap y Planes Futuros
-Actualmente el proyecto es un prototipo funcional con datos en memoria (mock). Los siguientes pasos incluyen:
+Los siguientes pasos incluyen:
 
-*   **Persistencia Real**: Migración del `ParkingRepository` para conectar con Firebase (Firestore/Realtime Database).
-*   **Notificaciones Cloud**: Integración con Firebase Cloud Messaging (FCM).
-*   **Testing**: Implementación de tests funcionales en Android.
-*   **Automatización**: Configuración de un pipeline de CI/CD (GitHub Actions) para ejecución de tests unitarios y generación automática de `.apk`.
+*   **Analíticas**: Implementación de Firebase Performance Monitoring y Crashlytics.
+*   **Testing**: Implementación de tests unitarios y funcionales en Android.
+*   **Automatización**: Configurar mejor el pipeline de CI/CD (GitHub Actions) para ejecución de tests unitarios y generación automática de `.apk`.
 
 ## Información para Desarrolladores
 

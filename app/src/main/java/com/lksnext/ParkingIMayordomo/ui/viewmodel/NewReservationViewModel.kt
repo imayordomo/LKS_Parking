@@ -9,6 +9,7 @@ import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepository
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
 import com.lksnext.ParkingIMayordomo.utils.SpotType
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,14 +30,16 @@ class NewReservationViewModel(private val repository: ParkingRepository) : ViewM
         vehicleId: String,
         licensePlate: String
     ) {
-        repository.addReservation(
-            spotNumber = spotNumber,
-            date = sdfDate.format(date.time),
-            startTime = sdfTime.format(startTime.time),
-            endTime = sdfTime.format(endTime.time),
-            vehicleId = vehicleId,
-            licensePlate = licensePlate
-        )
+        viewModelScope.launch {
+            repository.addReservation(
+                spotNumber = spotNumber,
+                date = sdfDate.format(date.time),
+                startTime = sdfTime.format(startTime.time),
+                endTime = sdfTime.format(endTime.time),
+                vehicleId = vehicleId,
+                licensePlate = licensePlate
+            )
+        }
     }
 
     fun getOccupiedSpots(selectedDate: Calendar, startTime: Calendar?, endTime: Calendar?): Flow<List<Int>> {

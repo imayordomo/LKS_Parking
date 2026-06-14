@@ -1,5 +1,6 @@
 package com.lksnext.ParkingIMayordomo.ui.pages
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,8 +13,10 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -42,18 +45,29 @@ fun Profile(
     modifier: Modifier = Modifier,
     showVehicleAlertInit: Boolean = false
 ) {
+    val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     
     val user by viewModel.user.collectAsState()
     val vehicles by viewModel.vehicles.collectAsState()
+    val reservations by viewModel.reservations.collectAsState()
+    val errorResId by viewModel.errorResId.collectAsState()
 
-    var showEditProfileDialog by remember { mutableStateOf(false) }
-    var showAddVehicleDialog by remember { mutableStateOf(false) }
-    var showLogoutDialog by remember { mutableStateOf(false) }
-    var showVehicleAlert by remember { mutableStateOf(showVehicleAlertInit) }
+    var showEditProfileDialog by rememberSaveable { mutableStateOf(false) }
+    var showAddVehicleDialog by rememberSaveable { mutableStateOf(false) }
+    var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
+    var showVehicleAlert by rememberSaveable { mutableStateOf(showVehicleAlertInit) }
     
-    var vehicleToDelete by remember { mutableStateOf<Vehicle?>(null) }
+    var vehicleToDeleteId by rememberSaveable { mutableStateOf<String?>(null) }
+    var showCannotDeleteVehicleDialog by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(errorResId) {
+        errorResId?.let {
+            Toast.makeText(context, context.getString(it), Toast.LENGTH_LONG).show()
+            viewModel.clearError()
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -220,7 +234,14 @@ fun Profile(
                     items(vehicles, key = { it.id }) { vehicle ->
                         VehicleItem(
                             vehicle = vehicle,
-                            onDelete = { vehicleToDelete = vehicle }
+                            onDelete = {
+                                val hasReservations = reservations.any { it.vehicleId == vehicle.id }
+                                if (hasReservations) {
+                                    showCannotDeleteVehicleDialog = true
+                                } else {
+                                    vehicleToDeleteId = vehicle.id
+                                }
+                            }
                         )
                     }
                 }
@@ -267,8 +288,9 @@ fun Profile(
         AddVehicleDialog(
             onDismiss = { showAddVehicleDialog = false },
             onAdd = { type, plate ->
-                viewModel.addVehicle(type, plate)
-                showAddVehicleDialog = false
+                viewModel.addVehicle(type, plate) {
+                    showAddVehicleDialog = false
+                }
             }
         )
     }
@@ -300,17 +322,17 @@ fun Profile(
     }
     
     // Confirmation dialog for vehicle deletion
-    val vToDelete = vehicleToDelete
-    if (vToDelete != null) {
+    if (vehicleToDeleteId != null) {
+        val vToDelete = vehicles.find { it.id == vehicleToDeleteId }
         AlertDialog(
-            onDismissRequest = { vehicleToDelete = null },
+            onDismissRequest = { vehicleToDeleteId = null },
             title = { Text(stringResource(R.string.delete_vehicle_title)) },
-            text = { Text(stringResource(R.string.delete_vehicle_msg, vToDelete.licensePlate)) },
+            text = { Text(stringResource(R.string.delete_vehicle_msg, vToDelete?.licensePlate ?: "")) },
             confirmButton = {
                 Button(
                     onClick = {
-                        viewModel.removeVehicle(vToDelete.id)
-                        vehicleToDelete = null
+                        vehicleToDeleteId?.let { viewModel.removeVehicle(it) }
+                        vehicleToDeleteId = null
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
@@ -318,8 +340,23 @@ fun Profile(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { vehicleToDelete = null }) {
+                TextButton(onClick = { vehicleToDeleteId = null }) {
                     Text(stringResource(R.string.cancel))
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(8.dp)
+        )
+    }
+
+    if (showCannotDeleteVehicleDialog) {
+        AlertDialog(
+            onDismissRequest = { showCannotDeleteVehicleDialog = false },
+            title = { Text(stringResource(R.string.delete_vehicle_error_title)) },
+            text = { Text(stringResource(R.string.delete_vehicle_error_msg)) },
+            confirmButton = {
+                Button(onClick = { showCannotDeleteVehicleDialog = false }) {
+                    Text(stringResource(R.string.save))
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -366,7 +403,7 @@ fun VehicleItem(vehicle: Vehicle, onDelete: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileDialog(currentName: String, onDismiss: () -> Unit, onSave: (String) -> Unit) {
-    var name by remember { mutableStateOf(currentName) }
+    var name by rememberSaveable { mutableStateOf(currentName) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.edit_profile), fontWeight = FontWeight.Bold) },
@@ -406,9 +443,9 @@ fun EditProfileDialog(currentName: String, onDismiss: () -> Unit, onSave: (Strin
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddVehicleDialog(onDismiss: () -> Unit, onAdd: (VehicleType, String) -> Unit) {
-    var type by remember { mutableStateOf(VehicleType.CAR) }
-    var plate by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
+    var type by rememberSaveable { mutableStateOf(VehicleType.CAR) }
+    var plate by rememberSaveable { mutableStateOf("") }
+    var expanded by rememberSaveable { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -479,7 +516,9 @@ fun AddVehicleDialog(onDismiss: () -> Unit, onAdd: (VehicleType, String) -> Unit
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = { 
+                onDismiss()
+            }) {
                 Text(stringResource(R.string.cancel))
             }
         },

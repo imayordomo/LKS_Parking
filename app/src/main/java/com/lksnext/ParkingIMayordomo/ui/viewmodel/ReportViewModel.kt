@@ -3,6 +3,7 @@ package com.lksnext.ParkingIMayordomo.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lksnext.ParkingIMayordomo.R
+import com.lksnext.ParkingIMayordomo.data.model.Report
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,6 +12,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ReportViewModel(private val repository: ParkingRepository) : ViewModel() {
+    val reports: StateFlow<List<Report>> = repository.reports
+
     private val _reportType = MutableStateFlow("")
     val reportType: StateFlow<String> = _reportType.asStateFlow()
 
@@ -66,15 +69,22 @@ class ReportViewModel(private val repository: ParkingRepository) : ViewModel() {
         viewModelScope.launch {
             _loading.value = true
             _errorResId.value = null
-            // Simular envío a repositorio (hasta que se implemente)
-            delay(1500)
-            _success.value = true
-            _loading.value = false
-            _reportType.value = ""
-            _spotNumber.value = ""
-            _description.value = ""
-            delay(3000)
-            _success.value = false
+            try {
+                val spotNum = _spotNumber.value.toIntOrNull()
+                repository.addReport(spotNum, _reportType.value, _description.value)
+                
+                _success.value = true
+                _reportType.value = ""
+                _spotNumber.value = ""
+                _description.value = ""
+                
+                delay(3000)
+                _success.value = false
+            } catch (e: Exception) {
+                _errorResId.value = R.string.error_unknown
+            } finally {
+                _loading.value = false
+            }
         }
     }
 }

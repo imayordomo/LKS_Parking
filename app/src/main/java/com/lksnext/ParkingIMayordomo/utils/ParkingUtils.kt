@@ -34,6 +34,7 @@ object ParkingUtils {
     const val ROUTE_EDIT_RESERVATION = "edit-reservation"
     const val ROUTE_NOTIFICATIONS = "notifications"
     const val ROUTE_REPORT = "report"
+    const val ROUTE_MY_REPORTS = "my-reports"
     const val ROUTE_HELP = "help"
     
     // Params
@@ -121,7 +122,7 @@ object ParkingUtils {
         }
     }
 
-     //Los tiempos deben venir en formato "HH:mm"
+     //time format must come as "HH:mm"
     fun isTimeOverlapping(
         date1: String, start1: String, end1: String,
         date2: String, start2: String, end2: String
