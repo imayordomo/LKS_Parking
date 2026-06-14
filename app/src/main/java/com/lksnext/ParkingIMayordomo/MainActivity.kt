@@ -35,7 +35,7 @@ import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_PROFILE
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_REGISTER
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_REPORT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_VIEW_PARKING
-import android.Manifest // ⚠️ ASEGÚRATE DE AÑADIR ESTE IMPORT
+import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.result.contract.ActivityResultContracts
@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
-                // 🟢 Si ya tenía el permiso de antes, también buscamos el Token
+                // Si ya tenía el permiso de antes, también buscamos el Token
                 obtenerFCMToken()
             } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
                 // ... Tu diálogo explicativo anterior
@@ -88,13 +88,13 @@ class MainActivity : ComponentActivity() {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         } else {
-            // 🟢 Para versiones antiguas de Android no hace falta pedir permiso en pantalla,
+            // Para versiones antiguas de Android no hace falta pedir permiso en pantalla,
             // así que buscamos el token directamente.
             obtenerFCMToken()
         }
     }
 
-    // 🟢 NUEVA FUNCIÓN: Obtiene el token y lo imprime en el Logcat de Android Studio
+    // Obtiene el token y lo imprime en el Logcat de Android Studio
     private fun obtenerFCMToken() {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (!task.isSuccessful) {
@@ -104,7 +104,6 @@ class MainActivity : ComponentActivity() {
 
             val token = task.result
             Log.d("FCM_PARKING", "TU TOKEN DE PRUEBA ES: $token")
-            // Tip: Puedes ver este token en la pestaña 'Logcat' buscando la palabra FCM_PARKING
         }
     }
 }

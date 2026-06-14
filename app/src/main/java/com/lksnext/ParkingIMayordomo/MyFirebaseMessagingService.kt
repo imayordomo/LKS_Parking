@@ -17,14 +17,14 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        // 1. Extraer el título y el cuerpo (de 'notification' o del mapa 'data')
+        // Extraer el título y el cuerpo (de 'notification' o del mapa 'data')
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "Aviso de Parking"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: "Tienes una nueva actualización."
 
-        // 2. Sincronizar con la base de datos local/UI de la app
+        // Sincronizar con la base de datos local/UI de la app
         AuthManager.addExternalNotification(title, body)
 
-        // 3. Mostrar la notificación en el sistema
+        // Mostrar la notificación en el sistema
         mostrarNotificacion(title, body)
     }
 
