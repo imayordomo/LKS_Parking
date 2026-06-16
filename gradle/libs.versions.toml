@@ -1,5 +1,5 @@
 [versions]
-agp = "8.7.3"
+agp = "8.8.2"
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -11,7 +11,7 @@ composeBom = "2024.12.01"
 navigationCompose = "2.8.5"
 firebaseBom = "33.7.0"
 googleServicesPlugin = "4.4.2"
-firebaseCrashlyticsPlugin = "3.0.2"
+firebaseCrashlyticsPlugin = "3.0.7"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
