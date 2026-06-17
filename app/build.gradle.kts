@@ -33,20 +33,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
+    kotlinOptions {
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
-    }
-}
-
-// Force Bouncy Castle version to resolve classpath conflicts during signing
-configurations.all {
-    resolutionStrategy {
-        force("org.bouncycastle:bcprov-jdk18on:1.80")
     }
 }
 
