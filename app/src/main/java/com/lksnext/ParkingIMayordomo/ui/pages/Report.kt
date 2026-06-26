@@ -34,6 +34,7 @@ import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.ReportViewModel
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_NOTIFICATIONS
@@ -84,7 +85,7 @@ fun Report(
                 ParkingBottomBar(
                     selectedItem = -1,
                     onItemSelected = { index ->
-                        val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING)
+                        val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING, ROUTE_ABOUT)
                         onNavigate(routes[index])
                     }
                 )

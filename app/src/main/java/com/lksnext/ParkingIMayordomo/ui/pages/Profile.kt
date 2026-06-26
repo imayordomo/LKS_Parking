@@ -2,6 +2,7 @@ package com.lksnext.ParkingIMayordomo.ui.pages
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,9 +17,13 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
@@ -28,7 +33,9 @@ import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.ProfileViewModel
+import com.lksnext.ParkingIMayordomo.utils.LocaleManager
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_LOGIN
@@ -92,7 +99,7 @@ fun Profile(
                 ParkingBottomBar(
                     selectedItem = 2,
                     onItemSelected = { index ->
-                        val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING)
+                        val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING, ROUTE_ABOUT)
                         onNavigate(routes[index])
                     }
                 )
@@ -148,29 +155,35 @@ fun Profile(
                                 color = MaterialTheme.colorScheme.secondary
                             )
                             Spacer(modifier = Modifier.height(24.dp))
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            
+                            // Edit Profile Button
+                            OutlinedButton(
+                                onClick = { showEditProfileDialog = true },
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF6D00)),
+                                border = BorderStroke(1.dp, Color(0xFFFF6D00)),
+                                modifier = Modifier.height(40.dp)
                             ) {
-                                OutlinedButton(
-                                    onClick = { showEditProfileDialog = true },
-                                    shape = RoundedCornerShape(8.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
-                                ) {
-                                    Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(stringResource(R.string.edit_profile))
-                                }
-                                OutlinedButton(
-                                    onClick = { showLogoutDialog = true },
-                                    shape = RoundedCornerShape(8.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error)
-                                ) {
-                                    Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, modifier = Modifier.size(18.dp))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(stringResource(R.string.logout))
-                                }
+                                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(stringResource(R.string.edit_profile), fontWeight = FontWeight.SemiBold)
+                            }
+                            
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            // Language Selector
+                            LanguageSelector()
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            // Logout Button
+                            TextButton(
+                                onClick = { showLogoutDialog = true },
+                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(stringResource(R.string.logout))
                             }
                         }
                     }
@@ -190,7 +203,7 @@ fun Profile(
                         )
                         Button(
                             onClick = { showAddVehicleDialog = true },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6D00)),
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                         ) {
@@ -362,6 +375,105 @@ fun Profile(
             containerColor = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(8.dp)
         )
+    }
+}
+
+data class LanguageOption(
+    val code: String, 
+    val nameRes: Int, 
+    val flagEmoji: String? = null, 
+    val flagDrawable: Int? = null
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LanguageSelector() {
+    val context = LocalContext.current
+    val currentLanguageCode by LocaleManager.localeFlow.collectAsState()
+    var expanded by remember { mutableStateOf(false) }
+
+    val languages = listOf(
+        LanguageOption("es", R.string.language_spanish, flagEmoji = "🇪🇸"),
+        LanguageOption("eu", R.string.language_basque, flagDrawable = R.drawable.basque_flag),
+        LanguageOption("en", R.string.language_english, flagEmoji = "🇬🇧")
+    )
+
+    val currentLang = languages.find { it.code == currentLanguageCode } ?: languages[0]
+    val localizedName = stringResource(currentLang.nameRes)
+
+    Box(modifier = Modifier.width(220.dp), contentAlignment = Alignment.Center) {
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }
+        ) {
+            OutlinedTextField(
+                value = localizedName,
+                onValueChange = {},
+                readOnly = true,
+                label = { 
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Language, contentDescription = null, modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(stringResource(R.string.select_language))
+                    }
+                },
+                leadingIcon = {
+                    LanguageFlag(currentLang)
+                },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFFFF6D00),
+                    unfocusedBorderColor = Color(0xFFFF6D00),
+                    focusedLabelColor = Color(0xFFFF6D00),
+                    unfocusedLabelColor = Color(0xFFFF6D00),
+                    focusedTrailingIconColor = Color(0xFF757575),
+                    unfocusedTrailingIconColor = Color(0xFF757575)
+                ),
+                shape = RoundedCornerShape(12.dp),
+                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Start, fontSize = 16.sp),
+                modifier = Modifier
+                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                    .fillMaxWidth()
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+            ) {
+                languages.forEach { lang ->
+                    val langName = stringResource(lang.nameRes)
+                    DropdownMenuItem(
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                LanguageFlag(lang)
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(langName, fontWeight = if (lang.code == currentLanguageCode) FontWeight.Bold else FontWeight.Normal)
+                            }
+                        },
+                        onClick = {
+                            expanded = false
+                            LocaleManager.updateLocale(context, lang.code)
+                        },
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LanguageFlag(option: LanguageOption) {
+    if (option.flagDrawable != null) {
+        Image(
+            painter = painterResource(id = option.flagDrawable),
+            contentDescription = null,
+            modifier = Modifier.size(22.dp),
+            contentScale = ContentScale.Fit
+        )
+    } else {
+        Text(text = option.flagEmoji ?: "", fontSize = 18.sp)
     }
 }
 

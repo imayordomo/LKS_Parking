@@ -235,8 +235,8 @@ object AuthManager {
             id = id,
             userId = userId,
             type = NotificationType.SUCCESS,
-            titleResId = R.string.notif_welcome_title,
-            messageResId = R.string.notif_welcome_msg,
+            titleRes = "notif_welcome_title",
+            messageRes = "notif_welcome_msg",
             time = Date(),
             read = false
         )
@@ -244,15 +244,15 @@ object AuthManager {
             .document(id).set(newNotif).await()
     }
 
-    suspend fun addInternalNotification(type: NotificationType, titleResId: Int, messageResId: Int, messageArgs: List<Any> = emptyList()) {
+    suspend fun addInternalNotification(type: NotificationType, titleRes: String, messageRes: String, messageArgs: List<Any> = emptyList()) {
         val userId = user?.id ?: return
         val id = UUID.randomUUID().toString()
         val newNotif = Notification(
             id = id,
             userId = userId,
             type = type,
-            titleResId = titleResId,
-            messageResId = messageResId,
+            titleRes = titleRes,
+            messageRes = messageRes,
             messageArgs = messageArgs,
             time = Date(),
             read = false
@@ -335,6 +335,14 @@ object AuthManager {
         )
         
         ref.set(newRes).await()
+
+        // Notification of confirmation
+        addInternalNotification(
+            NotificationType.SUCCESS,
+            "notif_confirm_title",
+            "notif_confirm_msg",
+            listOf(spotNumber, date, startTime)
+        )
     }
 
     suspend fun updateReservation(
@@ -370,10 +378,27 @@ object AuthManager {
         }
         
         db.collection("reservas").document(reservationId).update(updates.filterValues { it != null }).await()
+
+        // Notification of modification
+        addInternalNotification(
+            NotificationType.INFO,
+            "notif_modified_title",
+            "notif_modified_msg",
+            listOf(spotNumber ?: current?.spotNumber ?: 0, finalDate ?: "", finalStart ?: "")
+        )
     }
 
     suspend fun deleteReservation(reservationId: String) {
+        val current = reservations.find { it.id == reservationId }
         db.collection("reservas").document(reservationId).delete().await()
+
+        // Notification of cancellation
+        addInternalNotification(
+            NotificationType.WARNING,
+            "notif_cancelled_title",
+            "notif_cancelled_msg",
+            listOf(current?.spotNumber ?: 0, current?.date ?: "")
+        )
     }
 
     suspend fun addVehicle(type: VehicleType, licensePlate: String) {
@@ -436,5 +461,12 @@ object AuthManager {
             status = "PENDING"
         )
         db.collection("reportes").document(id).set(report).await()
+
+        // Notification of report sent
+        addInternalNotification(
+            NotificationType.SUCCESS,
+            "notif_report_sent_title",
+            "notif_report_sent_msg"
+        )
     }
 }

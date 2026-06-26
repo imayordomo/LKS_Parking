@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,6 +25,7 @@ import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.NotificationsViewModel
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_NOTIFICATIONS
@@ -68,7 +70,7 @@ fun Notifications(
                 ParkingBottomBar(
                     selectedItem = -1,
                     onItemSelected = { index ->
-                        val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING)
+                        val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING, ROUTE_ABOUT)
                         onNavigate(routes[index])
                     }
                 )
@@ -152,6 +154,7 @@ fun NotificationItem(
     onRead: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val context = LocalContext.current
     val bgColor = if (notification.read) Color.Transparent else when (notification.type) {
         NotificationType.WARNING -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f)
         NotificationType.SUCCESS -> SuccessGreen.copy(alpha = 0.1f)
@@ -173,6 +176,38 @@ fun NotificationItem(
     val dateFormatStr = stringResource(R.string.notification_date_format)
     val sdf = remember(dateFormatStr) { SimpleDateFormat(dateFormatStr, Locale.getDefault()) }
 
+    // Safe title resolution
+    val title = remember(notification) {
+        notification.titleRes?.let { resName ->
+            val id = context.resources.getIdentifier(resName, "string", context.packageName)
+            if (id != 0) context.getString(id) else null
+        } ?: notification.titleResId?.let { resId ->
+            try { context.getString(resId) } catch (e: Exception) { null }
+        } ?: notification.title ?: ""
+    }
+
+    // Safe message resolution
+    val message = remember(notification) {
+        notification.messageRes?.let { resName ->
+            val id = context.resources.getIdentifier(resName, "string", context.packageName)
+            if (id != 0) {
+                if (notification.messageArgs.isNotEmpty()) {
+                    context.getString(id, *notification.messageArgs.toTypedArray())
+                } else {
+                    context.getString(id)
+                }
+            } else null
+        } ?: notification.messageResId?.let { resId ->
+            try {
+                if (notification.messageArgs.isNotEmpty()) {
+                    context.getString(resId, *notification.messageArgs.toTypedArray())
+                } else {
+                    context.getString(resId)
+                }
+            } catch (e: Exception) { null }
+        } ?: notification.message ?: ""
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -189,7 +224,6 @@ fun NotificationItem(
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    val title = notification.titleResId?.let { stringResource(it) } ?: notification.title ?: ""
                     Text(
                         text = title,
                         fontWeight = if (notification.read) FontWeight.Normal else FontWeight.Bold,
@@ -213,9 +247,6 @@ fun NotificationItem(
                     }
                 }
                 Spacer(modifier = Modifier.height(4.dp))
-                val message = notification.messageResId?.let {
-                    stringResource(it, *notification.messageArgs.toTypedArray())
-                } ?: notification.message ?: ""
                 Text(
                     text = message,
                     fontSize = 14.sp,

@@ -16,7 +16,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:enableOnBackInvokedCallback="true"
-        android:theme="@style/Theme.LKS_Parking">
+        android:theme="@style/Theme.LKS_Parking"
+        android:localeConfig="@xml/locales_config">
+
+        <!-- Required for AppCompatDelegate to persist locales -->
+        <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="androidx.appcompat.app.AppLocalesMetadataHolderService" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name="com.lksnext.ParkingIMayordomo.MainActivity"
             android:exported="true"

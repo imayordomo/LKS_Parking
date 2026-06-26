@@ -35,6 +35,7 @@ import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.ViewParkingViewModel
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_NEW_RESERVATION
@@ -137,7 +138,7 @@ fun ViewParking(
                 ParkingBottomBar(
                     selectedItem = 3,
                     onItemSelected = { index ->
-                        val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING)
+                        val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING, ROUTE_ABOUT)
                         onNavigate(routes[index])
                     }
                 )

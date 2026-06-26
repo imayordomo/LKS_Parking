@@ -1,27 +1,39 @@
 package com.lksnext.ParkingIMayordomo
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.NavType
+import com.google.firebase.messaging.FirebaseMessaging
 import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepositoryImpl
 import com.lksnext.ParkingIMayordomo.ui.pages.*
 import com.lksnext.ParkingIMayordomo.ui.theme.LKS_ParkingTheme
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.*
+import com.lksnext.ParkingIMayordomo.utils.LocaleManager
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.PARAM_SHOW_VEHICLE_ALERT
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_EDIT_RESERVATION
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_FORGOT_PASSWORD
@@ -35,14 +47,6 @@ import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_PROFILE
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_REGISTER
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_REPORT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_VIEW_PARKING
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-import android.util.Log
-import androidx.lifecycle.lifecycleScope
-import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -53,15 +57,24 @@ class MainActivity : ComponentActivity() {
         if (isGranted) {
             obtenerFCMToken()
         } else {
-            android.widget.Toast.makeText(
+            Toast.makeText(
                 this,
                 "No recibirás avisos de tus turnos.",
-                android.widget.Toast.LENGTH_LONG
+                Toast.LENGTH_LONG
             ).show()
         }
     }
 
+    override fun attachBaseContext(newBase: Context) {
+        // Manually wrap the context with the saved locale before the Activity is created.
+        // This is necessary for ComponentActivity to load the correct strings.xml.
+        super.attachBaseContext(LocaleManager.wrapContext(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Initialize/Sync AppCompatDelegate with the saved preference for system-level strings
+        LocaleManager.init(this)
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setBackgroundDrawableResource(android.R.color.transparent)
         super.onCreate(savedInstanceState)
@@ -197,6 +210,11 @@ fun AppNavigation() {
         composable(ROUTE_HELP) {
             ProtectedRoute(currentUser, navController) {
                 Help(viewModel = viewModel(factory = factory), onNavigate = { navController.navigate(it) })
+            }
+        }
+        composable(ROUTE_ABOUT) {
+            ProtectedRoute(currentUser, navController) {
+                About(onNavigate = { navController.navigate(it) })
             }
         }
         composable("${ROUTE_NEW_RESERVATION}?spot={spot}&date={date}",
