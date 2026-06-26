@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.ui.theme.*
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HELP
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
@@ -180,7 +181,8 @@ fun ParkingDrawerContent(
             Triple(Icons.Default.Search, stringResource(R.string.drawer_parking), ROUTE_VIEW_PARKING),
             Triple(Icons.Default.Notifications, stringResource(R.string.menu_notifications), ROUTE_NOTIFICATIONS),
             Triple(Icons.Default.ReportProblem, stringResource(R.string.menu_report), ROUTE_REPORT),
-            Triple(Icons.AutoMirrored.Filled.HelpOutline, stringResource(R.string.menu_help), ROUTE_HELP)
+            Triple(Icons.AutoMirrored.Filled.HelpOutline, stringResource(R.string.menu_help), ROUTE_HELP),
+            Triple(Icons.Default.Info, stringResource(R.string.menu_about), ROUTE_ABOUT)
         )
 
         menuItems.forEach { (icon, label, route) ->

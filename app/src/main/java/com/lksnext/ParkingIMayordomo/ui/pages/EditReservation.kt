@@ -31,6 +31,7 @@ import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.EditReservationViewModel
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_EDIT_RESERVATION
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
@@ -210,9 +211,9 @@ fun EditReservation(
             },
             bottomBar = {
                 ParkingBottomBar(
-                    selectedItem = 0,
+                    selectedItem = -1,
                     onItemSelected = { index ->
-                        val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING)
+                        val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING, ROUTE_ABOUT)
                         onNavigate(routes[index])
                     }
                 )

@@ -1,0 +1,285 @@
+<resources>
+    <string name="app_name">LKS Parking</string>
+    <string name="landing_title">LKS Parking</string>
+    <string name="landing_subtitle">Kudeatu zure aparkaleku-erreserbak</string>
+    <string name="login_button">Saioa hasi</string>
+    <string name="register_button">Erregistratu</string>
+    <string name="email_label">Emaila *</string>
+    <string name="password_label">Pasahitza *</string>
+    <string name="forgot_password">Pasahitza ahaztu duzu?</string>
+    <string name="no_account">Ez duzu konturik?</string>
+    <string name="register_link">Erregistratu</string>
+    <string name="create_account">Kontua sortu</string>
+    <string name="full_name_label">Izen osoa *</string>
+    <string name="confirm_password_label">Baieztatu pasahitza *</string>
+    <string name="corporate_email_hint">Erabili zure helbide korporatiboa (@lksnext.com)</string>
+    <string name="already_have_account">Dagoeneko baduzu kontua?</string>
+    <string name="login_link">Hasi saioa</string>
+
+    <!-- Login -->
+    <string name="login_loading">Saioa hasten…</string>
+    <string name="error_required_fields">Eremu guztiak derrigorrezkoak dira</string>
+    <string name="error_invalid_credentials">Email edo pasahitz okerra</string>
+    <string name="corporate_suffix"> (@lksnext.com)</string>
+    <string name="email_label_with_corporate">Emaila * (@lksnext.com)</string>
+
+    <!-- Forgot Password -->
+    <string name="recover_password_title">Pasahitza berreskuratu</string>
+    <string name="recover_password_subtitle">Sartu zure emaila eta berreskuratze-esteka bat bidaliko dizugu</string>
+    <string name="send_email_button">Bidali esteka</string>
+    <string name="back_to_login">Itzuli saio-hasierara</string>
+    <string name="email_sent_instructions">Egiaztatu zure sarrera-ontzia pasahitza berrezartzeko</string>
+    <string name="reset_email_sent_success">Berreskuratze-esteka bidali da</string>
+    <string name="check_inbox_hint">Minutu gutxiren buruan mezu elektronikoa jasotzen ez baduzu, egiaztatu spam karpeta.</string>
+    <string name="error_enter_email">Mesedez, sartu zure emaila</string>
+    <string name="error_corporate_only">@lksnext.com posta korporatiboak bakarrik onartzen dira</string>
+    <string name="error_invalid_email_format">Email formatu baliogabea</string>
+
+    <!-- Home Screen (Dashboard) -->
+    <string name="my_reservations">Nire Erreserbak</string>
+    <string name="welcome_user">Ongi etorri, %1$s</string>
+    <string name="register_vehicle_alert">Ibilgailu bat erregistratu behar duzu erreserbatzeko</string>
+    <string name="add_button">Gehitu</string>
+    <string name="no_active_reservations">Erreserba aktiborik gabe</string>
+    <string name="create_reservation">Erreserba berria</string>
+    <string name="delete_reservation_title">Erreserba ezabatu?</string>
+    <string name="delete_reservation_msg">Ekintza hau ezin da desegin.</string>
+    <string name="delete_btn">EZABATU</string>
+    <string name="today_tag">GAUR</string>
+    <string name="tomorrow_tag">BIHAR</string>
+    <string name="content_desc_add">Gehitu erreserba</string>
+    <string name="content_desc_edit">Editatu erreserba</string>
+    <string name="content_desc_warning">Abisua</string>
+
+    <!-- Navigation & Labels -->
+    <string name="menu_dashboard">Erreserbak</string>
+    <string name="menu_history">Historia</string>
+    <string name="menu_profile">Profila</string>
+    <string name="menu_parking">Aparkalekua</string>
+    <string name="menu_notifications">Jakinarazpenak</string>
+    <string name="menu_report">Jakinarazi</string>
+    <string name="menu_help">Laguntza</string>
+    <string name="menu_about">Honi buruz</string>
+    <string name="drawer_history">Erreserben Historia</string>
+    <string name="drawer_profile">Profila eta Ibilgailuak</string>
+    <string name="drawer_parking">Aparkalekua Kontsultatu</string>
+    <string name="default_user_name">Erabiltzailea</string>
+    <string name="content_desc_menu">Menua</string>
+    <string name="content_desc_notifications">Jakinarazpenak</string>
+    <string name="content_desc_back">Itzuli</string>
+    <string name="content_desc_delete">Ezabatu erreserba</string>
+    <string name="content_desc_view_list">Ikusi zerrenda</string>
+    <string name="content_desc_view_grid">Ikusi sareta</string>
+
+    <!-- Report Screen -->
+    <string name="report_title">Arazo baten berri eman</string>
+    <string name="report_subtitle">Lagundu gaitzazu aparkalekua egoera onean mantentzen</string>
+    <string name="report_type_label">Arazo mota *</string>
+    <string name="spot_number_optional_label">Plaza zenbakia (aukerakoa)</string>
+    <string name="problem_description_label">Arazoaren azalpena *</string>
+    <string name="problem_description_placeholder">Azaldu arazoa ahalik eta xehetasun gehienekin…</string>
+    <string name="send_report_button">Bidali jakinarazpena</string>
+    <string name="report_success_message">Jakinarazpena ondo bidali da. Eskerrik asko zure laguntzagatik.</string>
+    <string name="report_type_damage">Kalteak plazan</string>
+    <string name="report_type_unauthorized">Baimenik gabeko ibilgailua</string>
+    <string name="report_type_lighting">Argiztapen arazoa</string>
+    <string name="report_type_cleaning">Garbiketa behar du</string>
+    <string name="report_type_other">Beste bat</string>
+    <string name="error_invalid_spot_number">Plaza zenbakia baliogabea (1–50)</string>
+    <string name="my_reports_title">Nire Jakinarazpenak</string>
+    <string name="status_pending">ZAIN</string>
+    <string name="status_in_review">BERRIKUSTEN</string>
+    <string name="status_resolved">EBATZIA</string>
+
+    <!-- Notifications Screen -->
+    <string name="notifications_title">Jakinarazpenak</string>
+    <string name="notifications_subtitle">Egon zure erreserben berri</string>
+    <string name="mark_all_read">Markatu guztiak irakurrita bezala</string>
+    <string name="no_notifications">Ez duzu jakinarazpenik</string>
+    <string name="new_label">Berria</string>
+    <string name="mark_read">Markatu irakurrita bezala</string>
+    <string name="notification_date_format">MMMM d, HH:mm</string>
+
+    <string name="notif_welcome_title">Ongi etorri LKS Parking-era</string>
+    <string name="notif_welcome_msg">Dagoeneko kudeatu ditzakezu zure aparkaleku-erreserbak aplikaziotik.</string>
+    <string name="notif_confirm_title">Erreserba baieztatuta</string>
+    <string name="notif_confirm_msg">#%1$d plaza erreserbatu duzu %2$s egunerako, %3$s orduan</string>
+    <string name="notif_start_soon_title">Zure erreserba laster hasiko da</string>
+    <string name="notif_start_soon_msg">#%1$d plazako zure erreserba 30 minututan hasiko da</string>
+    <string name="notif_modified_title">Erreserba aldatuta</string>
+    <string name="notif_modified_msg">#%1$d plaza eguneratuta %2$s egunerako, %3$s orduan</string>
+    <string name="notif_cancelled_title">Erreserba bertan behera utzita</string>
+    <string name="notif_cancelled_msg">#%1$d plazako erreserba bertan behera utzi da %2$s egunerako.</string>
+    <string name="notif_report_sent_title">Jakinarazpena bidalita</string>
+    <string name="notif_report_sent_msg">Zure jakinarazpena jaso dugu. Eskerrik asko hobetzen laguntzeagatik.</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_title">Nire Profila</string>
+    <string name="edit_profile">Editatu Profila</string>
+    <string name="logout">Saioa itxi</string>
+    <string name="my_vehicles">Nire Ibilgailuak</string>
+    <string name="add_vehicle">Gehitu Ibilgailua</string>
+    <string name="no_vehicles">Ez duzu ibilgailurik erregistratuta</string>
+    <string name="vehicle_type">Ibilgailu Mota</string>
+    <string name="license_plate">Matrikula</string>
+    <string name="vehicle_required_alert">Gutxienez ibilgailu bat gehitu behar duzu zure profilean erreserba egin ahal izateko.</string>
+    <string name="vehicle_required_title">Ibilgailua beharrezkoa</string>
+    <string name="go_to_profile">JOAN PROFILERA</string>
+    <string name="logout_confirmation">Ziur zaude saioa itxi nahi duzula?</string>
+    <string name="vehicle_not_compatible_short">Ez da bateragarria</string>
+    <string name="save_profile">Gorde</string>
+    <string name="license_plate_placeholder">ABC-1234</string>
+    <string name="delete_vehicle_title">Ibilgailua ezabatu?</string>
+    <string name="delete_vehicle_msg">Ziur zaude %1$s matrikuladun ibilgailua ezabatu nahi duzula?</string>
+    <string name="delete_vehicle_error_title">Ezin da ezabatu</string>
+    <string name="delete_vehicle_error_msg">Ibilgailu honek erreserba aktibo bat edo etorkizunekoa du. Erreserba amaitu arte zain egon behar duzu edo erreserba ezabatu ibilgailua kendu ahal izateko.</string>
+    <string name="error_license_plate_exists">Matrikula hau beste erabiltzaile batek edo zure profilean dagoeneko erregistratuta dago.</string>
+
+    <!-- About Screen -->
+    <string name="about_title">Aplikazioari buruz</string>
+    <string name="about_version">Parking App > 1.0.0 bertsioa</string>
+    <string name="about_description">LKS Next-ekin eta Euskal Herriko Unibertsitatearekin (UPV/EHU) lankidetzan, Produktu Digitalen Kontzeptualizazio eta Garapeneko Enpresa Gelarako garatutako proiektu akademikoa.</string>
+    <string name="about_developed_by">Garatzailea: imayordomo</string>
+    <string name="about_acknowledgments_title">Esker onak eta Aitortzak:</string>
+    <string name="about_openmoji_desc">Aplikazio honek hirugarrenen kode irekiko baliabideak erabiltzen ditu, haien lizentziapean:</string>
+    <string name="about_openmoji_item">Aplikazio honetan erabilitako OpenMoji osagaiak: Ikurrina (🏴)</string>
+    <string name="about_author">Egilea: Sam Hocevar</string>
+    <string name="about_source">Iturria: https://openmoji.org/library/emoji-1F3F4-E0065-E0073-E0070-E0076-E007F/</string>
+    <string name="about_license">Lizentzia: CC BY-SA 4.0</string>
+
+    <!-- History Screen -->
+    <string name="history_title">Historia</string>
+    <string name="history_subtitle">Zure erreserba guztiak</string>
+    <string name="filters">Iragazkiak</string>
+    <string name="date_range">Data tartea</string>
+    <string name="from_date">Noiztik</string>
+    <string name="to_date">Noiz arte</string>
+    <string name="reservation_status">Erreserba egoera</string>
+    <string name="filter_all">GUZTIAK</string>
+    <string name="filter_past">IRAGANEKOAK</string>
+    <string name="filter_future">ETORKIZUNEKOAK</string>
+    <string name="clear_filters">Garbitu iragazki guztiak</string>
+    <string name="no_history">Ez duzu erreserbarik historian</string>
+    <string name="status_past">Iragana</string>
+    <string name="status_next">Hurrengoa</string>
+    <string name="spot_short_prefix">P</string>
+    <string name="spot_label_format">%1$s %2$d</string>
+
+    <!-- Help Screen -->
+    <string name="help_title">Laguntza</string>
+    <string name="help_subtitle">Maiz egiten diren galderak</string>
+    <string name="faq_q1">Nola egiten dut erreserba bat?</string>
+    <string name="faq_a1">Joan \"Erreserbak\" atalera eta sakatu \"+\" botoi mugikorra. Hautatu data, hasiera eta amaiera ordua, aukeratu plaza libre bat (berdea) eta baieztatu. Gutxienez ibilgailu bat erregistratuta izan behar duzu erreserbatu ahal izateko.</string>
+    <string name="faq_q2">Zenbateko aurrerapenarekin erreserbatu dezaket?</string>
+    <string name="faq_a2">Gehienez 7 eguneko aurrerapenarekin egin ditzakezu erreserbak.</string>
+    <string name="faq_q3">Zenbat denboraz erreserbatu dezaket plaza bat?</string>
+    <string name="faq_a3">Saio bakoitzeko erreserba-denbora handiena 9 ordukoa da.</string>
+    <string name="faq_q4">Zer plaza mota daude?</string>
+    <string name="faq_a4">Aparkalekuak 50 plaza ditu: plaza arruntak, ibilgailu elektrikoentzako plazak (kargagailuarekin), motoentzako plazak eta mugikortasun murriztuko pertsonentzako egokitutako plazak. Plaza bakoitza dagokion ikonoarekin identifikatuta dago.</string>
+    <string name="faq_q5">Ikusi dezaket nork erreserbatu duen plaza bat?</string>
+    <string name="faq_a5">Bai, \"Aparkalekua Kontsultatu\" atalean data bat hautatu eta betetako plazak ikusi ditzakezu. Betetako plaza batean klik eginez, nork erreserbatu duen eta bere matrikula ikusiko duzu.</string>
+    <string name="faq_q6">Nola gehitzen dut ibilgailu bat?</string>
+    <string name="faq_a6">Joan \"Profila eta Ibilgailuak\" atalera eta sakatu \"Gehitu Ibilgailua\" botoia. Hautatu ibilgailu mota (autoa, elektrikoa, motoa edo desgaitua) eta sartu matrikula. Gutxienez ibilgailu bat erregistratuta izan behar duzu erreserbak egin ahal izateko.</string>
+    <string name="faq_q7">Nola jakinarazten dut arazo bat?</string>
+    <string name="faq_a7">Erabili menuko \"Jakinarazi\" atala. Hautatu arazo mota (garbiketa, kalteak, argiztapena, segurtasuna edo beste bat), adierazi plaza zenbakia badagokio, eta azaldu arazoa ahalik eta xehetasun gehienekin.</string>
+    <string name="faq_q8">Nola funtzionatzen dute jakinarazpenek?</string>
+    <string name="faq_a8">Aplikazioak zure hurrengo erreserbei, gogorarazpenei eta baieztapenei buruzko jakinarazpenekin informatuta mantentzen zaitu. Zure jakinarazpen guztiak ikus ditzakezu goiko barrako kanpai ikonoan klik eginez.</string>
+    <string name="faq_q9">Erreserba bat bertan behera utzi dezaket?</string>
+    <string name="faq_a9">Bai, zure erreserbak bertan behera utzi ditzakezu \"Erreserbak\" ataletik. Hedatu bertan behera utzi nahi duzun erreserba eta sakatu ezabatzeko botoia. Kontuan izan ekintza hau ezin dela desegin.</string>
+    <string name="faq_q10">Zer egiten dut nire emaila @lksnext.com ez bada?</string>
+    <string name="faq_a10">@lksnext.com posta korporatiboa duten langileek bakarrik erregistratu daitezke sisteman. Sarbidea behar baduzu eta posta hori ez baduzu, jarri harremanetan facilities sailarekin.</string>
+    <string name="more_help_title">Laguntza gehiago behar duzu?</string>
+    <string name="more_help_desc">Jarri harremanetan facilities sailarekin example@lksnext.com helbidean edo deitu 1234 luzapenera</string>
+
+    <!-- Reservations & View Parking -->
+    <string name="new_reservation_title">Erreserba Berria</string>
+    <string name="edit_reservation_title">Editatu Erreserba - #%1$d Plaza</string>
+    <string name="reservation_not_found">Erreserba ez da aurkitu</string>
+    <string name="back_to_dashboard">Itzuli Dashboard-era</string>
+    <string name="edit_instruction">Aldatu zure erreserbaren xehetasunak</string>
+    <string name="max_advance_hint">Gehienez 7 eguneko aurrerapena</string>
+    <string name="max_duration_hint">Gehienez 9 ordu</string>
+    <string name="vehicle_label">Ibilgailua</string>
+    <string name="save_changes">Gorde Aldaketak</string>
+    <string name="date_time_section">Data eta ordutegia</string>
+    <string name="date_label">Data</string>
+    <string name="date_label_required">Data *</string>
+    <string name="start_time_label">Hasiera ordua</string>
+    <string name="start_time_required">Hasiera ordua *</string>
+    <string name="end_time_label">Amaiera ordua</string>
+    <string name="end_time_required">Amaiera ordua *</string>
+    <string name="select_spot_title">Hautatu plaza bat</string>
+    <string name="available_legend">Libre</string>
+    <string name="occupied_legend">Beteta</string>
+    <string name="selection_legend">Hautapena</string>
+    <string name="user_spot_legend">Zure plaza</string>
+    <string name="confirm_reservation_btn">Baieztatu Erreserba - #%1$d Plaza</string>
+    <string name="select_vehicle_dialog_title">Hautatu zure ibilgailua</string>
+    <string name="spot_type_normal">Arrunta</string>
+    <string name="spot_type_electric">Elektrikoa</string>
+    <string name="spot_type_motorcycle">Motoa</string>
+    <string name="spot_type_disabled">Desgaitua</string>
+    <string name="spots_available_count">%1$d plaza libre</string>
+    <string name="no_spots_available">Ez dago plazarik libre</string>
+    <string name="view_parking_title">Aparkalekua Kontsultatu</string>
+    <string name="view_parking_subtitle">Ikusi aparkalekuaren egoera dataren arabera</string>
+    <string name="prefilled_info_msg">Data eta plaza aurrez hautatuta Aparkalekua Kontsultatutik.</string>
+    <string name="prefilled_summary">#%1$d Plaza - %2$s</string>
+    <string name="spot_number_label">#%1$d Plaza</string>
+    <string name="status_user_reserve">ZURE ERRESERBA</string>
+    <string name="status_occupied">BETETA</string>
+    <string name="status_available">LIBRE</string>
+    <string name="reservations_count_label">Egun honetarako erreserbak (%1$d): </string>
+    <string name="no_license_plate">Matrikularik gabe</string>
+    <string name="mine_suffix"> (Zu)</string>
+    <string name="schedule_format">Ordutegia: %1$s - %2$s</string>
+    <string name="reserve_spot_btn">Erreserbatu plaza hau</string>
+    <string name="error_date_out_of_range">Ezin dira erreserbak egin iraganeko datetarako edo 7 egun baino gehiagoko aurrerapenarekin.</string>
+    <string name="consultation_mode_info">Kontsulta modua: Erreserba-epetik kanpoko egun bat ikusten (hurrengo 7 egunak bakarrik).</string>
+    <string name="select_spot_prompt">Hautatu plaza</string>
+    <string name="badge_mine">Zurea</string>
+    <string name="vehicle_display_format">%1$s (%2$s)</string>
+    <string name="time_range_format">%1$s - %2$s</string>
+    <string name="date_display_format">yyyy\'(e)ko\' MMMM d</string>
+    <string name="full_date_format">EEEE, MMMM d</string>
+    <string name="day_month_format">MMM d</string>
+    <string name="spot_display">%1$s %2$d</string>
+    <string name="spot_number_with_prefix">%1$s #%2$d</string>
+    <string name="license_plate_with_mine">%1$s%2$s</string>
+    <string name="spot_with_type_format">%1$s #%2$d (%3$s)</string>
+    <string name="discard_changes_title">Aldaketak baztertu?</string>
+    <string name="discard_changes_msg">Aldaketak egin dituzu inprimakian. Orain irteten bazara, galdu egingo dira.</string>
+    <string name="discard_btn">BAZTERTU</string>
+    <string name="keep_editing_btn">JARRAITU EDITATZEN</string>
+
+    <!-- Validaciones -->
+    <string name="error_start_before_now">Hasiera ordua ezin da unekoa baino lehenago izan</string>
+    <string name="error_end_after_start">Amaiera orduak hasierakoa baino beranduago izan behar du</string>
+    <string name="error_max_9_hours">Erreserba ezin da 9 ordu baino luzeagoa izan</string>
+    <string name="error_spot_occupied">#%1$d plaza beteta dago ordutegi honetan. Mesedez, hautatu libre dagoen beste bat.</string>
+    <string name="error_spot_occupied_edit">#%1$d plaza beteta dago ordutegi honetan</string>
+    <string name="error_user_overlap">Dagoeneko baduzu beste erreserba bat ordutegi honetan</string>
+    <string name="error_vehicle_not_compatible">Zure ibilgailua ez da bateragarria plaza honekin (%1$s)</string>
+    <string name="error_select_vehicle">Ibilgailu bat hautatu behar duzu</string>
+    <string name="error_spot_occupied_simple">Plaza beteta</string>
+    <string name="error_passwords_dont_match">Pasahitzak ez datoz bat</string>
+    <string name="error_password_too_short">Pasahitzak gutxienez 8 karaktere izan behar ditu</string>
+    <string name="error_password_complexity">Pasahitzak gutxienez letra larri bat eta zenbaki bat izan behar ditu</string>
+    <string name="error_email_already_in_use">Email hau dagoeneko erabiltzen ari da</string>
+    <string name="register_loading">Kontua sortzen…</string>
+    <string name="error_unknown">Ustekabeko errorea gertatu da</string>
+    <string name="incompatible_vehicle_title">Ibilgailu ez-bateragarria</string>
+    <string name="incompatible_vehicle_msg">Zure uneko ibilgailua ez da bateragarria hautatutako plaza motarekin (#%1$d). Beste ibilgailu bat gehitu nahi duzu?</string>
+
+    <!-- Common Buttons -->
+    <string name="cancel">DEUSEZTATU</string>
+    <string name="save">GORDE</string>
+    <string name="add">GEHITU</string>
+
+    <!-- Language Selection -->
+    <string name="select_language">Hizkuntza</string>
+    <string name="language_english">Ingelesa</string>
+    <string name="language_spanish">Gaztelera</string>
+    <string name="language_basque">Euskara</string>
+    <string name="system_default">Sistema</string>
+</resources>

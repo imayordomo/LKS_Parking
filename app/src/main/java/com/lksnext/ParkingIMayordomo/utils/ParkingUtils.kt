@@ -36,6 +36,7 @@ object ParkingUtils {
     const val ROUTE_REPORT = "report"
     const val ROUTE_MY_REPORTS = "my-reports"
     const val ROUTE_HELP = "help"
+    const val ROUTE_ABOUT = "about"
     
     // Params
     const val PARAM_SHOW_VEHICLE_ALERT = "showVehicleAlert"

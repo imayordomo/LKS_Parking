@@ -59,6 +59,7 @@
     <string name="menu_notifications">Notificaciones</string>
     <string name="menu_report">Reportar</string>
     <string name="menu_help">Ayuda</string>
+    <string name="menu_about">Acerca de</string>
     <string name="drawer_history">Historial de Reservas</string>
     <string name="drawer_profile">Perfil y Vehículos</string>
     <string name="drawer_parking">Consultar Parking</string>
@@ -133,6 +134,18 @@
     <string name="delete_vehicle_error_title">No se puede eliminar</string>
     <string name="delete_vehicle_error_msg">Este vehículo tiene una reserva activa o futura. Debes esperar a que termine la reserva o eliminarla antes de poder borrar el vehículo.</string>
     <string name="error_license_plate_exists">Esta matrícula ya está registrada por otro usuario o en tu perfil.</string>
+
+    <!-- About Screen -->
+    <string name="about_title">Acerca de la App</string>
+    <string name="about_version">Parking App > Versión 1.0.0</string>
+    <string name="about_description">Proyecto académico desarrollado para el Aula de Empresa de Conceptualización y Desarrollo de Productos Digitales en colaboración con LKS Next y la Universidad del País Vasco (UPV/EHU).</string>
+    <string name="about_developed_by">Desarrollado por: imayordomo</string>
+    <string name="about_acknowledgments_title">Agradecimientos y Atribuciones:</string>
+    <string name="about_openmoji_desc">Esta aplicación utiliza recursos de código abierto de terceros bajo sus respectivas licencias:</string>
+    <string name="about_openmoji_item">OpenMoji assets used in this app: Basque flag emoji (🏴)</string>
+    <string name="about_author">Author: Sam Hocevar</string>
+    <string name="about_source">Source: https://openmoji.org/library/emoji-1F3F4-E0065-E0073-E0070-E0076-E007F/</string>
+    <string name="about_license">License: CC BY-SA 4.0</string>
 
     <!-- History Screen -->
     <string name="history_title">Historial</string>
@@ -262,5 +275,12 @@
     <string name="cancel">CANCELAR</string>
     <string name="save">GUARDAR</string>
     <string name="add">AÑADIR</string>
+
+    <!-- Language Selection -->
+    <string name="select_language">Idioma</string>
+    <string name="language_english">Inglés</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_basque">Vasco</string>
+    <string name="system_default">Sistema</string>
 
 </resources>

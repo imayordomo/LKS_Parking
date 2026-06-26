@@ -58,8 +58,10 @@ data class Notification(
     val type: NotificationType = NotificationType.INFO,
     val title: String? = null,
     val message: String? = null,
-    val titleResId: Int? = null,
-    val messageResId: Int? = null,
+    val titleRes: String? = null,
+    val messageRes: String? = null,
+    val titleResId: Int? = null, // Legacy, avoid using for new notifications
+    val messageResId: Int? = null, // Legacy, avoid using for new notifications
     val messageArgs: List<Any> = emptyList(),
     val time: Date = Date(),
     val read: Boolean = false
