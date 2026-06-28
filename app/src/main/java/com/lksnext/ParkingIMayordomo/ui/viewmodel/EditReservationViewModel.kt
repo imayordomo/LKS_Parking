@@ -60,7 +60,10 @@ class EditReservationViewModel(private val repository: ParkingRepository) : View
         currentUserId: String?,
         selectedVehicleId: String
     ): Int? {
-        val now = Calendar.getInstance()
+        val now = Calendar.getInstance().apply {
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
         val startCal = Calendar.getInstance().apply {
             time = selectedDate.time
             set(Calendar.HOUR_OF_DAY, startTime.get(Calendar.HOUR_OF_DAY))
