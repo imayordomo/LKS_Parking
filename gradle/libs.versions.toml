@@ -14,6 +14,10 @@ firebaseBom = "34.13.0"
 googleServicesPlugin = "4.4.4"
 firebaseCrashlyticsPlugin = "3.0.7"
 fragment = "1.7.1"
+mockk = "1.14.11"
+kotlinxCoroutinesTest = "1.11.0"
+turbine = "1.2.1"
+jacoco = "0.8.12"
 
 [libraries]
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
@@ -40,6 +44,9 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
