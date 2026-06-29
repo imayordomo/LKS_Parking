@@ -32,6 +32,9 @@ object AuthManager {
     private val _reservations = MutableStateFlow<List<Reservation>>(emptyList())
     val reservations: StateFlow<List<Reservation>> = _reservations.asStateFlow()
 
+    private val _allReservations = MutableStateFlow<List<Reservation>>(emptyList())
+    val allReservations: StateFlow<List<Reservation>> = _allReservations.asStateFlow()
+
     private val _vehicles = MutableStateFlow<List<Vehicle>>(emptyList())
     val vehicles: StateFlow<List<Vehicle>> = _vehicles.asStateFlow()
 
@@ -67,12 +70,20 @@ object AuthManager {
         
         clearListeners()
 
-        // Real-time Reservations
+        // Real-time Reservations (user-specific)
         activeListeners.add(
             db.collection("reservas")
                 .whereEqualTo("userId", userId)
                 .addSnapshotListener { snapshot, _ ->
                     _reservations.value = snapshot?.documents?.mapNotNull { it.toObject<Reservation>() } ?: emptyList()
+                }
+        )
+
+        // Real-time All Reservations (for parking view occupancy)
+        activeListeners.add(
+            db.collection("reservas")
+                .addSnapshotListener { snapshot, _ ->
+                    _allReservations.value = snapshot?.documents?.mapNotNull { it.toObject<Reservation>() } ?: emptyList()
                 }
         )
 
@@ -233,6 +244,7 @@ object AuthManager {
         auth.signOut()
         _user.value = null
         _reservations.value = emptyList()
+        _allReservations.value = emptyList()
         _vehicles.value = emptyList()
         _notifications.value = emptyList()
         _reports.value = emptyList()

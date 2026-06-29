@@ -45,7 +45,7 @@ class NewReservationViewModel(private val repository: ParkingRepository) : ViewM
     fun getOccupiedSpots(selectedDate: Calendar, startTime: Calendar?, endTime: Calendar?): Flow<List<Int>> {
         if (startTime == null || endTime == null) return flowOf(emptyList())
         
-        return repository.reservations.map { reservations ->
+        return repository.allReservations.map { reservations ->
             val dateStr = sdfDate.format(selectedDate.time)
             val startStr = sdfTime.format(startTime.time)
             val endStr = sdfTime.format(endTime.time)

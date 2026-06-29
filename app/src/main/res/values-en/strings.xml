@@ -177,6 +177,10 @@
     <string name="faq_a9">Yes, you can cancel your reservations from \"My Reservations\". Simply expand the reservation you want to cancel and press the delete button. Keep in mind that this action cannot be undone.</string>
     <string name="faq_q10">What if my email is not @lksnext.com?</string>
     <string name="faq_a10">Only employees with corporate @lksnext.com email can register in the system. If you need access and do not have this email, contact the facilities department.</string>
+    <string name="faq_q11">What do the colors mean in the Check Parking view?</string>
+    <string name="faq_a11">In the parking view, spots are shown in three colors:\n\n• Green = Available: no one has reserved the spot at that time.\n• Yellow = Your reservation: you have an active reservation in that spot.\n• Gray = Occupied: another user has reserved that spot.</string>
+    <string name="faq_q12">Why do the occupied spots change when viewing today vs another day?</string>
+    <string name="faq_a12">When you select today, only spots with an active reservation right now are shown as occupied. If a reservation starts later, the spot will appear free until that time. When you select a future day, all reservations scheduled for that day are shown, regardless of the time.</string>
     <string name="more_help_title">Need more help?</string>
     <string name="more_help_desc">Contact the facilities department at example@lksnext.com or call ext. 1234</string>
 

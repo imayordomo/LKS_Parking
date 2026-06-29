@@ -189,6 +189,10 @@
     <string name="faq_a9">Bai, zure erreserbak bertan behera utzi ditzakezu \"Erreserbak\" ataletik. Hedatu bertan behera utzi nahi duzun erreserba eta sakatu ezabatzeko botoia. Kontuan izan ekintza hau ezin dela desegin.</string>
     <string name="faq_q10">Zer egiten dut nire emaila @lksnext.com ez bada?</string>
     <string name="faq_a10">@lksnext.com posta korporatiboa duten langileek bakarrik erregistratu daitezke sisteman. Sarbidea behar baduzu eta posta hori ez baduzu, jarri harremanetan facilities sailarekin.</string>
+    <string name="faq_q11">Zer esan nahi dute koloreek Aparkalekua Kontsultatu atalean?</string>
+    <string name="faq_a11">Aparkalekuaren ikuspegian, plazak hiru koloretan agertzen dira:\n\n• Berdea = Eskuragarri: inork ez du plaza erreserbatu ordu horretan.\n• Horia = Zure erreserba: erreserba aktibo bat duzu plaza horretan.\n• Grisa = Okupatua: beste erabiltzaile batek plaza hori erreserbatu du.</string>
+    <string name="faq_q12">Zergatik aldatzen dira plaza okupatuak gaur eta beste egun batean ikustean?</string>
+    <string name="faq_a12">Gaurko eguna hautatzen duzunean, une honetan erreserba aktibo bat duten plazak soilik agertzen dira okupatuta. Erreserba bat beranduago hasten bada, plaza librea agertuko da ordu horretara arte. Etorkizuneko egun bat hautatzean, egun horretarako programatutako erreserba guztiak erakusten dira, ordua kontuan hartu gabe.</string>
     <string name="more_help_title">Laguntza gehiago behar duzu?</string>
     <string name="more_help_desc">Jarri harremanetan facilities sailarekin example@lksnext.com helbidean edo deitu 1234 luzapenera</string>
 

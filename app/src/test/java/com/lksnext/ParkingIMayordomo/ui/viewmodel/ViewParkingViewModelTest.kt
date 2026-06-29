@@ -28,12 +28,14 @@ class ViewParkingViewModelTest {
 
     private val userFlow = MutableStateFlow<User?>(null)
     private val reservationsFlow = MutableStateFlow<List<Reservation>>(emptyList())
+    private val allReservationsFlow = MutableStateFlow<List<Reservation>>(emptyList())
 
     @Before
     fun setup() {
         repository = mockk(relaxed = true)
         every { repository.user } returns (userFlow as StateFlow<User?>)
         every { repository.reservations } returns (reservationsFlow as StateFlow<List<Reservation>>)
+        every { repository.allReservations } returns (allReservationsFlow as StateFlow<List<Reservation>>)
         
         viewModel = ViewParkingViewModel(repository)
     }
@@ -43,7 +45,7 @@ class ViewParkingViewModelTest {
         val date = Calendar.getInstance()
         date.set(2023, 4, 10) // 2023-05-10
         
-        reservationsFlow.value = listOf(
+        allReservationsFlow.value = listOf(
             Reservation(id = "1", spotNumber = 5, date = "2023-05-10"),
             Reservation(id = "2", spotNumber = 10, date = "2023-05-10"),
             Reservation(id = "3", spotNumber = 5, date = "2023-05-10"),

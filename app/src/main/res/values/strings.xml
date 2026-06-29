@@ -183,6 +183,10 @@
     <string name="faq_a9">Sí, puedes cancelar tus reservas desde \"Mis Reservas\". Simplemente expande la reserva que quieres cancelar y pulsa el botón de eliminar. Ten en cuenta que esta acción no se puede deshacer.</string>
     <string name="faq_q10">¿Qué hago si mi correo no es @lksnext.com?</string>
     <string name="faq_a10">Solo los empleados con correo corporativo @lksnext.com pueden registrarse en el sistema. Si necesitas acceso y no tienes este correo, contacta con el departamento de facilities.</string>
+    <string name="faq_q11">¿Qué significan los colores en Consultar Parking?</string>
+    <string name="faq_a11">En la vista de parking, las plazas se muestran en tres colores:\n\n• Verde = Disponible: nadie ha reservado la plaza en ese horario.\n• Amarillo = Tu reserva: tienes una reserva activa en esa plaza.\n• Gris = Ocupada: otro usuario ha reservado esa plaza.</string>
+    <string name="faq_q12">¿Por qué cambian las plazas ocupadas al consultar hoy y otro día?</string>
+    <string name="faq_a12">Cuando seleccionas el día de hoy, solo se muestran como ocupadas las plazas con una reserva activa en este momento. Si una reserva empieza más tarde, la plaza se verá libre hasta esa hora. Al seleccionar un día futuro, se muestran todas las reservas programadas para ese día, independientemente de la hora.</string>
     <string name="more_help_title">¿Necesitas más ayuda?</string>
     <string name="more_help_desc">Contacta con el departamento de facilities en example@lksnext.com o llama al ext. 1234</string>
 

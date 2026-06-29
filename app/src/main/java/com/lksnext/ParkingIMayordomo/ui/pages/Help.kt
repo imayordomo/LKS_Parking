@@ -57,7 +57,9 @@ fun Help(
         FAQ(stringResource(R.string.faq_q7), stringResource(R.string.faq_a7)),
         FAQ(stringResource(R.string.faq_q8), stringResource(R.string.faq_a8)),
         FAQ(stringResource(R.string.faq_q9), stringResource(R.string.faq_a9)),
-        FAQ(stringResource(R.string.faq_q10), stringResource(R.string.faq_a10))
+        FAQ(stringResource(R.string.faq_q10), stringResource(R.string.faq_a10)),
+        FAQ(stringResource(R.string.faq_q11), stringResource(R.string.faq_a11)),
+        FAQ(stringResource(R.string.faq_q12), stringResource(R.string.faq_a12))
     )
 
     ModalNavigationDrawer(

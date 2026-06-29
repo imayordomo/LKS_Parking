@@ -25,12 +25,14 @@ class NewReservationViewModelTest {
     private lateinit var repository: ParkingRepository
     private lateinit var viewModel: NewReservationViewModel
     private val reservationsFlow = MutableStateFlow<List<Reservation>>(emptyList())
+    private val allReservationsFlow = MutableStateFlow<List<Reservation>>(emptyList())
     private val userFlow = MutableStateFlow<User?>(null)
 
     @Before
     fun setup() {
         repository = mockk(relaxed = true)
         every { repository.reservations } returns (reservationsFlow as StateFlow<List<Reservation>>)
+        every { repository.allReservations } returns (allReservationsFlow as StateFlow<List<Reservation>>)
         every { repository.user } returns (userFlow as StateFlow<User?>)
         viewModel = NewReservationViewModel(repository)
     }
@@ -73,7 +75,7 @@ class NewReservationViewModelTest {
         val testEnd = Calendar.getInstance()
         
         val res = Reservation(id = "1", date = "2023-05-10", startTime = "09:00", endTime = "11:00", spotNumber = 5)
-        reservationsFlow.value = listOf(res)
+        allReservationsFlow.value = listOf(res)
         
         mockkObject(ParkingUtils)
         // Ensure we test the filter logic inside the map
