@@ -1,4 +1,4 @@
-# LKS Parking 
+# LKS Parking
 
 ![Android](https://img.shields.io/badge/Platform-Android-brightgreen.svg)
 ![Kotlin](https://img.shields.io/badge/Kotlin-1.9+-blue.svg)
@@ -6,30 +6,26 @@
 ![Architecture](https://img.shields.io/badge/Architecture-MVVM-red.svg)
 
 ## Descripción
-Aplicación móvil para la gestión de reservas de plazas de parking en las oficinas de LKS Next. 
+Aplicación móvil para la gestión de reservas de plazas de parking en las oficinas de LKS Next.
 **Este proyecto forma parte del Aula de Empresa de Movilidad de LKS Next y la UPV/EHU 2026.**
-<br>
-
-> [!WARNING]
-> Proyecto todavía **en desarrollo**. Siguiente implementación: Testing y Analíticas. 
 
 ## Características Principales
-- **Autenticación**: Registro e inicio de sesión con validación de correo corporativo (@lks.com).
-- **Reservas**: Sistema de reserva de plazas con selección de fecha y tramos horarios (máx. 7 días de antelación y 9 horas de duración).
+- **Autenticación**: Registro e inicio de sesión con validación de correo corporativo (@lksnext.com).
+- **Reservas**: Sistema de reserva de plazas con selección de fecha y tramos horarios (máx. 7 días de antelación y 9 horas de duración). Posibilidad de cancelación.
 - **Visualización**: Mapa interactivo del estado del parking en tiempo real (Vista Cuadrícula y Lista).
 - **Gestión de Vehículos**: Registro de múltiples vehículos (Coche, Eléctrico, Moto, Discapacitado).
-- **Historial**: Consulta y filtrado de reservas pasadas y futuras (sin opción de borrado para auditoría).
-- **Notificaciones**: Avisos sobre confirmaciones y recordatorios automáticos.
+- **Historial**: Consulta de reservas pasadas, activas y futuras con indicador de estado.
+- **Notificaciones**: Avisos sobre confirmaciones, cancelaciones y recordatorios automáticos.
 - **Reportes**: Sistema para informar de incidencias (daños, limpieza, ocupación indebida).
 
 **[Prototipo interactivo en Figma](https://ardent-harp-31107545.figma.site)**
 
 ## Roadmap y Planes Futuros
-Los siguientes pasos incluyen:
 
-*   **Analíticas**: Implementación de Firebase Performance Monitoring y Crashlytics.
-*   **Testing**: Implementación de tests unitarios y funcionales en Android.
-*   **Automatización**: Configurar mejor el pipeline de CI/CD (GitHub Actions) para ejecución de tests unitarios y generación automática de `.apk`.
+- [x] **Firebase**: Integración de Firestore, Auth, Cloud Messaging y Crashlytics.
+- [x] **Testing**: Tests unitarios de todos los ViewModels (cobertura 100%).
+- [ ] **Analíticas**: Implementación de Firebase Performance Monitoring.
+- [ ] **Automatización**: Pipeline de CI/CD (GitHub Actions) para tests y generación de `.apk`.
 
 ## Información para Desarrolladores
 
@@ -44,12 +40,15 @@ Toda la información técnica relativa a la arquitectura del sistema, la estruct
 - **Navegación**: Compose Navigation
 - **Inyección de Dependencias**: Provisión manual vía `ViewModelFactory`
 - **Componentes**: Material Design 3
+- **Asincronía**: Kotlin Coroutines & StateFlow
+- **Backend**: Firebase (Auth, Firestore, Cloud Messaging, Crashlytics)
+- **Soporte Multiidioma**: Español, Inglés, Euskera
 
 ```text
 app/src/main/java/com/lksnext/ParkingIMayordomo/
-├── data/          # Modelos, Repositorios y Gestión de Datos (AuthManager)
+├── data/          # Modelos, Repositorios y AuthManager (Firebase)
 ├── ui/            # Pantallas (Pages), ViewModels y Componentes Reutilizables
-├── utils/         # Lógica de validación, constantes de rutas y utilidades
+├── utils/         # Validación, constantes de rutas, LocaleManager
 └── MainActivity   # Punto de entrada, NavHost y Protección de Rutas
 ```
 

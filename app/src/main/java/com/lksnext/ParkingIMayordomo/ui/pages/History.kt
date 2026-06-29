@@ -357,7 +357,31 @@ fun ReservationHistoryItem(
     }
     
     val isPast = remember(reservation.date, reservation.endTime, todayStr, currentTimeStr) {
-        reservation.date < todayStr || (reservation.date == todayStr && reservation.endTime <= currentTimeStr)
+        reservation.date < todayStr || (reservation.date == todayStr && reservation.endTime < currentTimeStr)
+    }
+    val isActive = remember(reservation.date, reservation.startTime, reservation.endTime, todayStr, currentTimeStr) {
+        reservation.date == todayStr && reservation.startTime <= currentTimeStr && reservation.endTime > currentTimeStr
+    }
+
+    val itemAlpha = when {
+        isPast -> 0.5f
+        isActive -> 1f
+        else -> 1f
+    }
+    val badgeColor = when {
+        isPast -> MaterialTheme.colorScheme.outlineVariant
+        isActive -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.primaryContainer
+    }
+    val badgeTextColor = when {
+        isPast -> MaterialTheme.colorScheme.onSurfaceVariant
+        isActive -> MaterialTheme.colorScheme.onError
+        else -> MaterialTheme.colorScheme.onPrimaryContainer
+    }
+    val statusLabel = when {
+        isPast -> stringResource(R.string.status_past)
+        isActive -> stringResource(R.string.status_active)
+        else -> stringResource(R.string.status_next)
     }
 
     Row(
@@ -376,7 +400,7 @@ fun ReservationHistoryItem(
                 text = stringResource(R.string.spot_short_prefix),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = if (isPast) 0.5f else 1f)
+                color = MaterialTheme.colorScheme.primary.copy(alpha = itemAlpha)
             )
         }
 
@@ -386,7 +410,7 @@ fun ReservationHistoryItem(
                     text = stringResource(R.string.spot_label_format, stringResource(R.string.spot_short_prefix), reservation.spotNumber),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (isPast) MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = itemAlpha)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
@@ -396,14 +420,14 @@ fun ReservationHistoryItem(
                     modifier = Modifier.weight(1f)
                 )
                 Surface(
-                    color = if (isPast) MaterialTheme.colorScheme.outlineVariant else MaterialTheme.colorScheme.primaryContainer,
+                    color = badgeColor,
                     shape = RoundedCornerShape(4.dp)
                 ) {
                     Text(
-                        text = if (isPast) stringResource(R.string.status_past) else stringResource(R.string.status_next),
+                        text = statusLabel,
                         fontSize = 10.sp,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                        color = if (isPast) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimaryContainer
+                        color = badgeTextColor
                     )
                 }
             }

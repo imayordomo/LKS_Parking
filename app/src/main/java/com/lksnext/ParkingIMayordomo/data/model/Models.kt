@@ -88,7 +88,4 @@ data class Report(
     val description: String = "",
     val timestamp: Timestamp? = null,
     val status: String = "PENDING"
-) {
-    val reportStatus: ReportStatus
-        get() = ReportStatus.fromString(status)
-}
+)

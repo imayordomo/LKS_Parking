@@ -148,6 +148,7 @@
     <string name="filter_future">FUTURE</string>
     <string name="clear_filters">Clear all filters</string>
     <string name="no_history">You have no reservations in your history</string>
+    <string name="status_active">ACTIVE</string>
     <string name="status_past">Past</string>
     <string name="status_next">Next</string>
     <string name="spot_short_prefix">S</string>

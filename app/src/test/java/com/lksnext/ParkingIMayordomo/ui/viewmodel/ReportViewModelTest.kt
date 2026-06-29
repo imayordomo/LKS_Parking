@@ -34,7 +34,7 @@ class ReportViewModelTest {
 
     @Test
     fun `viewModel should expose repository reports flow`() {
-        val testReports = listOf(Report(id = "r1", title = "Test"))
+        val testReports = listOf(Report(title = "Test"))
         reportsFlow.value = testReports
 
         assertEquals(testReports, viewModel.reports.value)

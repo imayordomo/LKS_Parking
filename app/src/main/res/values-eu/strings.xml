@@ -160,6 +160,7 @@
     <string name="filter_future">ETORKIZUNEKOAK</string>
     <string name="clear_filters">Garbitu iragazki guztiak</string>
     <string name="no_history">Ez duzu erreserbarik historian</string>
+    <string name="status_active">AKTIBOA</string>
     <string name="status_past">Iragana</string>
     <string name="status_next">Hurrengoa</string>
     <string name="spot_short_prefix">P</string>
