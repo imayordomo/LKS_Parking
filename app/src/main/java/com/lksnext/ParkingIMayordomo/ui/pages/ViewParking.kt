@@ -89,6 +89,10 @@ fun ViewParking(
         viewModel.getUserSpots(selectedDate) 
     }.collectAsState(initial = emptyList())
 
+    val currentReservations by remember(selectedDateMillis) {
+        viewModel.getCurrentReservations(selectedDate)
+    }.collectAsState(initial = emptyList())
+
     val isDateInReservationRange = remember(selectedDateMillis) {
         val today = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
@@ -248,7 +252,7 @@ fun ViewParking(
                 }
 
                 if (selectedSpot != null) {
-                    val spotReservations = reservations.filter { it.date == dateStr && it.spotNumber == selectedSpot }
+                    val spotReservations = currentReservations.filter { it.spotNumber == selectedSpot }
                     val isUserSpot = userSpots.contains(selectedSpot!!)
                     val spotType = ParkingUtils.getSpotType(selectedSpot!!)
                     
@@ -301,7 +305,7 @@ fun ViewParking(
 
                             if (spotReservations.isNotEmpty()) {
                                 Text(stringResource(R.string.reservations_count_label, spotReservations.size), fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 16.dp), color = MaterialTheme.colorScheme.onSurface)
-                                spotReservations.forEach { reservation ->
+                                spotReservations.sortedBy { it.startTime }.forEach { reservation ->
                                     val isMine = reservation.userId == currentUser?.id
                                     Surface(
                                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),

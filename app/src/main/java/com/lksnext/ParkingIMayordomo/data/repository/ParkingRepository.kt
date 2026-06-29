@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface ParkingRepository {
     val user: StateFlow<User?>
     val reservations: StateFlow<List<Reservation>>
+    val allReservations: StateFlow<List<Reservation>>
     val vehicles: StateFlow<List<Vehicle>>
     val notifications: StateFlow<List<Notification>>
     val reports: StateFlow<List<Report>>
