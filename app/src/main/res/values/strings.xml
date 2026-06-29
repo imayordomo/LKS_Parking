@@ -17,10 +17,8 @@
     <string name="login_link">Inicia sesión</string>
 
     <!-- Login -->
-    <string name="login_loading">Iniciando sesión…</string>
     <string name="error_required_fields">Todos los campos son obligatorios</string>
     <string name="error_invalid_credentials">Email o contraseña incorrectos</string>
-    <string name="corporate_suffix"> (@lksnext.com)</string>
     <string name="email_label_with_corporate">Email * (@lksnext.com)</string>
 
     <!-- Forgot Password -->
@@ -31,7 +29,6 @@
     <string name="email_sent_instructions">Revisa tu bandeja de entrada para restablecer tu contraseña</string>
     <string name="reset_email_sent_success">Enlace de recuperación enviado</string>
     <string name="check_inbox_hint">Si no recibes el correo en unos minutos, revisa tu carpeta de spam.</string>
-    <string name="error_enter_email">Por favor, introduce tu email</string>
     <string name="error_corporate_only">Solo se aceptan correos corporativos @lksnext.com</string>
     <string name="error_invalid_email_format">Formato de email no válido</string>
 
@@ -104,8 +101,6 @@
     <string name="notif_welcome_msg">Ya puedes gestionar tus reservas de plaza de parking desde la app.</string>
     <string name="notif_confirm_title">Reserva confirmada</string>
     <string name="notif_confirm_msg">Has reservado la plaza #%1$d para el día %2$s a las %3$s</string>
-    <string name="notif_start_soon_title">Tu reserva comienza pronto</string>
-    <string name="notif_start_soon_msg">Tu reserva de la plaza #%1$d comienza en 30 minutos</string>
     <string name="notif_modified_title">Reserva modificada</string>
     <string name="notif_modified_msg">Plaza #%1$d actualizada para el %2$s a las %3$s</string>
     <string name="notif_cancelled_title">Reserva cancelada</string>
@@ -127,7 +122,6 @@
     <string name="go_to_profile">IR AL PERFIL</string>
     <string name="logout_confirmation">¿Estás seguro de que quieres cerrar sesión?</string>
     <string name="vehicle_not_compatible_short">No compatible</string>
-    <string name="save_profile">Guardar</string>
     <string name="license_plate_placeholder">ABC-1234</string>
     <string name="delete_vehicle_title">¿Eliminar vehículo?</string>
     <string name="delete_vehicle_msg">¿Estás seguro de que quieres eliminar el vehículo con matrícula %1$s?</string>
@@ -160,6 +154,7 @@
     <string name="filter_future">FUTURAS</string>
     <string name="clear_filters">Limpiar todos los filtros</string>
     <string name="no_history">No tienes reservas en tu historial</string>
+    <string name="status_active">ACTIVA</string>
     <string name="status_past">Pasada</string>
     <string name="status_next">Próxima</string>
     <string name="spot_short_prefix">P</string>
@@ -234,7 +229,6 @@
     <string name="mine_suffix"> (Tú)</string>
     <string name="schedule_format">Horario: %1$s - %2$s</string>
     <string name="reserve_spot_btn">Reservar esta plaza</string>
-    <string name="error_date_out_of_range">No se pueden realizar reservas para fechas pasadas o con más de 7 días de antelación.</string>
     <string name="consultation_mode_info">Modo consulta: Visualizando un día fuera del periodo de reserva (solo próximos 7 días).</string>
     <string name="select_spot_prompt">Seleccionar plaza</string>
     <string name="badge_mine">Tuya</string>
@@ -256,10 +250,7 @@
     <string name="error_start_before_now">La hora de inicio no puede ser anterior a la actual</string>
     <string name="error_end_after_start">La hora de fin debe ser posterior a la de inicio</string>
     <string name="error_max_9_hours">La reserva no puede superar las 9 horas</string>
-    <string name="error_spot_occupied">La plaza #%1$d ya está ocupada en este horario. Por favor, selecciona otra disponible.</string>
-    <string name="error_spot_occupied_edit">La plaza #%1$d ya está ocupada en este horario</string>
     <string name="error_user_overlap">Ya tienes otra reserva realizada para este horario</string>
-    <string name="error_vehicle_not_compatible">Tu vehículo no es compatible con esta plaza (%1$s)</string>
     <string name="error_select_vehicle">Debes seleccionar un vehículo</string>
     <string name="error_spot_occupied_simple">Plaza ocupada</string>
     <string name="error_passwords_dont_match">Las contraseñas no coinciden</string>
@@ -281,6 +272,5 @@
     <string name="language_english">Inglés</string>
     <string name="language_spanish">Español</string>
     <string name="language_basque">Vasco</string>
-    <string name="system_default">Sistema</string>
 
 </resources>

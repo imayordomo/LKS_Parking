@@ -144,8 +144,8 @@ fun AppNavigation() {
     val factory = remember { ViewModelFactory(repository) }
     val currentUser by repository.user.collectAsState()
     
-    val startRoute = remember { 
-        if (AuthManager.user != null) ROUTE_DASHBOARD else ROUTE_LANDING 
+    val startRoute = remember {
+        if (currentUser != null) ROUTE_DASHBOARD else ROUTE_LANDING
     }
 
     NavHost(

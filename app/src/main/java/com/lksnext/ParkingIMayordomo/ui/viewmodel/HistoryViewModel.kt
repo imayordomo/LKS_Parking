@@ -35,7 +35,7 @@ class HistoryViewModel(private val repository: ParkingRepository) : ViewModel() 
         reservations
             .filter { it.userId == currentUser?.id }
             .filter { res ->
-                val isPast = res.date < todayStr || (res.date == todayStr && res.endTime <= currentTimeStr)
+                val isPast = res.date < todayStr || (res.date == todayStr && res.endTime < currentTimeStr)
                 
                 val matchesStatus = when (status) {
                     "past" -> isPast
@@ -48,7 +48,7 @@ class HistoryViewModel(private val repository: ParkingRepository) : ViewModel() 
 
                 matchesStatus && matchesDate
             }
-            .sortedByDescending { it.date }
+            .sortedWith(compareByDescending<Reservation> { it.date }.thenByDescending { it.startTime })
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun setStatusFilter(status: String) { _statusFilter.value = status }

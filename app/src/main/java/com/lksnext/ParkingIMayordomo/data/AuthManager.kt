@@ -1,9 +1,6 @@
 package com.lksnext.ParkingIMayordomo.data
 
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
@@ -15,6 +12,9 @@ import com.google.firebase.firestore.toObject
 import com.google.firebase.messaging.FirebaseMessaging
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.data.model.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.*
@@ -26,11 +26,20 @@ object AuthManager {
     
     private const val CORPORATE_DOMAIN = "@lksnext.com"
     
-    var user by mutableStateOf<User?>(null)
-    var reservations by mutableStateOf<List<Reservation>>(emptyList())
-    var vehicles by mutableStateOf<List<Vehicle>>(emptyList())
-    var notifications by mutableStateOf<List<Notification>>(emptyList())
-    var reports by mutableStateOf<List<Report>>(emptyList())
+    private val _user = MutableStateFlow<User?>(null)
+    val user: StateFlow<User?> = _user.asStateFlow()
+
+    private val _reservations = MutableStateFlow<List<Reservation>>(emptyList())
+    val reservations: StateFlow<List<Reservation>> = _reservations.asStateFlow()
+
+    private val _vehicles = MutableStateFlow<List<Vehicle>>(emptyList())
+    val vehicles: StateFlow<List<Vehicle>> = _vehicles.asStateFlow()
+
+    private val _notifications = MutableStateFlow<List<Notification>>(emptyList())
+    val notifications: StateFlow<List<Notification>> = _notifications.asStateFlow()
+
+    private val _reports = MutableStateFlow<List<Report>>(emptyList())
+    val reports: StateFlow<List<Report>> = _reports.asStateFlow()
 
     private val activeListeners = mutableListOf<ListenerRegistration>()
 
@@ -42,7 +51,7 @@ object AuthManager {
         auth.currentUser?.let { firebaseUser ->
             val userId = firebaseUser.uid
             val email = firebaseUser.email ?: ""
-            user = User(
+            _user.value = User(
                 id = userId,
                 email = email,
                 name = firebaseUser.displayName ?: email.substringBefore("@"),
@@ -54,7 +63,7 @@ object AuthManager {
     }
 
     private fun refreshAllData() {
-        val userId = user?.id ?: return
+        val userId = _user.value?.id ?: return
         
         clearListeners()
 
@@ -63,7 +72,7 @@ object AuthManager {
             db.collection("reservas")
                 .whereEqualTo("userId", userId)
                 .addSnapshotListener { snapshot, _ ->
-                    reservations = snapshot?.documents?.mapNotNull { it.toObject<Reservation>() } ?: emptyList()
+                    _reservations.value = snapshot?.documents?.mapNotNull { it.toObject<Reservation>() } ?: emptyList()
                 }
         )
 
@@ -72,7 +81,7 @@ object AuthManager {
             db.collection("vehiculos")
                 .whereEqualTo("userId", userId)
                 .addSnapshotListener { snapshot, _ ->
-                    vehicles = snapshot?.documents?.mapNotNull { it.toObject<Vehicle>() } ?: emptyList()
+                    _vehicles.value = snapshot?.documents?.mapNotNull { it.toObject<Vehicle>() } ?: emptyList()
                 }
         )
 
@@ -81,7 +90,7 @@ object AuthManager {
             db.collection("usuarios").document(userId).collection("notificaciones")
                 .orderBy("time", Query.Direction.DESCENDING)
                 .addSnapshotListener { snapshot, _ ->
-                    notifications = snapshot?.documents?.mapNotNull { it.toObject<Notification>() } ?: emptyList()
+                    _notifications.value = snapshot?.documents?.mapNotNull { it.toObject<Notification>() } ?: emptyList()
                 }
         )
 
@@ -96,7 +105,7 @@ object AuthManager {
                     }
                     val list = snapshot?.documents?.mapNotNull { it.toObject<Report>() } ?: emptyList()
                     // Use MAX_VALUE for null timestamps to keep new unsynced reports at top
-                    reports = list.sortedByDescending { it.timestamp?.seconds ?: Long.MAX_VALUE }
+                    _reports.value = list.sortedByDescending { it.timestamp?.seconds ?: Long.MAX_VALUE }
                 }
         )
     }
@@ -126,7 +135,7 @@ object AuthManager {
             val userDoc = db.collection("usuarios").document(userId).get().await()
             val firestoreUser = userDoc.toObject<User>()
 
-            user = User(
+            _user.value = User(
                 id = userId,
                 email = normalizedEmail,
                 name = firestoreUser?.name ?: (firebaseUser.displayName ?: normalizedEmail.substringBefore("@")),
@@ -177,7 +186,7 @@ object AuthManager {
             )
             db.collection("usuarios").document(userId).set(userProfile).await()
 
-            user = userProfile
+            _user.value = userProfile
             
             refreshAllData()
             syncFcmToken()
@@ -194,14 +203,14 @@ object AuthManager {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val token = task.result
-                val userId = user?.id ?: return@addOnCompleteListener
+                val userId = _user.value?.id ?: return@addOnCompleteListener
                 db.collection("usuarios").document(userId).update("fcmToken", token)
             }
         }
     }
 
     suspend fun updateFcmToken(token: String) {
-        val userId = user?.id ?: return
+        val userId = _user.value?.id ?: return
         db.collection("usuarios").document(userId)
             .update("fcmToken", token)
             .await()
@@ -222,11 +231,11 @@ object AuthManager {
     fun logout() {
         clearListeners()
         auth.signOut()
-        user = null
-        reservations = emptyList()
-        vehicles = emptyList()
-        notifications = emptyList()
-        reports = emptyList()
+        _user.value = null
+        _reservations.value = emptyList()
+        _vehicles.value = emptyList()
+        _notifications.value = emptyList()
+        _reports.value = emptyList()
     }
 
     private suspend fun generateInitialNotifications(userId: String) {
@@ -245,7 +254,7 @@ object AuthManager {
     }
 
     suspend fun addInternalNotification(type: NotificationType, titleRes: String, messageRes: String, messageArgs: List<Any> = emptyList()) {
-        val userId = user?.id ?: return
+        val userId = _user.value?.id ?: return
         val id = UUID.randomUUID().toString()
         val newNotif = Notification(
             id = id,
@@ -262,7 +271,7 @@ object AuthManager {
     }
 
     suspend fun addExternalNotification(title: String, message: String) {
-        val userId = user?.id ?: return
+        val userId = _user.value?.id ?: return
         val id = UUID.randomUUID().toString()
         val newNotif = Notification(
             id = id,
@@ -278,13 +287,13 @@ object AuthManager {
     }
 
     suspend fun markAsRead(id: String) {
-        val userId = user?.id ?: return
+        val userId = _user.value?.id ?: return
         db.collection("usuarios").document(userId).collection("notificaciones")
             .document(id).update("read", true).await()
     }
 
     suspend fun markAllAsRead() {
-        val userId = user?.id ?: return
+        val userId = _user.value?.id ?: return
         val batch = db.batch()
         val notifs = db.collection("usuarios").document(userId).collection("notificaciones")
             .whereEqualTo("read", false).get().await()
@@ -295,7 +304,7 @@ object AuthManager {
     }
 
     suspend fun deleteNotification(id: String) {
-        val userId = user?.id ?: return
+        val userId = _user.value?.id ?: return
         db.collection("usuarios").document(userId).collection("notificaciones")
             .document(id).delete().await()
     }
@@ -314,7 +323,7 @@ object AuthManager {
     }
 
     suspend fun addReservation(spotNumber: Int, date: String, startTime: String, endTime: String, vehicleId: String, licensePlate: String? = null) {
-        val userId = user?.id ?: return
+        val userId = _user.value?.id ?: return
         
         val ref = db.collection("reservas").document()
         
@@ -326,7 +335,7 @@ object AuthManager {
             endTime = endTime,
             userId = userId,
             vehicleId = vehicleId,
-            userName = user?.name,
+            userName = _user.value?.name,
             licensePlate = licensePlate,
             alertaInicioEnviada = false,
             alertaFinEnviada = false,
@@ -365,7 +374,7 @@ object AuthManager {
         updates["alertaInicioEnviada"] = false
         updates["alertaFinEnviada"] = false
 
-        val current = reservations.find { it.id == reservationId }
+        val current = _reservations.value.find { it.id == reservationId }
         val finalDate = date ?: current?.date
         val finalStart = startTime ?: current?.startTime
         val finalEnd = endTime ?: current?.endTime
@@ -389,7 +398,7 @@ object AuthManager {
     }
 
     suspend fun deleteReservation(reservationId: String) {
-        val current = reservations.find { it.id == reservationId }
+        val current = _reservations.value.find { it.id == reservationId }
         db.collection("reservas").document(reservationId).delete().await()
 
         // Notification of cancellation
@@ -402,7 +411,7 @@ object AuthManager {
     }
 
     suspend fun addVehicle(type: VehicleType, licensePlate: String) {
-        val userId = user?.id ?: return
+        val userId = _user.value?.id ?: return
         val normalizedPlate = licensePlate.trim().uppercase()
         
         // Check if license plate is unique
@@ -442,14 +451,14 @@ object AuthManager {
 
         db.collection("usuarios").document(userId).update(updates).await()
         
-        user = user?.copy(
+        _user.value = _user.value?.copy(
             name = name.trim(),
-            profileImage = imageUri ?: user?.profileImage
+            profileImage = imageUri ?: _user.value?.profileImage
         )
     }
 
     suspend fun addReport(spotNumber: Int?, title: String, description: String) {
-        val userId = user?.id ?: return
+        val userId = _user.value?.id ?: return
         val id = UUID.randomUUID().toString()
         val report = Report(
             id = id,

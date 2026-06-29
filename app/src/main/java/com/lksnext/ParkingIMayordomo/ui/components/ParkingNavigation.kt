@@ -9,6 +9,8 @@ import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,7 +36,8 @@ fun ParkingTopAppBar(
     onMenuClick: () -> Unit,
     onNotificationsClick: () -> Unit
 ) {
-    val unreadCount = AuthManager.notifications.count { !it.read }
+    val notifications by AuthManager.notifications.collectAsState()
+    val unreadCount = notifications.count { !it.read }
 
     TopAppBar(
         title = {
@@ -127,7 +130,7 @@ fun ParkingDrawerContent(
     currentRoute: String,
     onItemClick: (String) -> Unit
 ) {
-    val user = AuthManager.user
+    val user by AuthManager.user.collectAsState()
 
     ModalDrawerSheet(
         modifier = Modifier.width(300.dp),

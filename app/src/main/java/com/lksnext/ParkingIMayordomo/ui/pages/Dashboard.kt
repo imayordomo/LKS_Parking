@@ -203,13 +203,20 @@ fun Dashboard(
                         }
                     }
                 } else {
+                    val todayStr = ParkingUtils.formatDate(Date())
+                    val hasTodayReservation = userReservations.any { it.date == todayStr }
+                    val closestFutureReservationId = if (!hasTodayReservation) {
+                        userReservations.firstOrNull()?.id
+                    } else null
+
                     items(userReservations, key = { it.id }) { reservation ->
                         val vehicle = vehicles.find { it.id == reservation.vehicleId }
                         ReservationItem(
                             reservation = reservation,
                             vehicle = vehicle,
                             onEdit = { onNavigate("${ROUTE_EDIT_RESERVATION}/${reservation.id}") },
-                            onDelete = { reservationToDeleteId = reservation.id }
+                            onDelete = { reservationToDeleteId = reservation.id },
+                            defaultExpanded = reservation.date == todayStr || reservation.id == closestFutureReservationId
                         )
                     }
                 }
@@ -250,12 +257,13 @@ fun ReservationItem(
     reservation: Reservation,
     vehicle: Vehicle?,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    defaultExpanded: Boolean = false
 ) {
-    val todayStr = remember { ParkingUtils.formatDate(Date()) }
+    val todayStr = ParkingUtils.formatDate(Date())
     val isToday = reservation.date == todayStr
     
-    var expanded by rememberSaveable { mutableStateOf(isToday) }
+    var expanded by rememberSaveable { mutableStateOf(defaultExpanded) }
     
     val fullDateFormatStr = stringResource(R.string.full_date_format)
     val displayDateSdf = remember(fullDateFormatStr) { SimpleDateFormat(fullDateFormatStr, Locale.getDefault()) }

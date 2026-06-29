@@ -382,8 +382,7 @@ private fun ReportHistoryItemCompact(report: Report) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 
-                val status = report.reportStatus
-                val (statusText, statusColor) = when (status) {
+                val (statusText, statusColor) = when (ReportStatus.fromString(report.status)) {
                     ReportStatus.PENDING -> stringResource(R.string.status_pending) to MaterialTheme.colorScheme.secondary
                     ReportStatus.IN_REVIEW -> stringResource(R.string.status_in_review) to UserSpotYellow
                     ReportStatus.RESOLVED -> stringResource(R.string.status_resolved) to SuccessGreen
