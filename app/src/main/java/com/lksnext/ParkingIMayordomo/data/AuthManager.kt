@@ -12,6 +12,7 @@ import com.google.firebase.firestore.toObject
 import com.google.firebase.messaging.FirebaseMessaging
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.data.model.*
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -336,34 +337,69 @@ object AuthManager {
 
     suspend fun addReservation(spotNumber: Int, date: String, startTime: String, endTime: String, vehicleId: String, licensePlate: String? = null) {
         val userId = _user.value?.id ?: return
-        
-        val ref = db.collection("reservas").document()
-        
-        val newRes = Reservation(
-            id = ref.id,
-            spotNumber = spotNumber,
-            date = date,
-            startTime = startTime,
-            endTime = endTime,
-            userId = userId,
-            vehicleId = vehicleId,
-            userName = _user.value?.name,
-            licensePlate = licensePlate,
-            alertaInicioEnviada = false,
-            alertaFinEnviada = false,
-            fechaAlertaInicio = calculateAlertTimestamp(date, startTime, -15),
-            fechaAlertaFin = calculateAlertTimestamp(date, endTime, -15)
-        )
-        
-        ref.set(newRes).await()
+        val userName = _user.value?.name
 
-        // Notification of confirmation
-        addInternalNotification(
-            NotificationType.SUCCESS,
-            "notif_confirm_title",
-            "notif_confirm_msg",
-            listOf(spotNumber, date, startTime)
-        )
+        if (ParkingUtils.isMidnightCrossing(startTime, endTime)) {
+            val totalMinutes = ParkingUtils.calculateDurationMinutes(startTime, endTime)
+            if (totalMinutes > 9 * 60) throw Exception("error_max_9_hours")
+
+            val groupId = UUID.randomUUID().toString()
+            val nextDate = ParkingUtils.addDays(date, 1)
+
+            // Day 1: startTime to 23:59
+            val ref1 = db.collection("reservas").document()
+            val res1 = Reservation(
+                id = ref1.id, spotNumber = spotNumber, date = date,
+                startTime = startTime, endTime = "23:59",
+                userId = userId, vehicleId = vehicleId, userName = userName,
+                licensePlate = licensePlate, groupId = groupId,
+                alertaInicioEnviada = false, alertaFinEnviada = false,
+                fechaAlertaInicio = calculateAlertTimestamp(date, startTime, -15),
+                fechaAlertaFin = calculateAlertTimestamp(date, "23:59", -15)
+            )
+            ref1.set(res1).await()
+
+            // Day 2: 00:00 to endTime
+            val ref2 = db.collection("reservas").document()
+            val res2 = Reservation(
+                id = ref2.id, spotNumber = spotNumber, date = nextDate,
+                startTime = "00:00", endTime = endTime,
+                userId = userId, vehicleId = vehicleId, userName = userName,
+                licensePlate = licensePlate, groupId = groupId,
+                alertaInicioEnviada = false, alertaFinEnviada = false,
+                fechaAlertaInicio = calculateAlertTimestamp(nextDate, "00:00", -15),
+                fechaAlertaFin = calculateAlertTimestamp(nextDate, endTime, -15)
+            )
+            ref2.set(res2).await()
+
+            addInternalNotification(
+                NotificationType.SUCCESS,
+                "notif_confirm_title",
+                "notif_confirm_msg",
+                listOf(spotNumber, date, startTime)
+            )
+        } else {
+            val ref = db.collection("reservas").document()
+
+            val newRes = Reservation(
+                id = ref.id, spotNumber = spotNumber, date = date,
+                startTime = startTime, endTime = endTime,
+                userId = userId, vehicleId = vehicleId, userName = userName,
+                licensePlate = licensePlate,
+                alertaInicioEnviada = false, alertaFinEnviada = false,
+                fechaAlertaInicio = calculateAlertTimestamp(date, startTime, -15),
+                fechaAlertaFin = calculateAlertTimestamp(date, endTime, -15)
+            )
+
+            ref.set(newRes).await()
+
+            addInternalNotification(
+                NotificationType.SUCCESS,
+                "notif_confirm_title",
+                "notif_confirm_msg",
+                listOf(spotNumber, date, startTime)
+            )
+        }
     }
 
     suspend fun updateReservation(
@@ -397,8 +433,21 @@ object AuthManager {
         if (finalDate != null && finalEnd != null) {
             updates["fechaAlertaFin"] = calculateAlertTimestamp(finalDate, finalEnd, -15)
         }
-        
+
         db.collection("reservas").document(reservationId).update(updates.filterValues { it != null }).await()
+
+        // If this reservation belongs to a midnight-crossing group, update sibling
+        val currentRes = current ?: _reservations.value.find { it.id == reservationId }
+        if (currentRes?.groupId?.isNotEmpty() == true && spotNumber != null) {
+            val siblings = _reservations.value.filter { it.groupId == currentRes.groupId && it.id != reservationId }
+            for (sibling in siblings) {
+                val sibUpdates = mutableMapOf<String, Any?>()
+                spotNumber?.let { sibUpdates["spotNumber"] = it }
+                if (sibUpdates.isNotEmpty()) {
+                    db.collection("reservas").document(sibling.id).update(sibUpdates).await()
+                }
+            }
+        }
 
         // Notification of modification
         addInternalNotification(
@@ -411,6 +460,12 @@ object AuthManager {
 
     suspend fun deleteReservation(reservationId: String) {
         val current = _reservations.value.find { it.id == reservationId }
+        if (current?.groupId?.isNotEmpty() == true) {
+            val siblings = _reservations.value.filter { it.groupId == current.groupId && it.id != reservationId }
+            for (sibling in siblings) {
+                db.collection("reservas").document(sibling.id).delete().await()
+            }
+        }
         db.collection("reservas").document(reservationId).delete().await()
 
         // Notification of cancellation
