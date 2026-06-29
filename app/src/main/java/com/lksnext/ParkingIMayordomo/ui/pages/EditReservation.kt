@@ -112,7 +112,7 @@ fun EditReservation(
     
     val vehicles by viewModel.vehicles.collectAsState()
     val currentUser by viewModel.user.collectAsState()
-    val allReservations by viewModel.reservations.collectAsState()
+     val allReservations by viewModel.allReservations.collectAsState()
 
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     var showStartTimePicker by rememberSaveable { mutableStateOf(false) }
@@ -159,6 +159,27 @@ fun EditReservation(
                 currentUserId = currentUser?.id,
                 selectedVehicleId = selectedVehicleId
             )
+        }
+    }
+
+    val isInProgress by remember(reservation) {
+        derivedStateOf {
+            reservation?.let { res ->
+                val now = Calendar.getInstance()
+                val startCal = Calendar.getInstance()
+                try {
+                    val dateParts = res.date.split("-")
+                    startCal.set(Calendar.YEAR, dateParts[0].toInt())
+                    startCal.set(Calendar.MONTH, dateParts[1].toInt() - 1)
+                    startCal.set(Calendar.DAY_OF_MONTH, dateParts[2].toInt())
+                    val timeParts = res.startTime.split(":")
+                    startCal.set(Calendar.HOUR_OF_DAY, timeParts[0].toInt())
+                    startCal.set(Calendar.MINUTE, timeParts[1].toInt())
+                    startCal.set(Calendar.SECOND, 0)
+                    startCal.set(Calendar.MILLISECOND, 0)
+                    now >= startCal
+                } catch (_: Exception) { false }
+            } ?: false
         }
     }
 
@@ -266,7 +287,7 @@ fun EditReservation(
                         )
                         
                         val dateInteractionSource = remember { MutableInteractionSource() }
-                        if (dateInteractionSource.collectIsPressedAsState().value) showDatePicker = true
+                        if (!isInProgress && dateInteractionSource.collectIsPressedAsState().value) showDatePicker = true
 
                         OutlinedTextField(
                             value = displayDate.format(selectedDate.time),
@@ -275,7 +296,7 @@ fun EditReservation(
                             label = { Text(stringResource(R.string.date_label_required)) },
                             modifier = Modifier.fillMaxWidth(),
                             interactionSource = dateInteractionSource,
-                            enabled = true,
+                            enabled = !isInProgress,
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                                 unfocusedBorderColor = MaterialTheme.colorScheme.outline,
@@ -289,7 +310,7 @@ fun EditReservation(
 
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             val startInteractionSource = remember { MutableInteractionSource() }
-                            if (startInteractionSource.collectIsPressedAsState().value) showStartTimePicker = true
+                            if (!isInProgress && startInteractionSource.collectIsPressedAsState().value) showStartTimePicker = true
 
                             OutlinedTextField(
                                 value = ParkingUtils.formatTime(startTime.time),
@@ -298,7 +319,7 @@ fun EditReservation(
                                 label = { Text(stringResource(R.string.start_time_required)) },
                                 modifier = Modifier.weight(1f),
                                 interactionSource = startInteractionSource,
-                                enabled = true,
+                                enabled = !isInProgress,
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                                     unfocusedBorderColor = MaterialTheme.colorScheme.outline,

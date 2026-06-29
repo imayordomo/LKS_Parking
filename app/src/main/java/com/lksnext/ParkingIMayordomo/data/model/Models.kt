@@ -42,6 +42,7 @@ data class Reservation(
     val vehicleId: String = "",
     val userName: String? = null,
     val licensePlate: String? = null,
+    val groupId: String = "",
     val alertaInicioEnviada: Boolean = false,
     val alertaFinEnviada: Boolean = false,
     val fechaAlertaInicio: Timestamp? = null,

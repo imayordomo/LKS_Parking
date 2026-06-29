@@ -16,6 +16,7 @@ class EditReservationViewModel(private val repository: ParkingRepository) : View
     val vehicles = repository.vehicles
     val user = repository.user
     val reservations = repository.reservations
+    val allReservations = repository.allReservations
 
     private val sdfDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     private val sdfTime = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -70,34 +71,70 @@ class EditReservationViewModel(private val repository: ParkingRepository) : View
             set(Calendar.MINUTE, startTime.get(Calendar.MINUTE))
             set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
         }
-
-        val diff = endTime.timeInMillis - startTime.timeInMillis
-        val hours = diff / (1000 * 60 * 60.0)
+        val endCal = Calendar.getInstance().apply {
+            time = selectedDate.time
+            set(Calendar.HOUR_OF_DAY, endTime.get(Calendar.HOUR_OF_DAY))
+            set(Calendar.MINUTE, endTime.get(Calendar.MINUTE))
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
 
         val dateStr = sdfDate.format(selectedDate.time)
         val startStr = sdfTime.format(startTime.time)
         val endStr = sdfTime.format(endTime.time)
+        val crossesMidnight = ParkingUtils.isMidnightCrossing(startStr, endStr)
 
-        val isSpotOccupiedByOthers = allReservations.any { r ->
-            r.id != currentReservationId &&
-            r.spotNumber == currentSpotNumber &&
-            ParkingUtils.isTimeOverlapping(dateStr, startStr, endStr, r.date, r.startTime, r.endTime)
-        }
+        if (crossesMidnight) {
+            val totalMinutes = ParkingUtils.calculateDurationMinutes(startStr, endStr)
+            if (totalMinutes > 9 * 60) return R.string.error_max_9_hours
+            if (startCal.before(now)) return R.string.error_start_before_now
 
-        val hasUserOtherReservation = allReservations.any { r ->
-            r.id != currentReservationId &&
-            r.userId == currentUserId &&
-            ParkingUtils.isTimeOverlapping(dateStr, startStr, endStr, r.date, r.startTime, r.endTime)
-        }
+            val nextDateStr = ParkingUtils.addDays(dateStr, 1)
+            val isSpotOccupiedByOthers = allReservations.any { r ->
+                r.id != currentReservationId &&
+                r.spotNumber == currentSpotNumber &&
+                (ParkingUtils.isTimeOverlapping(dateStr, startStr, "23:59", r.date, r.startTime, r.endTime) ||
+                 ParkingUtils.isTimeOverlapping(nextDateStr, "00:00", endStr, r.date, r.startTime, r.endTime))
+            }
 
-        return when {
-            startCal.before(now) -> R.string.error_start_before_now
-            hours <= 0 -> R.string.error_end_after_start
-            hours > 9 -> R.string.error_max_9_hours
-            isSpotOccupiedByOthers -> R.string.error_spot_occupied_simple
-            hasUserOtherReservation -> R.string.error_user_overlap
-            selectedVehicleId.isBlank() -> R.string.error_select_vehicle
-            else -> null
+            val hasUserOtherReservation = allReservations.any { r ->
+                r.id != currentReservationId &&
+                r.userId == currentUserId &&
+                (ParkingUtils.isTimeOverlapping(dateStr, startStr, "23:59", r.date, r.startTime, r.endTime) ||
+                 ParkingUtils.isTimeOverlapping(nextDateStr, "00:00", endStr, r.date, r.startTime, r.endTime))
+            }
+
+            return when {
+                isSpotOccupiedByOthers -> R.string.error_spot_occupied_simple
+                hasUserOtherReservation -> R.string.error_user_overlap
+                selectedVehicleId.isBlank() -> R.string.error_select_vehicle
+                else -> null
+            }
+        } else {
+            val diff = endTime.timeInMillis - startTime.timeInMillis
+            val hours = diff / (1000 * 60 * 60.0)
+
+            val isSpotOccupiedByOthers = allReservations.any { r ->
+                r.id != currentReservationId &&
+                r.spotNumber == currentSpotNumber &&
+                ParkingUtils.isTimeOverlapping(dateStr, startStr, endStr, r.date, r.startTime, r.endTime)
+            }
+
+            val hasUserOtherReservation = allReservations.any { r ->
+                r.id != currentReservationId &&
+                r.userId == currentUserId &&
+                ParkingUtils.isTimeOverlapping(dateStr, startStr, endStr, r.date, r.startTime, r.endTime)
+            }
+
+            return when {
+                endCal.before(now) -> R.string.error_start_before_now
+                hours <= 0 -> R.string.error_end_after_start
+                hours > 9 -> R.string.error_max_9_hours
+                isSpotOccupiedByOthers -> R.string.error_spot_occupied_simple
+                hasUserOtherReservation -> R.string.error_user_overlap
+                selectedVehicleId.isBlank() -> R.string.error_select_vehicle
+                else -> null
+            }
         }
     }
 }

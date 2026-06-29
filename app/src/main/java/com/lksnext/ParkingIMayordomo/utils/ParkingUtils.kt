@@ -123,6 +123,33 @@ object ParkingUtils {
         }
     }
 
+    fun timeToMinutes(time: String): Int {
+        val parts = time.split(":")
+        return parts[0].toInt() * 60 + parts[1].toInt()
+    }
+
+    fun minutesToTime(minutes: Int): String {
+        val h = minutes / 60
+        val m = minutes % 60
+        return "${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}"
+    }
+
+    fun addDays(date: String, days: Int): String {
+        val sdf = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
+        val cal = Calendar.getInstance().apply { time = sdf.parse(date) ?: return date; add(Calendar.DAY_OF_YEAR, days) }
+        return sdf.format(cal.time)
+    }
+
+    fun isMidnightCrossing(startTime: String, endTime: String): Boolean {
+        return timeToMinutes(endTime) <= timeToMinutes(startTime)
+    }
+
+    fun calculateDurationMinutes(startTime: String, endTime: String): Int {
+        val start = timeToMinutes(startTime)
+        val end = timeToMinutes(endTime)
+        return if (end > start) end - start else (24 * 60 - start) + end
+    }
+
      //time format must come as "HH:mm"
     fun isTimeOverlapping(
         date1: String, start1: String, end1: String,
