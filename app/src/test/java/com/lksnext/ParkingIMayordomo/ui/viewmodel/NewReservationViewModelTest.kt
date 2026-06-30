@@ -133,10 +133,9 @@ class NewReservationViewModelTest {
 
     @Test
     fun `getValidationErrorResId should return error if end is before start`() {
-        val now = Calendar.getInstance().apply { add(Calendar.HOUR_OF_DAY, 1) }
-        val end = Calendar.getInstance().apply { time = now.time; add(Calendar.MINUTE, -30) }
+        val future = Calendar.getInstance().apply { add(Calendar.HOUR_OF_DAY, 1) }
 
-        assertEquals(R.string.error_end_after_start, viewModel.getValidationErrorResId(now, now, end, 1, false, emptyList()))
+        assertEquals(R.string.error_end_after_start, viewModel.getValidationErrorResId(future, future, future, 1, false, emptyList()))
     }
 
     @Test
