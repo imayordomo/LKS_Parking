@@ -26,14 +26,14 @@ class DashboardViewModelTest {
     private lateinit var viewModel: DashboardViewModel
 
     private val userFlow = MutableStateFlow<User?>(null)
-    private val vehiclesFlow = MutableStateFlow<List<Vehicle>>(emptyList())
+    private val vehiclesFlow = MutableStateFlow<List<Vehicle>?>(emptyList())
     private val reservationsFlow = MutableStateFlow<List<Reservation>>(emptyList())
 
     @Before
     fun setup() {
         repository = mockk(relaxed = true)
         every { repository.user } returns (userFlow as StateFlow<User?>)
-        every { repository.vehicles } returns (vehiclesFlow as StateFlow<List<Vehicle>>)
+        every { repository.vehicles } returns (vehiclesFlow as StateFlow<List<Vehicle>?>)
         every { repository.reservations } returns (reservationsFlow as StateFlow<List<Reservation>>)
 
         viewModel = DashboardViewModel(repository)

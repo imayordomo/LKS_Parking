@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.RegisterViewModel
+import com.lksnext.ParkingIMayordomo.utils.LocaleManager
 
 @Composable
 fun Register(
@@ -46,6 +48,9 @@ fun Register(
     
     val scrollState = rememberScrollState()
 
+    val context = LocalContext.current
+    val systemContext = remember(context) { LocaleManager.getSystemLocaleContext(context) }
+    CompositionLocalProvider(LocalContext provides systemContext) {
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -251,5 +256,6 @@ fun Register(
                 }
             }
         }
+    }
     }
 }

@@ -153,6 +153,13 @@
     <string name="status_next">Next</string>
     <string name="spot_short_prefix">S</string>
     <string name="spot_label_format">%1$s %2$d</string>
+    <string name="download_button">Download</string>
+    <string name="csv_header_spot">Spot</string>
+    <string name="csv_header_date">Date</string>
+    <string name="csv_header_start">Start</string>
+    <string name="csv_header_end">End</string>
+    <string name="csv_header_license">License Plate</string>
+    <string name="csv_filename">historial-reservas.csv</string>
 
     <!-- Help Screen -->
     <string name="help_title">Help</string>

@@ -214,7 +214,7 @@ fun Profile(
                     }
                 }
 
-                if (vehicles.isEmpty()) {
+                if (vehicles?.isEmpty() == true) {
                     item {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
@@ -244,7 +244,7 @@ fun Profile(
                         }
                     }
                 } else {
-                    items(vehicles, key = { it.id }) { vehicle ->
+                    items(vehicles.orEmpty(), key = { it.id }) { vehicle ->
                         VehicleItem(
                             vehicle = vehicle,
                             onDelete = {
@@ -336,7 +336,7 @@ fun Profile(
     
     // Confirmation dialog for vehicle deletion
     if (vehicleToDeleteId != null) {
-        val vToDelete = vehicles.find { it.id == vehicleToDeleteId }
+        val vToDelete = vehicles?.find { it.id == vehicleToDeleteId }
         AlertDialog(
             onDismissRequest = { vehicleToDeleteId = null },
             title = { Text(stringResource(R.string.delete_vehicle_title)) },

@@ -140,7 +140,7 @@ fun EditReservation(
 
     val compatibleVehicles = remember(reservation?.spotNumber, vehicles) {
         reservation?.let { res ->
-            vehicles.filter { ParkingUtils.isVehicleAllowedInSpot(res.spotNumber, it.type) }
+            (vehicles ?: emptyList()).filter { ParkingUtils.isVehicleAllowedInSpot(res.spotNumber, it.type) }
         } ?: emptyList()
     }
     
@@ -460,7 +460,7 @@ fun EditReservation(
                                 onClick = {
                                     scope.launch {
                                         loading = true
-                                        val vehicle = vehicles.find { it.id == selectedVehicleId }
+                                        val vehicle = vehicles?.find { it.id == selectedVehicleId }
                                         viewModel.updateReservation(
                                             id = reservation!!.id,
                                             date = selectedDate,

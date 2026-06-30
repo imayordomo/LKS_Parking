@@ -442,10 +442,10 @@ fun NewReservation(
                         Box(modifier = Modifier.padding(16.dp)) {
                             Button(
                                 onClick = {
-                                    if (vehicles.isEmpty()) {
+                                    if (vehicles?.isEmpty() == true) {
                                         showNoVehicleDialog = true
                                     } else {
-                                        val compatibleVehicles = vehicles.filter { ParkingUtils.isVehicleAllowedInSpot(selectedSpot!!, it.type) }
+                                        val compatibleVehicles = (vehicles ?: emptyList()).filter { ParkingUtils.isVehicleAllowedInSpot(selectedSpot!!, it.type) }
                                         if (compatibleVehicles.isEmpty()) {
                                             showIncompatibleVehicleDialog = true
                                         } else if (compatibleVehicles.size == 1) {
@@ -614,7 +614,7 @@ fun NewReservation(
 
     if (showVehicleDialog) {
         VehicleSelectionDialog(
-            vehicles = vehicles,
+            vehicles = vehicles.orEmpty(),
             selectedSpot = selectedSpot!!,
             onDismiss = { showVehicleDialog = false },
             onConfirm = { vehicle ->

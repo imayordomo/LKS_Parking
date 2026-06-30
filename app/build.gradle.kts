@@ -20,8 +20,8 @@ android {
         applicationId = "com.lksnext.ParkingIMayordomo"
         minSdk = 24
         targetSdk = 35
-        versionCode = 11
-        versionName = "1.9.0"
+        versionCode = 12
+        versionName = "1.10.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -50,6 +50,7 @@ android {
     buildFeatures {
         compose = true
     }
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true

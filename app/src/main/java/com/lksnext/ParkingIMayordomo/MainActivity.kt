@@ -66,6 +66,8 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun attachBaseContext(newBase: Context) {
+        // Capture system locale before wrapping (preserves it for auth pages)
+        LocaleManager.captureSystemLocale(newBase)
         // Manually wrap the context with the saved locale before the Activity is created.
         // This is necessary for ComponentActivity to load the correct strings.xml.
         super.attachBaseContext(LocaleManager.wrapContext(newBase))

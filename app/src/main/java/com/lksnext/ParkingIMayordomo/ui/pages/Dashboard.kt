@@ -60,8 +60,9 @@ fun Dashboard(
     var reservationToDeleteId by rememberSaveable { mutableStateOf<String?>(null) }
 
     val navigateToNewReservation = remember(vehicles, onNavigate) {
+        val list = vehicles
         {
-            if (vehicles.isEmpty()) {
+            if (list != null && list.isEmpty()) {
                 onNavigate("${ROUTE_PROFILE}?${PARAM_SHOW_VEHICLE_ALERT}=true")
             } else {
                 onNavigate(ROUTE_NEW_RESERVATION)
@@ -130,7 +131,7 @@ fun Dashboard(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                if (vehicles.isEmpty()) {
+                if (vehicles != null && vehicles?.isEmpty() == true) {
                     item {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
@@ -210,7 +211,7 @@ fun Dashboard(
                     } else null
 
                     items(userReservations, key = { it.id }) { reservation ->
-                        val vehicle = vehicles.find { it.id == reservation.vehicleId }
+                        val vehicle = vehicles?.find { it.id == reservation.vehicleId }
                         ReservationItem(
                             reservation = reservation,
                             vehicle = vehicle,
