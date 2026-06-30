@@ -60,4 +60,20 @@ class HistoryViewModel(private val repository: ParkingRepository) : ViewModel() 
         _startDateText.value = ""
         _endDateText.value = ""
     }
+
+    fun generateCsvContent(headers: List<String>): String {
+        val csvContent = StringBuilder()
+        csvContent.append(headers.joinToString(",")).append("\n")
+        filteredReservations.value.forEach { r ->
+            val row = listOf(
+                "#${r.spotNumber}",
+                r.date,
+                r.startTime,
+                r.endTime,
+                r.licensePlate ?: ""
+            )
+            csvContent.append(row.joinToString(",")).append("\n")
+        }
+        return csvContent.toString()
+    }
 }

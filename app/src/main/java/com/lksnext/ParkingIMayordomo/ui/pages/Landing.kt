@@ -7,14 +7,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.LandingViewModel
+import com.lksnext.ParkingIMayordomo.utils.LocaleManager
 
 @Composable
 fun Landing(
@@ -23,6 +27,9 @@ fun Landing(
     onRegisterClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val systemContext = remember(context) { LocaleManager.getSystemLocaleContext(context) }
+    CompositionLocalProvider(LocalContext provides systemContext) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -79,5 +86,6 @@ fun Landing(
                 fontSize = 18.sp
             )
         }
+    }
     }
 }

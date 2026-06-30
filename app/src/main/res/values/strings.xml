@@ -150,6 +150,13 @@
     <!-- History Screen -->
     <string name="history_title">Historial</string>
     <string name="history_subtitle">Todas tus reservas</string>
+    <string name="download_button">Descargar</string>
+    <string name="csv_header_spot">Plaza</string>
+    <string name="csv_header_date">Fecha</string>
+    <string name="csv_header_start">Inicio</string>
+    <string name="csv_header_end">Fin</string>
+    <string name="csv_header_license">Matrícula</string>
+    <string name="csv_filename">historial-reservas.csv</string>
     <string name="filters">Filtros</string>
     <string name="date_range">Rango de fechas</string>
     <string name="from_date">Desde</string>

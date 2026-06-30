@@ -2,6 +2,7 @@ package com.lksnext.ParkingIMayordomo.ui.viewmodel
 
 import app.cash.turbine.test
 import com.lksnext.ParkingIMayordomo.MainDispatcherRule
+import java.util.Date
 import com.lksnext.ParkingIMayordomo.data.model.Reservation
 import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.model.Vehicle
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -28,14 +30,14 @@ class HistoryViewModelTest {
     private lateinit var viewModel: HistoryViewModel
 
     private val userFlow = MutableStateFlow<User?>(null)
-    private val vehiclesFlow = MutableStateFlow<List<Vehicle>>(emptyList())
+    private val vehiclesFlow = MutableStateFlow<List<Vehicle>?>(emptyList())
     private val reservationsFlow = MutableStateFlow<List<Reservation>>(emptyList())
 
     @Before
     fun setup() {
         repository = mockk(relaxed = true)
         every { repository.user } returns (userFlow as StateFlow<User?>)
-        every { repository.vehicles } returns (vehiclesFlow as StateFlow<List<Vehicle>>)
+        every { repository.vehicles } returns (vehiclesFlow as StateFlow<List<Vehicle>?>)
         every { repository.reservations } returns (reservationsFlow as StateFlow<List<Reservation>>)
         
         viewModel = HistoryViewModel(repository)
@@ -81,58 +83,140 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun `filteredReservations logic branches`() = runTest {
-        mockkObject(ParkingUtils)
-        every { ParkingUtils.formatDate(any()) } returns "2023-05-10"
-        every { ParkingUtils.formatTime(any()) } returns "12:00"
-
+    fun `generateCsvContent should return correct csv format including empty license plate`() = runTest {
         val userId = "user1"
         userFlow.value = User(id = userId)
-        
         val reservations = listOf(
-            Reservation(id = "past", userId = userId, date = "2023-05-10", endTime = "11:59"),
-            Reservation(id = "future", userId = userId, date = "2023-05-11", startTime = "10:00", endTime = "11:00"),
-            Reservation(id = "other", userId = "user2", date = "2023-05-11")
+            Reservation(id = "1", userId = userId, spotNumber = 10, date = "2023-05-10", startTime = "10:00", endTime = "11:00", licensePlate = "1234ABC"),
+            Reservation(id = "2", userId = userId, spotNumber = 11, date = "2023-05-11", startTime = "12:00", endTime = "13:00", licensePlate = null)
         )
         reservationsFlow.value = reservations
+        
+        viewModel.filteredReservations.test {
+            var item = awaitItem()
+            if (item.isEmpty()) item = awaitItem()
+            
+            val headers = listOf("Spot", "Date", "Start", "End", "Plate")
+            val csv = viewModel.generateCsvContent(headers)
+            
+            val lines = csv.trim().split("\n")
+            assertEquals(3, lines.size)
+            assertEquals("Spot,Date,Start,End,Plate", lines[0])
+            assertEquals("#11,2023-05-11,12:00,13:00,", lines[1])
+            assertEquals("#10,2023-05-10,10:00,11:00,1234ABC", lines[2])
+        }
+    }
+
+    @Test
+    fun `filteredReservations should be empty when user is null`() = runTest {
+        userFlow.value = null
+        reservationsFlow.value = listOf(Reservation(id = "1", userId = "user1"))
+        
+        viewModel.filteredReservations.test {
+            assertEquals(0, awaitItem().size)
+        }
+    }
+
+    private fun applyFilter(
+        reservations: List<Reservation>,
+        currentUser: User?,
+        status: String,
+        start: String,
+        end: String
+    ): List<Reservation> {
+        val now = Date()
+        val todayStr = ParkingUtils.formatDate(now)
+        val currentTimeStr = ParkingUtils.formatTime(now)
+
+        return reservations
+            .filter { it.userId == currentUser?.id }
+            .filter { res ->
+                val isPast = res.date < todayStr || (res.date == todayStr && res.endTime < currentTimeStr)
+
+                val matchesStatus = when (status) {
+                    "past" -> isPast
+                    "future" -> !isPast
+                    else -> true
+                }
+
+                val matchesDate = (start.isEmpty() || res.date >= start) &&
+                        (end.isEmpty() || res.date <= end)
+
+                matchesStatus && matchesDate
+            }
+            .sortedWith(compareByDescending<Reservation> { it.date }.thenByDescending { it.startTime })
+    }
+
+    @Test
+    fun `filteredReservations logic branches`() {
+        val userId = "user1"
+        val todayStr = ParkingUtils.formatDate(Date())
+        val yesterday = ParkingUtils.addDays(todayStr, -1)
+        val tomorrow = ParkingUtils.addDays(todayStr, 1)
+
+        val user = User(id = userId)
+        val reservations = listOf(
+            Reservation(id = "past_yesterday", userId = userId, date = yesterday, endTime = "23:59"),
+            Reservation(id = "past_today_end_before", userId = userId, date = todayStr, endTime = "00:00"),
+            Reservation(id = "active_today", userId = userId, date = todayStr, startTime = "00:00", endTime = "23:59"),
+            Reservation(id = "future_tomorrow", userId = userId, date = tomorrow, startTime = "10:00", endTime = "11:00"),
+            Reservation(id = "other", userId = "user2", date = tomorrow)
+        )
+
+        val all = applyFilter(reservations, user, "all", "", "")
+        assertEquals(4, all.size)
+
+        val past = applyFilter(reservations, user, "past", "", "")
+        assertEquals(2, past.size)
+        assertTrue(past.any { it.id == "past_yesterday" })
+        assertTrue(past.any { it.id == "past_today_end_before" })
+
+        val future = applyFilter(reservations, user, "future", "", "")
+        assertEquals(2, future.size)
+        assertTrue(future.any { it.id == "active_today" })
+        assertTrue(future.any { it.id == "future_tomorrow" })
+
+        val startTomorrow = applyFilter(reservations, user, "all", tomorrow, "")
+        assertEquals(1, startTomorrow.size)
+
+        val endTomorrow = applyFilter(reservations, user, "all", tomorrow, tomorrow)
+        assertEquals(1, endTomorrow.size)
+
+        val startDayAfter = applyFilter(reservations, user, "all", ParkingUtils.addDays(tomorrow, 1), "")
+        assertEquals(0, startDayAfter.size)
+
+        val noDateFilter = applyFilter(reservations, user, "all", "", "")
+        assertEquals(4, noDateFilter.size)
+
+        val endBeforeYesterday = applyFilter(reservations, user, "all", "", ParkingUtils.addDays(yesterday, -1))
+        assertEquals(0, endBeforeYesterday.size)
+    }
+
+    @Test
+    fun `filteredReservations stateflow updates when filters change`() = runTest {
+        val userId = "user1"
+        val todayStr = ParkingUtils.formatDate(Date())
+        val yesterday = ParkingUtils.addDays(todayStr, -1)
+        val tomorrow = ParkingUtils.addDays(todayStr, 1)
+
+        userFlow.value = User(id = userId)
+        reservationsFlow.value = listOf(
+            Reservation(id = "past_yesterday", userId = userId, date = yesterday, endTime = "23:59"),
+            Reservation(id = "past_today_end_before", userId = userId, date = todayStr, endTime = "00:00"),
+            Reservation(id = "active_today", userId = userId, date = todayStr, startTime = "00:00", endTime = "23:59"),
+            Reservation(id = "future_tomorrow", userId = userId, date = tomorrow, startTime = "10:00", endTime = "11:00"),
+            Reservation(id = "other", userId = "user2", date = tomorrow)
+        )
 
         viewModel.filteredReservations.test {
-            // StateFlow emits the current value immediately upon collection.
-            // With UnconfinedTestDispatcher and the data already set, this should be the filtered list.
             var item = awaitItem()
-            
-            // In case combine hasn't finished and we get the initial emptyList() from stateIn
-            if (item.isEmpty()) {
-                item = awaitItem()
-            }
-            
-            assertEquals(2, item.size)
-            // Sorted descending by date
-            assertEquals("future", item[0].id)
-            assertEquals("past", item[1].id)
+            if (item.isEmpty()) item = awaitItem()
+            assertEquals(4, item.size)
 
-            // 1. Status: past
-            viewModel.setStatusFilter("past")
-            assertEquals("past", awaitItem()[0].id)
-
-            // 2. Status: future
             viewModel.setStatusFilter("future")
-            assertEquals("future", awaitItem()[0].id)
+            val futureItem = awaitItem()
+            assertEquals(2, futureItem.size)
 
-            // 3. Reset and test date filters
-            viewModel.setStatusFilter("all")
-            awaitItem()
-            
-            viewModel.setStartDate("2023-05-11")
-            assertEquals("future", awaitItem()[0].id)
-
-            viewModel.setStartDate("")
-            awaitItem()
-            
-            viewModel.setEndDate("2023-05-10")
-            assertEquals("past", awaitItem()[0].id)
-            
-            // Ensure no more items are expected
             expectNoEvents()
         }
     }

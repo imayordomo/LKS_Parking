@@ -165,6 +165,13 @@
     <string name="status_next">Hurrengoa</string>
     <string name="spot_short_prefix">P</string>
     <string name="spot_label_format">%1$s %2$d</string>
+    <string name="download_button">Deskargatu</string>
+    <string name="csv_header_spot">Plaza</string>
+    <string name="csv_header_date">Data</string>
+    <string name="csv_header_start">Hasiera</string>
+    <string name="csv_header_end">Amaiera</string>
+    <string name="csv_header_license">Matrikula</string>
+    <string name="csv_filename">historial-reservas.csv</string>
 
     <!-- Help Screen -->
     <string name="help_title">Laguntza</string>

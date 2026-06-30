@@ -24,6 +24,21 @@ object LocaleManager {
     private val _localeFlow = MutableStateFlow("es")
     val localeFlow: StateFlow<String> = _localeFlow.asStateFlow()
 
+    private var systemLocaleCode: String = "es"
+    private var systemLocale: Locale = Locale("es")
+
+    fun captureSystemLocale(context: Context) {
+        val raw = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            context.resources.configuration.locales[0]
+        } else {
+            @Suppress("DEPRECATION")
+            context.resources.configuration.locale
+        }
+        // Fallback to Spanish if system language isn't supported
+        systemLocaleCode = if (raw.language in supportedLanguages) raw.language else "es"
+        systemLocale = Locale(systemLocaleCode)
+    }
+
     /**
      * Initializes the locale state.
      * Logic: Saved Choice -> System Language (if supported) -> Spanish (Fallback)
@@ -110,4 +125,16 @@ object LocaleManager {
     }
 
     fun getCurrentLocale(): String = _localeFlow.value
+
+    fun getSystemLocaleContext(context: Context): Context {
+        val configuration = Configuration(context.resources.configuration)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            configuration.setLocales(LocaleList(systemLocale))
+        } else {
+            @Suppress("DEPRECATION")
+            configuration.locale = systemLocale
+        }
+        configuration.setLayoutDirection(systemLocale)
+        return context.createConfigurationContext(configuration)
+    }
 }

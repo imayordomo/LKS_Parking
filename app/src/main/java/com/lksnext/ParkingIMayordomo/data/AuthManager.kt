@@ -36,8 +36,8 @@ object AuthManager {
     private val _allReservations = MutableStateFlow<List<Reservation>>(emptyList())
     val allReservations: StateFlow<List<Reservation>> = _allReservations.asStateFlow()
 
-    private val _vehicles = MutableStateFlow<List<Vehicle>>(emptyList())
-    val vehicles: StateFlow<List<Vehicle>> = _vehicles.asStateFlow()
+    private val _vehicles = MutableStateFlow<List<Vehicle>?>(null)
+    val vehicles: StateFlow<List<Vehicle>?> = _vehicles.asStateFlow()
 
     private val _notifications = MutableStateFlow<List<Notification>>(emptyList())
     val notifications: StateFlow<List<Notification>> = _notifications.asStateFlow()
@@ -246,7 +246,7 @@ object AuthManager {
         _user.value = null
         _reservations.value = emptyList()
         _allReservations.value = emptyList()
-        _vehicles.value = emptyList()
+        _vehicles.value = null
         _notifications.value = emptyList()
         _reports.value = emptyList()
     }

@@ -1,5 +1,7 @@
 package com.lksnext.ParkingIMayordomo.ui.pages
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
@@ -17,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -48,9 +51,10 @@ fun History(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     
     val reservations by viewModel.filteredReservations.collectAsState()
-    val vehicles by viewModel.vehicles.collectAsState(initial = emptyList())
+    val vehicles by viewModel.vehicles.collectAsState()
     val statusFilter by viewModel.statusFilter.collectAsState()
     val startDateText by viewModel.startDateText.collectAsState()
     val endDateText by viewModel.endDateText.collectAsState()
@@ -65,6 +69,28 @@ fun History(
 
     val startDatePickerState = rememberDatePickerState()
     val endDatePickerState = rememberDatePickerState()
+
+    val createDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        uri?.let {
+            try {
+                context.contentResolver.openOutputStream(it)?.use { outputStream ->
+                    val headers = listOf(
+                        context.getString(R.string.csv_header_spot),
+                        context.getString(R.string.csv_header_date),
+                        context.getString(R.string.csv_header_start),
+                        context.getString(R.string.csv_header_end),
+                        context.getString(R.string.csv_header_license)
+                    )
+                    val csvContent = viewModel.generateCsvContent(headers)
+                    outputStream.write(csvContent.toByteArray())
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -103,18 +129,46 @@ fun History(
                     .padding(16.dp)
             ) {
                 item {
-                    Column(modifier = Modifier.padding(bottom = 24.dp)) {
-                        Text(
-                            text = stringResource(R.string.history_title),
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Text(
-                            text = stringResource(R.string.history_subtitle),
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 24.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.history_title),
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Normal,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                            Text(
+                                text = stringResource(R.string.history_subtitle),
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                        OutlinedButton(
+                            onClick = {
+                                createDocumentLauncher.launch(context.getString(R.string.csv_filename))
+                            },
+                            modifier = Modifier.padding(top = 8.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Download,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.download_button),
+                                fontSize = 14.sp
+                            )
+                        }
                     }
                 }
 
@@ -257,7 +311,7 @@ fun History(
                     }
                 } else {
                     itemsIndexed(reservations, key = { _, res -> res.id }) { index, reservation ->
-                        val vehicle = vehicles.find { it.id == reservation.vehicleId }
+                        val vehicle = vehicles?.find { it.id == reservation.vehicleId }
                         ReservationHistoryItem(
                             reservation = reservation, 
                             vehicle = vehicle,

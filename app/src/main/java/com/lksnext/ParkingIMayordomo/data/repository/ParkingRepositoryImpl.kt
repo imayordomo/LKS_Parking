@@ -8,7 +8,7 @@ class ParkingRepositoryImpl : ParkingRepository {
     override val user: StateFlow<User?> = AuthManager.user
     override val reservations: StateFlow<List<Reservation>> = AuthManager.reservations
     override val allReservations: StateFlow<List<Reservation>> = AuthManager.allReservations
-    override val vehicles: StateFlow<List<Vehicle>> = AuthManager.vehicles
+    override val vehicles: StateFlow<List<Vehicle>?> = AuthManager.vehicles
     override val notifications: StateFlow<List<Notification>> = AuthManager.notifications
     override val reports: StateFlow<List<Report>> = AuthManager.reports
 
