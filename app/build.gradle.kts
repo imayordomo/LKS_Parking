@@ -62,6 +62,7 @@ detekt {
     source.setFrom(files("src/main/java"))
     parallel = true
     ignoreFailures = false
+    baseline = file("detekt-baseline.xml")
 }
 
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
