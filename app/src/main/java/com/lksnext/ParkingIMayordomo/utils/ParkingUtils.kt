@@ -141,7 +141,7 @@ object ParkingUtils {
     }
 
     fun isMidnightCrossing(startTime: String, endTime: String): Boolean {
-        return timeToMinutes(endTime) <= timeToMinutes(startTime)
+        return timeToMinutes(endTime) < timeToMinutes(startTime)
     }
 
     fun calculateDurationMinutes(startTime: String, endTime: String): Int {

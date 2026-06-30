@@ -5,6 +5,7 @@ plugins {
     id("org.sonarqube") version "5.1.0.4882"
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.firebase.crashlytics) apply false
+    alias(libs.plugins.detekt) apply false
 }
 
 sonar {
