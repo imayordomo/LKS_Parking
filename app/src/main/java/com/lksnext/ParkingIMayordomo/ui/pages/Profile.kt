@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
+import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.data.model.Vehicle
 import com.lksnext.ParkingIMayordomo.data.model.VehicleType
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
@@ -35,6 +37,7 @@ import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.ProfileViewModel
 import com.lksnext.ParkingIMayordomo.utils.LocaleManager
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
+import com.lksnext.ParkingIMayordomo.utils.TestTags
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
@@ -88,11 +91,14 @@ fun Profile(
             )
         }
     ) {
+        val notifications by AuthManager.notifications.collectAsState()
+        val unreadCount = notifications.count { !it.read }
         Scaffold(
             topBar = {
                 ParkingTopAppBar(
                     onMenuClick = { scope.launch { drawerState.open() } },
-                    onNotificationsClick = { onNavigate(ROUTE_NOTIFICATIONS) }
+                    onNotificationsClick = { onNavigate(ROUTE_NOTIFICATIONS) },
+                    unreadNotificationsCount = unreadCount
                 )
             },
             bottomBar = {
@@ -162,7 +168,7 @@ fun Profile(
                                 shape = RoundedCornerShape(8.dp),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF6D00)),
                                 border = BorderStroke(1.dp, Color(0xFFFF6D00)),
-                                modifier = Modifier.height(40.dp)
+                                modifier = Modifier.height(40.dp).testTag(TestTags.PROFILE_EDIT_PROFILE_BUTTON)
                             ) {
                                 Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -172,13 +178,16 @@ fun Profile(
                             Spacer(modifier = Modifier.height(24.dp))
 
                             // Language Selector
-                            LanguageSelector()
+                            LanguageSelector(
+                                modifier = Modifier.testTag(TestTags.PROFILE_LANGUAGE_SELECTOR)
+                            )
 
                             Spacer(modifier = Modifier.height(24.dp))
 
                             // Logout Button
                             TextButton(
                                 onClick = { showLogoutDialog = true },
+                                modifier = Modifier.testTag(TestTags.PROFILE_LOGOUT_BUTTON),
                                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                             ) {
                                 Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -190,73 +199,18 @@ fun Profile(
                 }
 
                 item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.my_vehicles),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Button(
-                            onClick = { showAddVehicleDialog = true },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6D00)),
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(stringResource(R.string.add))
-                        }
-                    }
-                }
-
-                if (vehicles?.isEmpty() == true) {
-                    item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                            shape = RoundedCornerShape(8.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .padding(48.dp)
-                                    .fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(
-                                    Icons.Default.DirectionsCar,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(80.dp),
-                                    tint = MaterialTheme.colorScheme.outline
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = stringResource(R.string.no_vehicles),
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    fontSize = 16.sp
-                                )
+                    ProfileVehiclesSection(
+                        vehicles = vehicles,
+                        onAddVehicleClick = { showAddVehicleDialog = true },
+                        onDeleteVehicle = { vehicle ->
+                            val hasReservations = reservations.any { it.vehicleId == vehicle.id }
+                            if (hasReservations) {
+                                showCannotDeleteVehicleDialog = true
+                            } else {
+                                vehicleToDeleteId = vehicle.id
                             }
                         }
-                    }
-                } else {
-                    items(vehicles.orEmpty(), key = { it.id }) { vehicle ->
-                        VehicleItem(
-                            vehicle = vehicle,
-                            onDelete = {
-                                val hasReservations = reservations.any { it.vehicleId == vehicle.id }
-                                if (hasReservations) {
-                                    showCannotDeleteVehicleDialog = true
-                                } else {
-                                    vehicleToDeleteId = vehicle.id
-                                }
-                            }
-                        )
-                    }
+                    )
                 }
                 
                 item { Spacer(modifier = Modifier.height(80.dp)) }
@@ -270,19 +224,26 @@ fun Profile(
             title = { Text(stringResource(R.string.vehicle_required_title)) },
             text = { Text(stringResource(R.string.vehicle_required_alert)) },
             confirmButton = {
-                Button(onClick = { 
-                    showVehicleAlert = false
-                    showAddVehicleDialog = true
-                }) {
+                Button(
+                    onClick = { 
+                        showVehicleAlert = false
+                        showAddVehicleDialog = true
+                    },
+                    modifier = Modifier.testTag(TestTags.PROFILE_VEHICLE_ALERT_ADD)
+                ) {
                     Text(stringResource(R.string.add_vehicle))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showVehicleAlert = false }) {
+                TextButton(
+                    onClick = { showVehicleAlert = false },
+                    modifier = Modifier.testTag(TestTags.PROFILE_VEHICLE_ALERT_CANCEL)
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             },
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surface,
+            modifier = Modifier.testTag(TestTags.PROFILE_VEHICLE_ALERT_DIALOG)
         )
     }
 
@@ -316,21 +277,27 @@ fun Profile(
             confirmButton = {
                 Button(
                     onClick = {
+                        showLogoutDialog = false
                         viewModel.logout()
                         onNavigate(ROUTE_LOGIN)
                     },
+                    modifier = Modifier.testTag(TestTags.PROFILE_LOGOUT_CONFIRM),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
                     Text(stringResource(R.string.logout), color = MaterialTheme.colorScheme.onError)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showLogoutDialog = false }) {
+                TextButton(
+                    onClick = { showLogoutDialog = false },
+                    modifier = Modifier.testTag(TestTags.PROFILE_LOGOUT_CANCEL)
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier.testTag(TestTags.PROFILE_LOGOUT_DIALOG)
         )
     }
     
@@ -339,6 +306,7 @@ fun Profile(
         val vToDelete = vehicles?.find { it.id == vehicleToDeleteId }
         AlertDialog(
             onDismissRequest = { vehicleToDeleteId = null },
+            modifier = Modifier.testTag(TestTags.PROFILE_DELETE_VEHICLE_DIALOG),
             title = { Text(stringResource(R.string.delete_vehicle_title)) },
             text = { Text(stringResource(R.string.delete_vehicle_msg, vToDelete?.licensePlate ?: "")) },
             confirmButton = {
@@ -347,13 +315,17 @@ fun Profile(
                         vehicleToDeleteId?.let { viewModel.removeVehicle(it) }
                         vehicleToDeleteId = null
                     },
+                    modifier = Modifier.testTag(TestTags.PROFILE_DELETE_VEHICLE_CONFIRM),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
                     Text(stringResource(R.string.delete_btn), color = MaterialTheme.colorScheme.onError)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { vehicleToDeleteId = null }) {
+                TextButton(
+                    onClick = { vehicleToDeleteId = null },
+                    modifier = Modifier.testTag(TestTags.PROFILE_DELETE_VEHICLE_CANCEL)
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             },
@@ -365,10 +337,14 @@ fun Profile(
     if (showCannotDeleteVehicleDialog) {
         AlertDialog(
             onDismissRequest = { showCannotDeleteVehicleDialog = false },
+            modifier = Modifier.testTag(TestTags.PROFILE_CANNOT_DELETE_DIALOG),
             title = { Text(stringResource(R.string.delete_vehicle_error_title)) },
             text = { Text(stringResource(R.string.delete_vehicle_error_msg)) },
             confirmButton = {
-                Button(onClick = { showCannotDeleteVehicleDialog = false }) {
+                Button(
+                    onClick = { showCannotDeleteVehicleDialog = false },
+                    modifier = Modifier.testTag(TestTags.PROFILE_CANNOT_DELETE_OK)
+                ) {
                     Text(stringResource(R.string.save))
                 }
             },
@@ -387,7 +363,7 @@ data class LanguageOption(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LanguageSelector() {
+fun LanguageSelector(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val currentLanguageCode by LocaleManager.localeFlow.collectAsState()
     var expanded by remember { mutableStateOf(false) }
@@ -401,7 +377,7 @@ fun LanguageSelector() {
     val currentLang = languages.find { it.code == currentLanguageCode } ?: languages[0]
     val localizedName = stringResource(currentLang.nameRes)
 
-    Box(modifier = Modifier.width(220.dp), contentAlignment = Alignment.Center) {
+    Box(modifier = modifier.width(220.dp), contentAlignment = Alignment.Center) {
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded }
@@ -505,7 +481,10 @@ fun VehicleItem(vehicle: Vehicle, onDelete: () -> Unit) {
                     color = MaterialTheme.colorScheme.secondary
                 )
             }
-            IconButton(onClick = onDelete) {
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.testTag(TestTags.PROFILE_VEHICLE_DELETE)
+            ) {
                 Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.content_desc_delete), tint = MaterialTheme.colorScheme.error)
             }
         }
@@ -525,7 +504,7 @@ fun EditProfileDialog(currentName: String, onDismiss: () -> Unit, onSave: (Strin
                     value = name,
                     onValueChange = { name = it },
                     label = { Text(stringResource(R.string.full_name_label)) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().testTag(TestTags.PROFILE_EDIT_DIALOG_NAME_FIELD),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                         focusedLabelColor = MaterialTheme.colorScheme.primary
@@ -537,13 +516,17 @@ fun EditProfileDialog(currentName: String, onDismiss: () -> Unit, onSave: (Strin
             Button(
                 onClick = { onSave(name) },
                 enabled = name.isNotBlank(),
+                modifier = Modifier.testTag(TestTags.PROFILE_EDIT_DIALOG_SAVE),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.testTag(TestTags.PROFILE_EDIT_DIALOG_CANCEL)
+            ) {
                 Text(stringResource(R.string.cancel))
             }
         },
@@ -579,13 +562,17 @@ fun AddVehicleDialog(onDismiss: () -> Unit, onAdd: (VehicleType, String) -> Unit
                             Icon(icon, contentDescription = null, tint = iconColor)
                         },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
+                        modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth().testTag(TestTags.PROFILE_ADD_VEHICLE_TYPE_FIELD),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
                             focusedLabelColor = MaterialTheme.colorScheme.primary
                         )
                     )
-                    ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        modifier = Modifier.testTag(TestTags.PROFILE_ADD_VEHICLE_TYPE_MENU)
+                    ) {
                         VehicleType.entries.forEach { vType ->
                             DropdownMenuItem(
                                 text = { 
@@ -610,7 +597,7 @@ fun AddVehicleDialog(onDismiss: () -> Unit, onAdd: (VehicleType, String) -> Unit
                     onValueChange = { plate = it.uppercase() },
                     label = { Text(stringResource(R.string.license_plate)) },
                     placeholder = { Text(stringResource(R.string.license_plate_placeholder)) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().testTag(TestTags.PROFILE_ADD_VEHICLE_PLATE_FIELD),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                         focusedLabelColor = MaterialTheme.colorScheme.primary
@@ -622,19 +609,94 @@ fun AddVehicleDialog(onDismiss: () -> Unit, onAdd: (VehicleType, String) -> Unit
             Button(
                 onClick = { onAdd(type, plate) },
                 enabled = plate.isNotBlank(),
+                modifier = Modifier.testTag(TestTags.PROFILE_ADD_VEHICLE_ADD_BUTTON),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(stringResource(R.string.add))
             }
         },
         dismissButton = {
-            TextButton(onClick = { 
-                onDismiss()
-            }) {
+            TextButton(
+                onClick = { 
+                    onDismiss()
+                },
+                modifier = Modifier.testTag(TestTags.PROFILE_ADD_VEHICLE_CANCEL)
+            ) {
                 Text(stringResource(R.string.cancel))
             }
         },
         containerColor = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(12.dp)
     )
+}
+
+@Composable
+private fun ProfileVehiclesSection(
+    vehicles: List<Vehicle>?,
+    onAddVehicleClick: () -> Unit,
+    onDeleteVehicle: (Vehicle) -> Unit
+) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.my_vehicles),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Button(
+                onClick = onAddVehicleClick,
+                modifier = Modifier.testTag(TestTags.PROFILE_ADD_VEHICLE_BUTTON),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6D00)),
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(stringResource(R.string.add))
+            }
+        }
+
+        if (vehicles?.isEmpty() == true) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(48.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        Icons.Default.DirectionsCar,
+                        contentDescription = null,
+                        modifier = Modifier.size(80.dp),
+                        tint = MaterialTheme.colorScheme.outline
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(R.string.no_vehicles),
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        } else {
+            vehicles?.forEach { vehicle ->
+                Spacer(modifier = Modifier.height(8.dp))
+                VehicleItem(
+                    vehicle = vehicle,
+                    onDelete = { onDeleteVehicle(vehicle) }
+                )
+            }
+        }
+    }
 }

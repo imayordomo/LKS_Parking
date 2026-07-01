@@ -15,12 +15,14 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
+import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
@@ -33,6 +35,7 @@ import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_NOTIFICATIONS
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_PROFILE
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_VIEW_PARKING
+import com.lksnext.ParkingIMayordomo.utils.TestTags
 import kotlinx.coroutines.launch
 
 private data class FAQ(val question: String, val answer: String)
@@ -40,7 +43,6 @@ private data class FAQ(val question: String, val answer: String)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Help(
-    viewModel: HelpViewModel,
     onNavigate: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -74,11 +76,14 @@ fun Help(
             )
         }
     ) {
+        val notifications by AuthManager.notifications.collectAsState()
+        val unreadCount = notifications.count { !it.read }
         Scaffold(
             topBar = {
                 ParkingTopAppBar(
                     onMenuClick = { scope.launch { drawerState.open() } },
-                    onNotificationsClick = { onNavigate(ROUTE_NOTIFICATIONS) }
+                    onNotificationsClick = { onNavigate(ROUTE_NOTIFICATIONS) },
+                    unreadNotificationsCount = unreadCount
                 )
             },
             bottomBar = {
@@ -175,6 +180,7 @@ private fun FAQAccordion(faq: FAQ) {
         Column(
             modifier = Modifier
                 .clickable { expanded = !expanded }
+                .testTag(TestTags.HELP_FAQ_ACCORDION)
                 .padding(16.dp)
         ) {
             Row(

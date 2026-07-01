@@ -22,19 +22,21 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
+import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.ViewParkingViewModel
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
+import com.lksnext.ParkingIMayordomo.utils.TestTags
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
@@ -42,24 +44,23 @@ import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_NEW_RESERVATION
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_NOTIFICATIONS
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_PROFILE
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_VIEW_PARKING
+import com.lksnext.ParkingIMayordomo.data.model.Reservation
 import com.lksnext.ParkingIMayordomo.utils.SpotType
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewParking(
     viewModel: ViewParkingViewModel,
     onNavigate: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     
     val currentUser by viewModel.user.collectAsState()
-    val reservations by viewModel.reservations.collectAsState()
 
     // Use Long to preserve state across rotation
     var selectedDateMillis by rememberSaveable { 
@@ -131,11 +132,14 @@ fun ViewParking(
             )
         }
     ) {
+        val notifications by AuthManager.notifications.collectAsState()
+        val unreadCount = notifications.count { !it.read }
         Scaffold(
             topBar = {
                 ParkingTopAppBar(
                     onMenuClick = { scope.launch { drawerState.open() } },
-                    onNotificationsClick = { onNavigate(ROUTE_NOTIFICATIONS) }
+                    onNotificationsClick = { onNavigate(ROUTE_NOTIFICATIONS) },
+                    unreadNotificationsCount = unreadCount
                 )
             },
             bottomBar = {
@@ -159,224 +163,295 @@ fun ViewParking(
                 Text(text = stringResource(R.string.view_parking_title), fontSize = 32.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
                 Text(text = stringResource(R.string.view_parking_subtitle), fontSize = 16.sp, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(bottom = 24.dp))
 
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = stringResource(R.string.date_label), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(bottom = 16.dp))
-                        
-                        val dateInteractionSource = remember { MutableInteractionSource() }
-                        if (dateInteractionSource.collectIsPressedAsState().value) showDatePicker = true
+                ViewParkingDateCard(selectedDate = selectedDate, displayDate = displayDate, onDateClicked = { showDatePicker = true })
 
-                        OutlinedTextField(
-                            value = displayDate.format(selectedDate.time),
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text(stringResource(R.string.date_label)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            interactionSource = dateInteractionSource,
-                            enabled = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                                focusedLabelColor = MaterialTheme.colorScheme.primary
-                            ),
-                            trailingIcon = { Icon(Icons.Default.CalendarToday, null) }
+                ViewParkingSpotSection(
+                    spotsExpanded = spotsExpanded,
+                    viewMode = viewMode,
+                    spotTypeFilter = spotTypeFilter,
+                    selectedSpot = selectedSpot,
+                    occupiedSpots = occupiedSpots,
+                    userSpots = userSpots,
+                    onToggleExpanded = { spotsExpanded = !spotsExpanded },
+                    onViewModeChange = { viewMode = it },
+                    onSpotTypeSelected = { spotTypeFilter = it; selectedSpot = null },
+                    onSpotSelected = { selectedSpot = it }
+                )
+
+                if (selectedSpot != null) {
+                    val spotNonNull = selectedSpot!!
+                    val spotReservations = currentReservations.filter { it.spotNumber == spotNonNull }
+                    val isUserSpot = userSpots.contains(spotNonNull)
+                    val spotType = ParkingUtils.getSpotType(spotNonNull)
+                    ViewParkingSpotDetail(
+                        selectedSpot = spotNonNull,
+                        spotReservations = spotReservations,
+                        isUserSpot = isUserSpot,
+                        spotType = spotType,
+                        currentUser = currentUser,
+                        isDateInReservationRange = isDateInReservationRange,
+                        dateStr = dateStr,
+                        onNavigate = onNavigate
+                    )
+                }
+            }
+        }
+    }
+
+    ViewParkingDatePickerDialog(
+        showDatePicker = showDatePicker,
+        datePickerState = datePickerState,
+        onDateSelected = { selectedDateMillis = it; selectedSpot = null },
+        onDismiss = { showDatePicker = false }
+    )
+}
+
+@Composable
+private fun ViewParkingDateCard(
+    selectedDate: Calendar,
+    displayDate: SimpleDateFormat,
+    onDateClicked: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = stringResource(R.string.date_label), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(bottom = 16.dp))
+            val dateInteractionSource = remember { MutableInteractionSource() }
+            if (dateInteractionSource.collectIsPressedAsState().value) onDateClicked()
+            OutlinedTextField(
+                value = displayDate.format(selectedDate.time),
+                onValueChange = {},
+                readOnly = true,
+                label = { Text(stringResource(R.string.date_label)) },
+                modifier = Modifier.fillMaxWidth().testTag(TestTags.VIEW_PARKING_DATE_FIELD),
+                interactionSource = dateInteractionSource,
+                enabled = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary
+                ),
+                trailingIcon = { Icon(Icons.Default.CalendarToday, null) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ViewParkingSpotSection(
+    spotsExpanded: Boolean,
+    viewMode: String,
+    spotTypeFilter: SpotType?,
+    selectedSpot: Int?,
+    occupiedSpots: List<Int>,
+    userSpots: List<Int>,
+    onToggleExpanded: () -> Unit,
+    onViewModeChange: (String) -> Unit,
+    onSpotTypeSelected: (SpotType?) -> Unit,
+    onSpotSelected: (Int) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).animateContentSize(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth().clickable { onToggleExpanded() },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = stringResource(R.string.select_spot_title), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurface)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = { onViewModeChange("dropdown") }, modifier = Modifier.testTag(TestTags.VIEW_PARKING_VIEW_DROPDOWN)) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.List,
+                            contentDescription = stringResource(R.string.content_desc_menu),
+                            tint = if(viewMode == "dropdown") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    IconButton(onClick = { onViewModeChange("grid") }, modifier = Modifier.testTag(TestTags.VIEW_PARKING_VIEW_GRID)) {
+                        Icon(
+                            Icons.Default.ViewModule,
+                            contentDescription = stringResource(R.string.selection_legend),
+                            tint = if(viewMode == "grid") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    IconButton(onClick = onToggleExpanded, modifier = Modifier.testTag(TestTags.VIEW_PARKING_EXPAND_SPOTS)) {
+                        Icon(
+                            imageVector = if (spotsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp)
                         )
                     }
                 }
-
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).animateContentSize(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().clickable { spotsExpanded = !spotsExpanded },
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(text = stringResource(R.string.select_spot_title), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurface)
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                IconButton(onClick = { viewMode = "dropdown" }) {
-                                    Icon(
-                                        Icons.AutoMirrored.Filled.List, 
-                                        contentDescription = stringResource(R.string.content_desc_menu),
-                                        tint = if(viewMode == "dropdown") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
-                                    )
-                                }
-                                IconButton(onClick = { viewMode = "grid" }) {
-                                    Icon(
-                                        Icons.Default.ViewModule, 
-                                        contentDescription = stringResource(R.string.selection_legend),
-                                        tint = if(viewMode == "grid") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
-                                    )
-                                }
-                                
-                                Spacer(modifier = Modifier.width(4.dp))
-                                
-                                IconButton(onClick = { spotsExpanded = !spotsExpanded }) {
-                                    Icon(
-                                        imageVector = if (spotsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(28.dp)
-                                    )
-                                }
+            }
+            AnimatedVisibility(visible = spotsExpanded) {
+                Column {
+                    ViewParkingFilterChips(selectedType = spotTypeFilter, onTypeSelected = onSpotTypeSelected)
+                    if (viewMode == "dropdown") {
+                        ViewSpotDropdown(selectedSpot = selectedSpot, onSpotSelected = onSpotSelected, occupiedSpots = occupiedSpots, userSpots = userSpots, spotTypeFilter = spotTypeFilter)
+                    } else {
+                        Column {
+                            Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                ViewLegendItem(stringResource(R.string.available_legend), SuccessGreen)
+                                ViewLegendItem(stringResource(R.string.occupied_legend), MaterialTheme.colorScheme.outlineVariant)
+                                ViewLegendItem(stringResource(R.string.user_spot_legend), UserSpotYellow)
                             }
-                        }
-
-                        AnimatedVisibility(visible = spotsExpanded) {
-                            Column {
-                                ViewParkingFilterChips(selectedType = spotTypeFilter, onTypeSelected = { spotTypeFilter = it; selectedSpot = null })
-                                if (viewMode == "dropdown") {
-                                    ViewSpotDropdown(selectedSpot = selectedSpot, onSpotSelected = { selectedSpot = it }, occupiedSpots = occupiedSpots, userSpots = userSpots, spotTypeFilter = spotTypeFilter)
-                                } else {
-                                    Column {
-                                        Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            ViewLegendItem(stringResource(R.string.available_legend), SuccessGreen)
-                                            ViewLegendItem(stringResource(R.string.occupied_legend), MaterialTheme.colorScheme.outlineVariant)
-                                            ViewLegendItem(stringResource(R.string.user_spot_legend), UserSpotYellow)
-                                        }
-                                        ViewSpotGrid(selectedSpot = selectedSpot, onSpotSelected = { selectedSpot = it }, occupiedSpots = occupiedSpots, userSpots = userSpots, spotTypeFilter = spotTypeFilter)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (selectedSpot != null) {
-                    val spotReservations = currentReservations.filter { it.spotNumber == selectedSpot }
-                    val isUserSpot = userSpots.contains(selectedSpot!!)
-                    val spotType = ParkingUtils.getSpotType(selectedSpot!!)
-                    
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Surface(
-                                        color = when {
-                                            isUserSpot -> UserSpotYellow
-                                            spotReservations.isNotEmpty() -> MaterialTheme.colorScheme.outlineVariant
-                                            else -> SuccessGreen
-                                        },
-                                        shape = RoundedCornerShape(8.dp), modifier = Modifier.size(40.dp)
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) { 
-                                            Icon(ParkingUtils.getSpotIcon(spotType), null, tint = Color.White) 
-                                        }
-                                    }
-                                    Spacer(Modifier.width(12.dp))
-                                    Column {
-                                        Text(stringResource(R.string.spot_number_label, selectedSpot!!), fontWeight = FontWeight.Bold, fontSize = 20.sp, color = MaterialTheme.colorScheme.onSurface)
-                                        Text(stringResource(ParkingUtils.getSpotLabelRes(spotType)), color = MaterialTheme.colorScheme.secondary, fontSize = 14.sp)
-                                    }
-                                }
-                                Badge(
-                                    containerColor = when {
-                                        isUserSpot -> UserSpotYellow.copy(alpha = 0.2f)
-                                        spotReservations.isNotEmpty() -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
-                                        else -> SuccessGreen.copy(alpha = 0.2f)
-                                    },
-                                    contentColor = when {
-                                        isUserSpot -> UserSpotText
-                                        spotReservations.isNotEmpty() -> MaterialTheme.colorScheme.onSurfaceVariant
-                                        else -> SuccessTextDark
-                                    }
-                                ) {
-                                    Text(text = when {
-                                        isUserSpot -> stringResource(R.string.status_user_reserve)
-                                        spotReservations.isNotEmpty() -> stringResource(R.string.status_occupied)
-                                        else -> stringResource(R.string.status_available)
-                                    }, modifier = Modifier.padding(4.dp), fontWeight = FontWeight.Bold)
-                                }
-                            }
-
-                            if (spotReservations.isNotEmpty()) {
-                                Text(stringResource(R.string.reservations_count_label, spotReservations.size), fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 16.dp), color = MaterialTheme.colorScheme.onSurface)
-                                spotReservations.sortedBy { it.startTime }.forEach { reservation ->
-                                    val isMine = reservation.userId == currentUser?.id
-                                    Surface(
-                                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                                        color = if (isMine) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                        shape = RoundedCornerShape(8.dp),
-                                        border = if (isMine) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null
-                                    ) {
-                                        Column(modifier = Modifier.padding(12.dp)) {
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Icon(Icons.Default.DirectionsCar, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.secondary)
-                                                Spacer(Modifier.width(8.dp))
-                                                Text(
-                                                    text = stringResource(
-                                                        R.string.license_plate_with_mine, 
-                                                        reservation.licensePlate ?: stringResource(R.string.no_license_plate),
-                                                        if (isMine) stringResource(R.string.mine_suffix) else ""
-                                                    ),
-                                                    fontWeight = FontWeight.Medium,
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
-                                            }
-                                            Text(stringResource(R.string.schedule_format, reservation.startTime, reservation.endTime), fontSize = 13.sp, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(top = 4.dp))
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            if (spotReservations.isEmpty() || spotReservations.none { it.userId == currentUser?.id }) {
-                                if (isDateInReservationRange) {
-                                    Button(
-                                        onClick = { onNavigate("${ROUTE_NEW_RESERVATION}?spot=$selectedSpot&date=$dateStr") },
-                                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                                    ) { Text(stringResource(R.string.reserve_spot_btn)) }
-                                } else {
-                                    Surface(
-                                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
-                                        shape = RoundedCornerShape(4.dp),
-                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                                    ) {
-                                        Text(
-                                            stringResource(R.string.consultation_mode_info),
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                            modifier = Modifier.padding(12.dp),
-                                            fontSize = 14.sp
-                                        )
-                                    }
-                                }
-                            }
+                            ViewSpotGrid(selectedSpot = selectedSpot, onSpotSelected = onSpotSelected, occupiedSpots = occupiedSpots, userSpots = userSpots, spotTypeFilter = spotTypeFilter)
                         }
                     }
                 }
             }
         }
     }
+}
 
+@Composable
+private fun ViewParkingSpotDetail(
+    selectedSpot: Int,
+    spotReservations: List<Reservation>,
+    isUserSpot: Boolean,
+    spotType: SpotType,
+    currentUser: com.lksnext.ParkingIMayordomo.data.model.User?,
+    isDateInReservationRange: Boolean,
+    dateStr: String,
+    onNavigate: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        color = when {
+                            isUserSpot -> UserSpotYellow
+                            spotReservations.isNotEmpty() -> MaterialTheme.colorScheme.outlineVariant
+                            else -> SuccessGreen
+                        },
+                        shape = RoundedCornerShape(8.dp), modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) { Icon(ParkingUtils.getSpotIcon(spotType), null, tint = Color.White) }
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text(stringResource(R.string.spot_number_label, selectedSpot), fontWeight = FontWeight.Bold, fontSize = 20.sp, color = MaterialTheme.colorScheme.onSurface)
+                        Text(stringResource(ParkingUtils.getSpotLabelRes(spotType)), color = MaterialTheme.colorScheme.secondary, fontSize = 14.sp)
+                    }
+                }
+                Badge(
+                    containerColor = when {
+                        isUserSpot -> UserSpotYellow.copy(alpha = 0.2f)
+                        spotReservations.isNotEmpty() -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+                        else -> SuccessGreen.copy(alpha = 0.2f)
+                    },
+                    contentColor = when {
+                        isUserSpot -> UserSpotText
+                        spotReservations.isNotEmpty() -> MaterialTheme.colorScheme.onSurfaceVariant
+                        else -> SuccessTextDark
+                    }
+                ) {
+                    Text(text = when {
+                        isUserSpot -> stringResource(R.string.status_user_reserve)
+                        spotReservations.isNotEmpty() -> stringResource(R.string.status_occupied)
+                        else -> stringResource(R.string.status_available)
+                    }, modifier = Modifier.padding(4.dp), fontWeight = FontWeight.Bold)
+                }
+            }
+            if (spotReservations.isNotEmpty()) {
+                Text(stringResource(R.string.reservations_count_label, spotReservations.size), fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 16.dp), color = MaterialTheme.colorScheme.onSurface)
+                spotReservations.sortedBy { it.startTime }.forEach { reservation ->
+                    val isMine = reservation.userId == currentUser?.id
+                    Surface(
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        color = if (isMine) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(8.dp),
+                        border = if (isMine) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.DirectionsCar, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.secondary)
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = stringResource(
+                                        R.string.license_plate_with_mine,
+                                        reservation.licensePlate ?: stringResource(R.string.no_license_plate),
+                                        if (isMine) stringResource(R.string.mine_suffix) else ""
+                                    ),
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                            Text(stringResource(R.string.schedule_format, reservation.startTime, reservation.endTime), fontSize = 13.sp, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(top = 4.dp))
+                        }
+                    }
+                }
+            }
+            if (spotReservations.isEmpty() || spotReservations.none { it.userId == currentUser?.id }) {
+                if (isDateInReservationRange) {
+                    Button(
+                        onClick = { onNavigate("${ROUTE_NEW_RESERVATION}?spot=$selectedSpot&date=$dateStr") },
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag(TestTags.VIEW_PARKING_RESERVE_BUTTON),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) { Text(stringResource(R.string.reserve_spot_btn)) }
+                } else {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(4.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                    ) {
+                        Text(
+                            stringResource(R.string.consultation_mode_info),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(12.dp),
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ViewParkingDatePickerDialog(
+    showDatePicker: Boolean,
+    datePickerState: DatePickerState,
+    onDateSelected: (Long) -> Unit,
+    onDismiss: () -> Unit
+) {
     if (showDatePicker) {
         DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
+            onDismissRequest = onDismiss,
             confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let {
-                        selectedDateMillis = it
-                        selectedSpot = null
-                    }
-                    showDatePicker = false
-                }) { Text(stringResource(R.string.save)) }
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let(onDateSelected)
+                        onDismiss()
+                    },
+                    modifier = Modifier.testTag(TestTags.VIEW_PARKING_DATE_PICKER_SAVE)
+                ) { Text(stringResource(R.string.save)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.cancel)) }
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.testTag(TestTags.VIEW_PARKING_DATE_PICKER_CANCEL)
+                ) { Text(stringResource(R.string.cancel)) }
             }
         ) {
             DatePicker(state = datePickerState)
@@ -392,18 +467,18 @@ fun ViewParkingFilterChips(selectedType: SpotType?, onTypeSelected: (SpotType?) 
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        ViewParkingFilterChip(selected = selectedType == null, onClick = { onTypeSelected(null) }, label = stringResource(R.string.filter_all), icon = Icons.Default.LocalParking)
-        ViewParkingFilterChip(selected = selectedType == SpotType.NORMAL, onClick = { onTypeSelected(SpotType.NORMAL) }, label = stringResource(R.string.spot_type_normal), icon = Icons.Default.DirectionsCar)
-        ViewParkingFilterChip(selected = selectedType == SpotType.ELECTRIC, onClick = { onTypeSelected(SpotType.ELECTRIC) }, label = stringResource(R.string.spot_type_electric), icon = Icons.Default.ElectricCar)
-        ViewParkingFilterChip(selected = selectedType == SpotType.MOTORCYCLE, onClick = { onTypeSelected(SpotType.MOTORCYCLE) }, label = stringResource(R.string.spot_type_motorcycle), icon = Icons.Default.TwoWheeler)
-        ViewParkingFilterChip(selected = selectedType == SpotType.DISABLED, onClick = { onTypeSelected(SpotType.DISABLED) }, label = stringResource(R.string.spot_type_disabled), icon = Icons.AutoMirrored.Filled.Accessible)
+        ViewParkingFilterChip(selected = selectedType == null, onClick = { onTypeSelected(null) }, label = stringResource(R.string.filter_all), icon = Icons.Default.LocalParking, modifier = Modifier.testTag(TestTags.VIEW_PARKING_FILTER_ALL))
+        ViewParkingFilterChip(selected = selectedType == SpotType.NORMAL, onClick = { onTypeSelected(SpotType.NORMAL) }, label = stringResource(R.string.spot_type_normal), icon = Icons.Default.DirectionsCar, modifier = Modifier.testTag(TestTags.VIEW_PARKING_FILTER_NORMAL))
+        ViewParkingFilterChip(selected = selectedType == SpotType.ELECTRIC, onClick = { onTypeSelected(SpotType.ELECTRIC) }, label = stringResource(R.string.spot_type_electric), icon = Icons.Default.ElectricCar, modifier = Modifier.testTag(TestTags.VIEW_PARKING_FILTER_ELECTRIC))
+        ViewParkingFilterChip(selected = selectedType == SpotType.MOTORCYCLE, onClick = { onTypeSelected(SpotType.MOTORCYCLE) }, label = stringResource(R.string.spot_type_motorcycle), icon = Icons.Default.TwoWheeler, modifier = Modifier.testTag(TestTags.VIEW_PARKING_FILTER_MOTORCYCLE))
+        ViewParkingFilterChip(selected = selectedType == SpotType.DISABLED, onClick = { onTypeSelected(SpotType.DISABLED) }, label = stringResource(R.string.spot_type_disabled), icon = Icons.AutoMirrored.Filled.Accessible, modifier = Modifier.testTag(TestTags.VIEW_PARKING_FILTER_DISABLED))
     }
 }
 
 @Composable
-fun ViewParkingFilterChip(selected: Boolean, onClick: () -> Unit, label: String, icon: ImageVector) {
+fun ViewParkingFilterChip(selected: Boolean, onClick: () -> Unit, label: String, icon: ImageVector, modifier: Modifier = Modifier) {
     Surface(
-        modifier = Modifier.clickable { onClick() },
+        modifier = modifier.clickable { onClick() },
         color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
         shape = RoundedCornerShape(4.dp)
@@ -421,7 +496,7 @@ fun ViewParkingFilterChip(selected: Boolean, onClick: () -> Unit, label: String,
 fun ViewSpotDropdown(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, occupiedSpots: List<Int>, userSpots: List<Int>, spotTypeFilter: SpotType?) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     val spots = (1..50).filter { spotTypeFilter == null || ParkingUtils.getSpotType(it) == spotTypeFilter }
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag(TestTags.VIEW_PARKING_SPOT_DROPDOWN)) {
         OutlinedTextField(
             value = selectedSpot?.let { stringResource(R.string.spot_number_with_prefix, stringResource(R.string.available_legend), it) } ?: stringResource(R.string.select_spot_prompt), onValueChange = {}, readOnly = true,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -458,7 +533,7 @@ fun ViewSpotDropdown(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, occupied
 @Composable
 fun ViewSpotGrid(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, occupiedSpots: List<Int>, userSpots: List<Int>, spotTypeFilter: SpotType?) {
     val spots = (1..50).filter { spotTypeFilter == null || ParkingUtils.getSpotType(it) == spotTypeFilter }
-    FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    FlowRow(modifier = Modifier.fillMaxWidth().testTag(TestTags.VIEW_PARKING_SPOT_GRID), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         spots.forEach { spot ->
             val isOccupied = occupiedSpots.contains(spot); val isUserSpot = userSpots.contains(spot); val isSelected = selectedSpot == spot
             val spotType = ParkingUtils.getSpotType(spot)

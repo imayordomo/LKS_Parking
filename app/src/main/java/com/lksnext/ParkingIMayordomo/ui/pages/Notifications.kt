@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -25,6 +26,7 @@ import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.NotificationsViewModel
+import com.lksnext.ParkingIMayordomo.utils.TestTags
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
@@ -63,7 +65,8 @@ fun Notifications(
             topBar = {
                 ParkingTopAppBar(
                     onMenuClick = { scope.launch { drawerState.open() } },
-                    onNotificationsClick = { /* Already here */ }
+                    onNotificationsClick = { /* Already here */ },
+                    unreadNotificationsCount = unreadCount
                 )
             },
             bottomBar = {
@@ -76,79 +79,20 @@ fun Notifications(
                 )
             }
         ) { padding ->
-            Column(
-                modifier = modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp)
-            ) {
-
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = stringResource(R.string.notifications_title),
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Text(
-                        text = stringResource(R.string.notifications_subtitle),
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                if (unreadCount > 0) {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-                        TextButton(
-                            onClick = { viewModel.markAllAsRead() },
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            Icon(Icons.Default.DoneAll, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(stringResource(R.string.mark_all_read), fontSize = 14.sp)
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                if (notifications.isEmpty()) {
-                    EmptyNotifications()
-                } else {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                    ) {
-                        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                            itemsIndexed(notifications, key = { _, it -> it.id }) { index, notification ->
-                                NotificationItem(
-                                    notification = notification,
-                                    onRead = { viewModel.markAsRead(notification.id) },
-                                    onDelete = { viewModel.deleteNotification(notification.id) }
-                                )
-                                if (index < notifications.size - 1) {
-                                    HorizontalDivider(
-                                        modifier = Modifier.padding(horizontal = 16.dp),
-                                        thickness = 0.5.dp,
-                                        color = MaterialTheme.colorScheme.outlineVariant
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            NotificationsContent(
+                modifier = modifier.padding(padding),
+                notifications = notifications,
+                unreadCount = unreadCount,
+                onMarkAllAsRead = { viewModel.markAllAsRead() },
+                onMarkAsRead = { id -> viewModel.markAsRead(id) },
+                onDelete = { id -> viewModel.deleteNotification(id) }
+            )
         }
     }
 }
 
 @Composable
+@Suppress("DiscouragedApi")
 fun NotificationItem(
     notification: Notification,
     onRead: () -> Unit,
@@ -271,13 +215,13 @@ fun NotificationItem(
                     TextButton(
                         onClick = onRead,
                         contentPadding = PaddingValues(0.dp),
-                        modifier = Modifier.height(32.dp)
+                        modifier = Modifier.height(32.dp).testTag(TestTags.NOTIFICATIONS_ITEM_MARK_READ)
                     ) {
                         Text(stringResource(R.string.mark_read), fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
-            IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
+            IconButton(onClick = onDelete, modifier = Modifier.size(24.dp).testTag(TestTags.NOTIFICATIONS_ITEM_DELETE)) {
                 Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.content_desc_delete), tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))
             }
         }
@@ -305,5 +249,83 @@ fun EmptyNotifications() {
             fontSize = 18.sp,
             color = MaterialTheme.colorScheme.secondary
         )
+    }
+}
+
+@Composable
+private fun NotificationsContent(
+    modifier: Modifier = Modifier,
+    notifications: List<Notification>,
+    unreadCount: Int,
+    onMarkAllAsRead: () -> Unit,
+    onMarkAsRead: (String) -> Unit,
+    onDelete: (String) -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = stringResource(R.string.notifications_title),
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = stringResource(R.string.notifications_subtitle),
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.secondary
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (unreadCount > 0) {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                TextButton(
+                    onClick = onMarkAllAsRead,
+                    modifier = Modifier.testTag(TestTags.NOTIFICATIONS_MARK_ALL_READ),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(Icons.Default.DoneAll, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(stringResource(R.string.mark_all_read), fontSize = 14.sp)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (notifications.isEmpty()) {
+            EmptyNotifications()
+        } else {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                shape = RoundedCornerShape(8.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            ) {
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    itemsIndexed(notifications, key = { _, it -> it.id }) { index, notification ->
+                        NotificationItem(
+                            notification = notification,
+                            onRead = { onMarkAsRead(notification.id) },
+                            onDelete = { onDelete(notification.id) }
+                        )
+                        if (index < notifications.size - 1) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                thickness = 0.5.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }

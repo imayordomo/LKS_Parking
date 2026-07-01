@@ -76,7 +76,7 @@ class NewReservationViewModel(private val repository: ParkingRepository) : ViewM
             val dateStr = sdfDate.format(selectedDate.time)
             val startStr = sdfTime.format(startTime.time)
             val endStr = sdfTime.format(endTime.time)
-            val currentUserId = currentUser?.id ?: ""
+            val currentUserId = currentUser?.id.orEmpty()
 
             val crossesMidnight = ParkingUtils.isMidnightCrossing(startStr, endStr)
 

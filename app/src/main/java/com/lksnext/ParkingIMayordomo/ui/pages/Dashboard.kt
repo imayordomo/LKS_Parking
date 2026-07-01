@@ -17,17 +17,20 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
+import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.data.model.Reservation
 import com.lksnext.ParkingIMayordomo.data.model.Vehicle
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.theme.*
+import com.lksnext.ParkingIMayordomo.utils.TestTags
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.DashboardViewModel
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.PARAM_SHOW_VEHICLE_ALERT
@@ -82,12 +85,15 @@ fun Dashboard(
             )
         }
     ) {
+        val notifications by AuthManager.notifications.collectAsState()
+        val unreadCount = notifications.count { !it.read }
         Scaffold(
             modifier = modifier,
             topBar = {
                 ParkingTopAppBar(
                     onMenuClick = { scope.launch { drawerState.open() } },
-                    onNotificationsClick = { onNavigate(ROUTE_NOTIFICATIONS) }
+                    onNotificationsClick = { onNavigate(ROUTE_NOTIFICATIONS) },
+                    unreadNotificationsCount = unreadCount
                 )
             },
             bottomBar = {
@@ -104,7 +110,8 @@ fun Dashboard(
                     onClick = navigateToNewReservation,
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
-                    shape = CircleShape
+                    shape = CircleShape,
+                    modifier = Modifier.testTag(TestTags.DASHBOARD_ADD_FAB)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = stringResource(R.string.content_desc_add))
                 }
@@ -133,75 +140,13 @@ fun Dashboard(
 
                 if (vehicles != null && vehicles?.isEmpty() == true) {
                     item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = LightOrangeBackground),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Warning, 
-                                    contentDescription = stringResource(R.string.content_desc_warning), 
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Text(
-                                    text = stringResource(R.string.register_vehicle_alert),
-                                    modifier = Modifier.weight(1f),
-                                    fontSize = 14.sp
-                                )
-                                TextButton(onClick = { onNavigate(ROUTE_PROFILE) }) {
-                                    Text(
-                                        text = stringResource(R.string.add_button),
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-                        }
+                        DashboardSpotOverview(onNavigate = onNavigate)
                     }
                 }
 
                 if (userReservations.isEmpty()) {
                     item {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                        ) {
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.spot_short_prefix),
-                                    fontSize = 80.sp,
-                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = stringResource(R.string.no_active_reservations),
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    fontSize = 18.sp
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                TextButton(onClick = navigateToNewReservation) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary)
-                                        Text(
-                                            text = stringResource(R.string.create_reservation),
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        DashboardNoReservationsState(navigateToNewReservation = navigateToNewReservation)
                     }
                 } else {
                     val todayStr = ParkingUtils.formatDate(Date())
@@ -230,6 +175,7 @@ fun Dashboard(
     if (reservationToDeleteId != null) {
         AlertDialog(
             onDismissRequest = { reservationToDeleteId = null },
+            modifier = Modifier.testTag(TestTags.DASHBOARD_DELETE_RESERVATION_DIALOG),
             title = { Text(stringResource(R.string.delete_reservation_title)) },
             text = { Text(stringResource(R.string.delete_reservation_msg)) },
             confirmButton = {
@@ -238,13 +184,17 @@ fun Dashboard(
                         reservationToDeleteId?.let { viewModel.deleteReservation(it) }
                         reservationToDeleteId = null
                     },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                    modifier = Modifier.testTag(TestTags.DASHBOARD_DELETE_RESERVATION_CONFIRM)
                 ) {
                     Text(stringResource(R.string.delete_btn))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { reservationToDeleteId = null }) {
+                TextButton(
+                    onClick = { reservationToDeleteId = null },
+                    modifier = Modifier.testTag(TestTags.DASHBOARD_DELETE_RESERVATION_CANCEL)
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             },
@@ -266,9 +216,6 @@ fun ReservationItem(
     
     var expanded by rememberSaveable { mutableStateOf(defaultExpanded) }
     
-    val fullDateFormatStr = stringResource(R.string.full_date_format)
-    val displayDateSdf = remember(fullDateFormatStr) { SimpleDateFormat(fullDateFormatStr, Locale.getDefault()) }
-    
     val tomorrowStr = remember {
         val cal = Calendar.getInstance()
         cal.add(Calendar.DAY_OF_YEAR, 1)
@@ -281,7 +228,8 @@ fun ReservationItem(
         modifier = Modifier
             .fillMaxWidth()
             .animateContentSize()
-            .clickable { expanded = !expanded },
+            .clickable { expanded = !expanded }
+            .testTag(TestTags.DASHBOARD_RESERVATION_CARD),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(1.dp, if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
         shape = RoundedCornerShape(8.dp)
@@ -361,78 +309,169 @@ fun ReservationItem(
             }
 
             AnimatedVisibility(visible = expanded) {
-                Column(modifier = Modifier.padding(top = 16.dp)) {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.CalendarToday, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(12.dp))
-                        val date = remember(reservation.date) { ParkingUtils.parseDate(reservation.date) }
-                        Text(
-                            text = date?.let { displayDateSdf.format(it) } ?: reservation.date,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Light
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.AccessTime, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = stringResource(R.string.time_range_format, reservation.startTime, reservation.endTime),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Light
-                        )
-                    }
+                DashboardReservationCard(
+                    reservation = reservation,
+                    vehicle = vehicle,
+                    onEdit = onEdit,
+                    onDelete = onDelete
+                )
+            }
+        }
+    }
+}
 
-                    if (reservation.licensePlate != null) {
-                        val vehicleType = vehicle?.type ?: run {
-                            val spotType = ParkingUtils.getSpotType(reservation.spotNumber)
-                            when (spotType) {
-                                com.lksnext.ParkingIMayordomo.utils.SpotType.MOTORCYCLE -> com.lksnext.ParkingIMayordomo.data.model.VehicleType.MOTORCYCLE
-                                com.lksnext.ParkingIMayordomo.utils.SpotType.DISABLED -> com.lksnext.ParkingIMayordomo.data.model.VehicleType.DISABLED
-                                com.lksnext.ParkingIMayordomo.utils.SpotType.ELECTRIC -> com.lksnext.ParkingIMayordomo.data.model.VehicleType.ELECTRIC
-                                else -> com.lksnext.ParkingIMayordomo.data.model.VehicleType.CAR
-                            }
-                        }
-                        val icon = ParkingUtils.getVehicleIcon(vehicleType)
-                        val iconColor = ParkingUtils.getVehicleColor(vehicleType)
+@Composable
+private fun DashboardReservationCard(
+    reservation: Reservation,
+    vehicle: Vehicle?,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val fullDateFormatStr = stringResource(R.string.full_date_format)
+    val displayDateSdf = remember(fullDateFormatStr) { SimpleDateFormat(fullDateFormatStr, Locale.getDefault()) }
 
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(icon, null, tint = iconColor, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = reservation.licensePlate,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Normal
-                            )
-                        }
-                    }
+    Column(modifier = Modifier.padding(top = 16.dp)) {
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        Spacer(modifier = Modifier.height(16.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End) {
-                        IconButton(onClick = onEdit) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = stringResource(R.string.content_desc_edit),
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        IconButton(onClick = onDelete) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = stringResource(R.string.content_desc_delete),
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.CalendarToday, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(12.dp))
+            val date = remember(reservation.date) { ParkingUtils.parseDate(reservation.date) }
+            Text(
+                text = date?.let { displayDateSdf.format(it) } ?: reservation.date,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Light
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.AccessTime, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = stringResource(R.string.time_range_format, reservation.startTime, reservation.endTime),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Light
+            )
+        }
+
+        if (reservation.licensePlate != null) {
+            val vehicleType = vehicle?.type ?: run {
+                val spotType = ParkingUtils.getSpotType(reservation.spotNumber)
+                when (spotType) {
+                    com.lksnext.ParkingIMayordomo.utils.SpotType.MOTORCYCLE -> com.lksnext.ParkingIMayordomo.data.model.VehicleType.MOTORCYCLE
+                    com.lksnext.ParkingIMayordomo.utils.SpotType.DISABLED -> com.lksnext.ParkingIMayordomo.data.model.VehicleType.DISABLED
+                    com.lksnext.ParkingIMayordomo.utils.SpotType.ELECTRIC -> com.lksnext.ParkingIMayordomo.data.model.VehicleType.ELECTRIC
+                    else -> com.lksnext.ParkingIMayordomo.data.model.VehicleType.CAR
+                }
+            }
+            val icon = ParkingUtils.getVehicleIcon(vehicleType)
+            val iconColor = ParkingUtils.getVehicleColor(vehicleType)
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, null, tint = iconColor, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = reservation.licensePlate,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End) {
+            IconButton(onClick = onEdit, modifier = Modifier.testTag(TestTags.DASHBOARD_RESERVATION_EDIT)) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = stringResource(R.string.content_desc_edit),
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            IconButton(onClick = onDelete, modifier = Modifier.testTag(TestTags.DASHBOARD_RESERVATION_DELETE)) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(R.string.content_desc_delete),
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DashboardSpotOverview(onNavigate: (String) -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().testTag(TestTags.DASHBOARD_ADD_VEHICLE_ALERT),
+        colors = CardDefaults.cardColors(containerColor = LightOrangeBackground),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Warning, 
+                contentDescription = stringResource(R.string.content_desc_warning), 
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = stringResource(R.string.register_vehicle_alert),
+                modifier = Modifier.weight(1f),
+                fontSize = 14.sp
+            )
+            TextButton(onClick = { onNavigate(ROUTE_PROFILE) }) {
+                Text(
+                    text = stringResource(R.string.add_button),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DashboardNoReservationsState(navigateToNewReservation: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp)
+            .testTag(TestTags.DASHBOARD_CREATE_RESERVATION_EMPTY),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.spot_short_prefix),
+                fontSize = 80.sp,
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = stringResource(R.string.no_active_reservations),
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 18.sp
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            TextButton(onClick = navigateToNewReservation) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary)
+                    Text(
+                        text = stringResource(R.string.create_reservation),
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
         }

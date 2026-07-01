@@ -70,7 +70,7 @@ class HistoryViewModel(private val repository: ParkingRepository) : ViewModel() 
                 r.date,
                 r.startTime,
                 r.endTime,
-                r.licensePlate ?: ""
+                r.licensePlate.orEmpty()
             )
             csvContent.append(row.joinToString(",")).append("\n")
         }

@@ -22,10 +22,10 @@ Aplicación móvil para la gestión de reservas de plazas de parking en las ofic
 
 ## Roadmap y Planes Futuros
 
-- [x] **Firebase**: Integración de Firestore, Auth, Cloud Messaging y Crashlytics.
+- [x] **Firebase**: Integración de Firestore, Auth, Cloud Messaging.
 - [x] **Testing**: Tests unitarios de todos los ViewModels (cobertura 100%).
-- [ ] **Analíticas**: Implementación de Firebase Performance Monitoring.
-- [ ] **Automatización**: Pipeline de CI/CD (GitHub Actions) para tests y generación de `.apk`.
+- [ ] **Analíticas**: Implementación de Firebase Performance Monitoring y Crashlytics..
+- [x] **Automatización**: Pipeline de CI/CD (GitHub Actions) para tests y generación de `.apk`.
 
 ## Información para Desarrolladores
 
@@ -59,7 +59,7 @@ app/src/main/java/com/lksnext/ParkingIMayordomo/
    ```
 2. Abrir el proyecto en **Android Studio (Ladybug o superior)**.
 3. Sincronizar Gradle.
-4. Ejecutar en un emulador o dispositivo físico con **Android 8.0 (API 26) o superior**.
+4. Ejecutar en un emulador o dispositivo físico con **Android 7.0 (API 24) o superior**.
 
 ## Contacto
 Para dudas o soporte técnico, contactar con **imayordomo** o abrir un Issue en este repositorio.

@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
+    @Suppress("InjectDispatcher")
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
@@ -37,6 +38,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         mostrarNotificacion(title, body)
     }
 
+    @Suppress("InjectDispatcher")
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d("FCM_TOKEN", "Nuevo token generado: $token")

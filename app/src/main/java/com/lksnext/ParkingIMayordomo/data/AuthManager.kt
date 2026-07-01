@@ -1,8 +1,12 @@
 package com.lksnext.ParkingIMayordomo.data
 
 import android.util.Log
+import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
@@ -21,6 +25,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
 
+@Suppress("StaticFieldLeak")
 object AuthManager {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
@@ -35,6 +40,8 @@ object AuthManager {
 
     private val _allReservations = MutableStateFlow<List<Reservation>>(emptyList())
     val allReservations: StateFlow<List<Reservation>> = _allReservations.asStateFlow()
+
+    private var allReservationsStarted = false
 
     private val _vehicles = MutableStateFlow<List<Vehicle>?>(null)
     val vehicles: StateFlow<List<Vehicle>?> = _vehicles.asStateFlow()
@@ -54,7 +61,7 @@ object AuthManager {
     init {
         auth.currentUser?.let { firebaseUser ->
             val userId = firebaseUser.uid
-            val email = firebaseUser.email ?: ""
+            val email = firebaseUser.email.orEmpty()
             _user.value = User(
                 id = userId,
                 email = email,
@@ -77,14 +84,6 @@ object AuthManager {
                 .whereEqualTo("userId", userId)
                 .addSnapshotListener { snapshot, _ ->
                     _reservations.value = snapshot?.documents?.mapNotNull { it.toObject<Reservation>() } ?: emptyList()
-                }
-        )
-
-        // Real-time All Reservations (for parking view occupancy)
-        activeListeners.add(
-            db.collection("reservas")
-                .addSnapshotListener { snapshot, _ ->
-                    _allReservations.value = snapshot?.documents?.mapNotNull { it.toObject<Reservation>() } ?: emptyList()
                 }
         )
 
@@ -132,6 +131,17 @@ object AuthManager {
         return normalized.endsWith(CORPORATE_DOMAIN)
     }
 
+    fun startAllReservationsListener() {
+        if (allReservationsStarted) return
+        allReservationsStarted = true
+        activeListeners.add(
+            db.collection("reservas")
+                .addSnapshotListener { snapshot, _ ->
+                    _allReservations.value = snapshot?.documents?.mapNotNull { it.toObject<Reservation>() } ?: emptyList()
+                }
+        )
+    }
+
     suspend fun login(email: String, password: String) {
         val normalizedEmail = email.trim().lowercase()
         
@@ -157,8 +167,22 @@ object AuthManager {
             refreshAllData()
             syncFcmToken()
             
-        } catch (_: Exception) {
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            Log.w("AuthManager", "Login failed", e)
             throw Exception("error_invalid_credentials")
+        } catch (e: FirebaseAuthInvalidUserException) {
+            Log.w("AuthManager", "Login failed", e)
+            throw java.lang.IllegalStateException("error_user_disabled")
+        } catch (e: FirebaseNetworkException) {
+            Log.w("AuthManager", "Login failed", e)
+            throw java.lang.IllegalStateException("error_network")
+        } catch (e: FirebaseAuthException) {
+            if (e.errorCode == "ERROR_TOO_MANY_ATTEMPTS_TRY_LATER") {
+                throw java.lang.IllegalStateException("error_too_many_requests")
+            }
+            throw java.lang.IllegalStateException("error_unknown")
+        } catch (_: Exception) {
+            throw java.lang.IllegalStateException("error_unknown")
         }
     }
 
@@ -438,11 +462,26 @@ object AuthManager {
 
         // If this reservation belongs to a midnight-crossing group, update sibling
         val currentRes = current ?: _reservations.value.find { it.id == reservationId }
-        if (currentRes?.groupId?.isNotEmpty() == true && spotNumber != null) {
+        val hasFieldUpdates = spotNumber != null || vehicleId != null || licensePlate != null
+        if (currentRes?.groupId?.isNotEmpty() == true && hasFieldUpdates) {
             val siblings = _reservations.value.filter { it.groupId == currentRes.groupId && it.id != reservationId }
+            val siblingDate = date?.let { ParkingUtils.addDays(it, 1) }
             for (sibling in siblings) {
                 val sibUpdates = mutableMapOf<String, Any?>()
                 spotNumber?.let { sibUpdates["spotNumber"] = it }
+                vehicleId?.let { sibUpdates["vehicleId"] = it }
+                licensePlate?.let { sibUpdates["licensePlate"] = it }
+                sibUpdates["alertaInicioEnviada"] = false
+                sibUpdates["alertaFinEnviada"] = false
+                val sibFinalDate = siblingDate ?: currentRes.date
+                val sibFinalStart = currentRes.startTime
+                val sibFinalEnd = currentRes.endTime
+                if (sibFinalDate != null && sibFinalStart != null) {
+                    sibUpdates["fechaAlertaInicio"] = calculateAlertTimestamp(sibFinalDate, sibFinalStart, -15)
+                }
+                if (sibFinalDate != null && sibFinalEnd != null) {
+                    sibUpdates["fechaAlertaFin"] = calculateAlertTimestamp(sibFinalDate, sibFinalEnd, -15)
+                }
                 if (sibUpdates.isNotEmpty()) {
                     db.collection("reservas").document(sibling.id).update(sibUpdates).await()
                 }
@@ -454,7 +493,7 @@ object AuthManager {
             NotificationType.INFO,
             "notif_modified_title",
             "notif_modified_msg",
-            listOf(spotNumber ?: current?.spotNumber ?: 0, finalDate ?: "", finalStart ?: "")
+            listOf((spotNumber ?: current?.spotNumber) ?: 0, finalDate.orEmpty(), finalStart.orEmpty())
         )
     }
 
@@ -473,7 +512,7 @@ object AuthManager {
             NotificationType.WARNING,
             "notif_cancelled_title",
             "notif_cancelled_msg",
-            listOf(current?.spotNumber ?: 0, current?.date ?: "")
+            listOf(current?.spotNumber ?: 0, current?.date.orEmpty())
         )
     }
 

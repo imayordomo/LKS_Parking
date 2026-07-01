@@ -28,12 +28,7 @@ object LocaleManager {
     private var systemLocale: Locale = Locale("es")
 
     fun captureSystemLocale(context: Context) {
-        val raw = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            context.resources.configuration.locales[0]
-        } else {
-            @Suppress("DEPRECATION")
-            context.resources.configuration.locale
-        }
+        val raw = context.resources.configuration.locales[0]
         // Fallback to Spanish if system language isn't supported
         systemLocaleCode = if (raw.language in supportedLanguages) raw.language else "es"
         systemLocale = Locale(systemLocaleCode)
@@ -49,19 +44,14 @@ object LocaleManager {
 
         // If no preference yet or legacy "system" value exists, determine the best real default
         if (savedLocale == null || savedLocale == "system") {
-            val systemLocale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                context.resources.configuration.locales[0].language
-            } else {
-                @Suppress("DEPRECATION")
-                context.resources.configuration.locale.language
-            }
+            val systemLocale = context.resources.configuration.locales[0].language
 
             savedLocale = if (systemLocale in supportedLanguages) systemLocale else "es"
             // Persist the choice immediately so it stays fixed unless changed by user
             prefs.edit().putString(KEY_LOCALE, savedLocale).apply()
         }
 
-        _localeFlow.value = savedLocale!!
+        _localeFlow.value = savedLocale ?: "es"
         
         val expectedLocales = LocaleListCompat.forLanguageTags(savedLocale)
         if (AppCompatDelegate.getApplicationLocales().toLanguageTags() != expectedLocales.toLanguageTags()) {
@@ -81,7 +71,7 @@ object LocaleManager {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .edit()
             .putString(KEY_LOCALE, languageCode)
-            .commit()
+            .apply()
 
         _localeFlow.value = languageCode
 
@@ -113,12 +103,7 @@ object LocaleManager {
         Locale.setDefault(locale)
         
         val configuration = Configuration(context.resources.configuration)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            configuration.setLocales(LocaleList(locale))
-        } else {
-            @Suppress("DEPRECATION")
-            configuration.locale = locale
-        }
+        configuration.setLocales(LocaleList(locale))
         configuration.setLayoutDirection(locale)
         
         return context.createConfigurationContext(configuration)
@@ -128,12 +113,7 @@ object LocaleManager {
 
     fun getSystemLocaleContext(context: Context): Context {
         val configuration = Configuration(context.resources.configuration)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            configuration.setLocales(LocaleList(systemLocale))
-        } else {
-            @Suppress("DEPRECATION")
-            configuration.locale = systemLocale
-        }
+        configuration.setLocales(LocaleList(systemLocale))
         configuration.setLayoutDirection(systemLocale)
         return context.createConfigurationContext(configuration)
     }

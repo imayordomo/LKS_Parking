@@ -169,4 +169,58 @@ class NewReservationViewModelTest {
 
         assertNull(viewModel.getValidationErrorResId(now, now, end, 5, false, emptyList()))
     }
+
+    @Test
+    fun `getValidationErrorResId should handle midnight crossing too long`() {
+        val future = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1); set(Calendar.HOUR_OF_DAY, 22); set(Calendar.MINUTE, 0) }
+        val end = Calendar.getInstance().apply { time = future.time; add(Calendar.HOUR_OF_DAY, 10) }
+
+        assertEquals(R.string.error_max_9_hours, viewModel.getValidationErrorResId(future, future, end, 1, false, emptyList()))
+    }
+
+    @Test
+    fun `getValidationErrorResId should handle midnight crossing start before now`() {
+        val pastDate = Calendar.getInstance().apply { add(Calendar.HOUR_OF_DAY, -2) }
+        val end = Calendar.getInstance().apply { time = pastDate.time; add(Calendar.HOUR_OF_DAY, 4) }
+
+        assertEquals(R.string.error_start_before_now, viewModel.getValidationErrorResId(pastDate, pastDate, end, 1, false, emptyList()))
+    }
+
+    @Test
+    fun `hasExistingUserReservation should handle midnight crossing`() = runTest {
+        val testDate = Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, 22) }
+        val testStart = Calendar.getInstance().apply { time = testDate.time }
+        val testEnd = Calendar.getInstance().apply { time = testDate.time; add(Calendar.HOUR_OF_DAY, 3) }
+
+        userFlow.value = User(id = "user1")
+        val res = Reservation(id = "1", userId = "user1", date = "2023-05-10")
+        reservationsFlow.value = listOf(res)
+
+        mockkObject(ParkingUtils)
+        every { ParkingUtils.isMidnightCrossing(any(), any()) } returns true
+        every { ParkingUtils.addDays(any(), 1) } returns "2023-05-11"
+        every { ParkingUtils.isTimeOverlapping(any(), any(), any(), any(), any(), any()) } returns true
+
+        val hasOverlap = viewModel.hasExistingUserReservation(testDate, testStart, testEnd).first()
+        assertTrue(hasOverlap)
+    }
+
+    @Test
+    fun `getOccupiedSpots should handle midnight crossing`() = runTest {
+        val testDate = Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, 22) }
+        val testStart = Calendar.getInstance().apply { time = testDate.time }
+        val testEnd = Calendar.getInstance().apply { time = testDate.time; add(Calendar.HOUR_OF_DAY, 3) }
+
+        allReservationsFlow.value = listOf(
+            Reservation(id = "1", spotNumber = 5, date = "2023-05-10")
+        )
+
+        mockkObject(ParkingUtils)
+        every { ParkingUtils.isMidnightCrossing(any(), any()) } returns true
+        every { ParkingUtils.addDays(any(), 1) } returns "2023-05-11"
+        every { ParkingUtils.isTimeOverlapping(any(), any(), any(), any(), any(), any()) } returns true
+
+        val occupied = viewModel.getOccupiedSpots(testDate, testStart, testEnd).first()
+        assertEquals(listOf(5), occupied)
+    }
 }

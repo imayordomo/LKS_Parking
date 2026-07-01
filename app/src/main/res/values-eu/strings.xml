@@ -1,4 +1,5 @@
-<resources>
+﻿<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="UnusedResources,PluralsCandidate,Typos">
     <string name="app_name">LKS Parking</string>
     <string name="landing_title">LKS Parking</string>
     <string name="landing_subtitle">Kudeatu zure aparkaleku-erreserbak</string>
@@ -17,10 +18,8 @@
     <string name="login_link">Hasi saioa</string>
 
     <!-- Login -->
-    <string name="login_loading">Saioa hasten…</string>
     <string name="error_required_fields">Eremu guztiak derrigorrezkoak dira</string>
     <string name="error_invalid_credentials">Email edo pasahitz okerra</string>
-    <string name="corporate_suffix"> (@lksnext.com)</string>
     <string name="email_label_with_corporate">Emaila * (@lksnext.com)</string>
 
     <!-- Forgot Password -->
@@ -31,7 +30,6 @@
     <string name="email_sent_instructions">Egiaztatu zure sarrera-ontzia pasahitza berrezartzeko</string>
     <string name="reset_email_sent_success">Berreskuratze-esteka bidali da</string>
     <string name="check_inbox_hint">Minutu gutxiren buruan mezu elektronikoa jasotzen ez baduzu, egiaztatu spam karpeta.</string>
-    <string name="error_enter_email">Mesedez, sartu zure emaila</string>
     <string name="error_corporate_only">@lksnext.com posta korporatiboak bakarrik onartzen dira</string>
     <string name="error_invalid_email_format">Email formatu baliogabea</string>
 
@@ -114,7 +112,6 @@
     <string name="notif_report_sent_msg">Zure jakinarazpena jaso dugu. Eskerrik asko hobetzen laguntzeagatik.</string>
 
     <!-- Profile Screen -->
-    <string name="profile_title">Nire Profila</string>
     <string name="edit_profile">Editatu Profila</string>
     <string name="logout">Saioa itxi</string>
     <string name="my_vehicles">Nire Ibilgailuak</string>
@@ -127,7 +124,6 @@
     <string name="go_to_profile">JOAN PROFILERA</string>
     <string name="logout_confirmation">Ziur zaude saioa itxi nahi duzula?</string>
     <string name="vehicle_not_compatible_short">Ez da bateragarria</string>
-    <string name="save_profile">Gorde</string>
     <string name="license_plate_placeholder">ABC-1234</string>
     <string name="delete_vehicle_title">Ibilgailua ezabatu?</string>
     <string name="delete_vehicle_msg">Ziur zaude %1$s matrikuladun ibilgailua ezabatu nahi duzula?</string>
@@ -171,7 +167,7 @@
     <string name="csv_header_start">Hasiera</string>
     <string name="csv_header_end">Amaiera</string>
     <string name="csv_header_license">Matrikula</string>
-    <string name="csv_filename">historial-reservas.csv</string>
+    <string name="csv_filename">erreserba-historia.csv</string>
 
     <!-- Help Screen -->
     <string name="help_title">Laguntza</string>
@@ -246,7 +242,6 @@
     <string name="mine_suffix"> (Zu)</string>
     <string name="schedule_format">Ordutegia: %1$s - %2$s</string>
     <string name="reserve_spot_btn">Erreserbatu plaza hau</string>
-    <string name="error_date_out_of_range">Ezin dira erreserbak egin iraganeko datetarako edo 7 egun baino gehiagoko aurrerapenarekin.</string>
     <string name="consultation_mode_info">Kontsulta modua: Erreserba-epetik kanpoko egun bat ikusten (hurrengo 7 egunak bakarrik).</string>
     <string name="select_spot_prompt">Hautatu plaza</string>
     <string name="badge_mine">Zurea</string>
@@ -268,10 +263,7 @@
     <string name="error_start_before_now">Hasiera ordua ezin da unekoa baino lehenago izan</string>
     <string name="error_end_after_start">Amaiera orduak hasierakoa baino beranduago izan behar du</string>
     <string name="error_max_9_hours">Erreserba ezin da 9 ordu baino luzeagoa izan</string>
-    <string name="error_spot_occupied">#%1$d plaza beteta dago ordutegi honetan. Mesedez, hautatu libre dagoen beste bat.</string>
-    <string name="error_spot_occupied_edit">#%1$d plaza beteta dago ordutegi honetan</string>
     <string name="error_user_overlap">Dagoeneko baduzu beste erreserba bat ordutegi honetan</string>
-    <string name="error_vehicle_not_compatible">Zure ibilgailua ez da bateragarria plaza honekin (%1$s)</string>
     <string name="error_select_vehicle">Ibilgailu bat hautatu behar duzu</string>
     <string name="error_spot_occupied_simple">Plaza beteta</string>
     <string name="error_passwords_dont_match">Pasahitzak ez datoz bat</string>
@@ -282,6 +274,9 @@
     <string name="error_unknown">Ustekabeko errorea gertatu da</string>
     <string name="incompatible_vehicle_title">Ibilgailu ez-bateragarria</string>
     <string name="incompatible_vehicle_msg">Zure uneko ibilgailua ez da bateragarria hautatutako plaza motarekin (#%1$d). Beste ibilgailu bat gehitu nahi duzu?</string>
+    <string name="error_network">Konexio-errorea. Egiaztatu zure internet konexioa</string>
+    <string name="error_user_disabled">Kontu hau desgaitu egin da</string>
+    <string name="error_too_many_requests">Saiakera gehiegi. Saiatu berriro geroago</string>
 
     <!-- Common Buttons -->
     <string name="cancel">DEUSEZTATU</string>
@@ -293,5 +288,4 @@
     <string name="language_english">Ingelesa</string>
     <string name="language_spanish">Gaztelera</string>
     <string name="language_basque">Euskara</string>
-    <string name="system_default">Sistema</string>
 </resources>
