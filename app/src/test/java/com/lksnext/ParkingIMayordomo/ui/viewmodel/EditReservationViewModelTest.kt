@@ -88,14 +88,14 @@ class EditReservationViewModelTest {
     fun `getValidationErrorResId - Branch start before now`() {
         val pastDate = createNormalizedFutureDate(-1, 10)
         val futureTime = createNormalizedFutureDate(1, 10)
-        val error = viewModel.getValidationErrorResId(pastDate, futureTime, futureTime, emptyList(), "id", 1, "u", "v")
+        val error = viewModel.getValidationErrorResId(ValidationParams(pastDate, futureTime, futureTime, emptyList(), "id", 1, "u", "v"))
         assertEquals(R.string.error_start_before_now, error)
     }
 
     @Test
     fun `getValidationErrorResId - Branch hours non-positive`() {
         val future = createNormalizedFutureDate(1, 10)
-        val error = viewModel.getValidationErrorResId(future, future, future, emptyList(), "id", 1, "u", "v")
+        val error = viewModel.getValidationErrorResId(ValidationParams(future, future, future, emptyList(), "id", 1, "u", "v"))
         assertEquals(R.string.error_end_after_start, error)
     }
 
@@ -103,7 +103,7 @@ class EditReservationViewModelTest {
     fun `getValidationErrorResId - Branch hours too long`() {
         val future = createNormalizedFutureDate(1, 10)
         val lateEnd = createNormalizedFutureDate(1, 21)
-        val error = viewModel.getValidationErrorResId(future, future, lateEnd, emptyList(), "id", 1, "u", "v")
+        val error = viewModel.getValidationErrorResId(ValidationParams(future, future, lateEnd, emptyList(), "id", 1, "u", "v"))
         assertEquals(R.string.error_max_9_hours, error)
     }
 
@@ -115,7 +115,7 @@ class EditReservationViewModelTest {
         val end = createNormalizedFutureDate(1, 11)
         val list = listOf(Reservation(id = "other", spotNumber = 1))
         
-        val error = viewModel.getValidationErrorResId(future, future, end, list, "current", 1, "u", "v")
+        val error = viewModel.getValidationErrorResId(ValidationParams(future, future, end, list, "current", 1, "u", "v"))
         assertEquals(R.string.error_spot_occupied_simple, error)
     }
 
@@ -129,7 +129,7 @@ class EditReservationViewModelTest {
         val future = createNormalizedFutureDate(1, 10)
         val end = createNormalizedFutureDate(1, 11)
         
-        val error = viewModel.getValidationErrorResId(future, future, end, list, "current", 1, "u1", "v")
+        val error = viewModel.getValidationErrorResId(ValidationParams(future, future, end, list, "current", 1, "u1", "v"))
         assertEquals(R.string.error_user_overlap, error)
     }
 
@@ -137,7 +137,7 @@ class EditReservationViewModelTest {
     fun `getValidationErrorResId - Branch select vehicle`() {
         val future = createNormalizedFutureDate(1, 10)
         val end = createNormalizedFutureDate(1, 11) // Hours > 0
-        val error = viewModel.getValidationErrorResId(future, future, end, emptyList(), "id", 1, "u", "")
+        val error = viewModel.getValidationErrorResId(ValidationParams(future, future, end, emptyList(), "id", 1, "u", ""))
         assertEquals(R.string.error_select_vehicle, error)
     }
 
@@ -145,7 +145,79 @@ class EditReservationViewModelTest {
     fun `getValidationErrorResId - Success`() {
         val future = createNormalizedFutureDate(1, 10)
         val end = createNormalizedFutureDate(1, 11)
-        val error = viewModel.getValidationErrorResId(future, future, end, emptyList(), "id", 1, "u", "v1")
+        val error = viewModel.getValidationErrorResId(ValidationParams(future, future, end, emptyList(), "id", 1, "u", "v1"))
+        assertNull(error)
+    }
+
+    // ── Midnight crossing branches ──
+
+    @Test
+    fun `getValidationErrorResId - Midnight crossing too many hours`() {
+        val future = createNormalizedFutureDate(1, 22)
+        val nextMorning = createNormalizedFutureDate(1, 8) // 10h duration crossing midnight
+        val error = viewModel.getValidationErrorResId(ValidationParams(future, future, nextMorning, emptyList(), "id", 1, "u", "v"))
+        assertEquals(R.string.error_max_9_hours, error)
+    }
+
+    @Test
+    fun `getValidationErrorResId - Midnight crossing start before now`() {
+        val pastDate = createNormalizedFutureDate(-1, 22)
+        val nextMorning = createNormalizedFutureDate(1, 1)
+        val error = viewModel.getValidationErrorResId(ValidationParams(pastDate, pastDate, nextMorning, emptyList(), "id", 1, "u", "v"))
+        assertEquals(R.string.error_start_before_now, error)
+    }
+
+    @Test
+    fun `getValidationErrorResId - Midnight crossing spot occupied`() {
+        mockkObject(ParkingUtils)
+        every { ParkingUtils.isMidnightCrossing(any(), any()) } returns true
+        every { ParkingUtils.calculateDurationMinutes(any(), any()) } returns 120
+        every { ParkingUtils.addDays(any(), 1) } returns "2026-07-02"
+        every { ParkingUtils.isTimeOverlapping(any(), any(), any(), any(), any(), any()) } returns true
+        val future = createNormalizedFutureDate(1, 22)
+        val nextMorning = createNormalizedFutureDate(1, 1)
+        val list = listOf(Reservation(id = "other", spotNumber = 1))
+        val error = viewModel.getValidationErrorResId(ValidationParams(future, future, nextMorning, list, "current", 1, "u", "v"))
+        assertEquals(R.string.error_spot_occupied_simple, error)
+    }
+
+    @Test
+    fun `getValidationErrorResId - Midnight crossing user overlap`() {
+        mockkObject(ParkingUtils)
+        every { ParkingUtils.isMidnightCrossing(any(), any()) } returns true
+        every { ParkingUtils.calculateDurationMinutes(any(), any()) } returns 120
+        every { ParkingUtils.addDays(any(), 1) } returns "2026-07-02"
+        every { ParkingUtils.isTimeOverlapping(any(), any(), any(), any(), any(), any()) } returns true
+        val future = createNormalizedFutureDate(1, 22)
+        val nextMorning = createNormalizedFutureDate(1, 1)
+        val list = listOf(Reservation(id = "other", spotNumber = 5, userId = "u"))
+        val error = viewModel.getValidationErrorResId(ValidationParams(future, future, nextMorning, list, "current", 1, "u", "v"))
+        assertEquals(R.string.error_user_overlap, error)
+    }
+
+    @Test
+    fun `getValidationErrorResId - Midnight crossing vehicle blank`() {
+        mockkObject(ParkingUtils)
+        every { ParkingUtils.isMidnightCrossing(any(), any()) } returns true
+        every { ParkingUtils.calculateDurationMinutes(any(), any()) } returns 120
+        every { ParkingUtils.addDays(any(), 1) } returns "2026-07-02"
+        every { ParkingUtils.isTimeOverlapping(any(), any(), any(), any(), any(), any()) } returns false
+        val future = createNormalizedFutureDate(1, 22)
+        val nextMorning = createNormalizedFutureDate(1, 1)
+        val error = viewModel.getValidationErrorResId(ValidationParams(future, future, nextMorning, emptyList(), "current", 1, "u", ""))
+        assertEquals(R.string.error_select_vehicle, error)
+    }
+
+    @Test
+    fun `getValidationErrorResId - Midnight crossing success`() {
+        mockkObject(ParkingUtils)
+        every { ParkingUtils.isMidnightCrossing(any(), any()) } returns true
+        every { ParkingUtils.calculateDurationMinutes(any(), any()) } returns 120
+        every { ParkingUtils.addDays(any(), 1) } returns "2026-07-02"
+        every { ParkingUtils.isTimeOverlapping(any(), any(), any(), any(), any(), any()) } returns false
+        val future = createNormalizedFutureDate(1, 22)
+        val nextMorning = createNormalizedFutureDate(1, 1)
+        val error = viewModel.getValidationErrorResId(ValidationParams(future, future, nextMorning, emptyList(), "current", 1, "u", "v"))
         assertNull(error)
     }
 }

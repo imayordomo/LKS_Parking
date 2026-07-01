@@ -71,7 +71,7 @@ Permite instanciar ViewModels que requieren parámetros en su constructor (como 
 ### Requisitos Previos
 - **Android Studio**: Ladybug (2024.2.1) o superior.
 - **JDK**: 17 o superior.
-- **Android SDK**: API 26 (Android 8.0) como mínimo.
+- **Android SDK**: API 24 (Android 7.0) como mínimo.
 
 ### Pasos para empezar
 1.  **Importar el proyecto**:

@@ -46,10 +46,7 @@ class ViewParkingViewModel(private val repository: ParkingRepository) : ViewMode
     fun getCurrentReservations(selectedDate: Calendar): Flow<List<com.lksnext.ParkingIMayordomo.data.model.Reservation>> {
         return repository.allReservations.map { reservations ->
             val dateStr = sdfDate.format(selectedDate.time)
-            val isToday = dateStr == todayStr
-            reservations.filter { r ->
-                r.date == dateStr && (!isToday || isCurrentlyActive(r.startTime, r.endTime))
-            }
+            reservations.filter { r -> r.date == dateStr }
         }
     }
 

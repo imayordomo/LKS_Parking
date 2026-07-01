@@ -14,14 +14,20 @@ jacoco {
 
 android {
     namespace = "com.lksnext.ParkingIMayordomo"
-    compileSdk = 35
+    compileSdk = 36
+
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
 
     defaultConfig {
         applicationId = "com.lksnext.ParkingIMayordomo"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 12
-        versionName = "1.10.0"
+        targetSdk = 36
+        versionCode = 13
+        versionName = "1.11.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -63,6 +69,7 @@ detekt {
     source.setFrom(files("src/main/java"))
     parallel = true
     ignoreFailures = false
+    config.setFrom(files("../config/detekt/detekt.yml"))
     baseline = file("detekt-baseline.xml")
 }
 
@@ -130,8 +137,15 @@ dependencies {
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.mockk.android)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.androidx.test.uiautomator)
+    androidTestImplementation(libs.androidx.espresso.core)
+
 }

@@ -1,5 +1,6 @@
 package com.lksnext.ParkingIMayordomo.ui.pages
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -20,6 +21,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -27,11 +29,13 @@ import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.data.model.Reservation
 import com.lksnext.ParkingIMayordomo.data.model.Vehicle
+import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.HistoryViewModel
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
+import com.lksnext.ParkingIMayordomo.utils.TestTags
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
@@ -86,8 +90,8 @@ fun History(
                     val csvContent = viewModel.generateCsvContent(headers)
                     outputStream.write(csvContent.toByteArray())
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
+            } catch (e: java.io.IOException) {
+                Log.e("History", "Failed to write CSV", e)
             }
         }
     }
@@ -104,11 +108,14 @@ fun History(
             )
         }
     ) {
+        val notifications by AuthManager.notifications.collectAsState()
+        val unreadCount = notifications.count { !it.read }
         Scaffold(
             topBar = {
                 ParkingTopAppBar(
                     onMenuClick = { scope.launch { drawerState.open() } },
-                    onNotificationsClick = { onNavigate(ROUTE_NOTIFICATIONS) }
+                    onNotificationsClick = { onNavigate(ROUTE_NOTIFICATIONS) },
+                    unreadNotificationsCount = unreadCount
                 )
             },
             bottomBar = {
@@ -153,7 +160,7 @@ fun History(
                             onClick = {
                                 createDocumentLauncher.launch(context.getString(R.string.csv_filename))
                             },
-                            modifier = Modifier.padding(top = 8.dp),
+                            modifier = Modifier.padding(top = 8.dp).testTag(TestTags.HISTORY_DOWNLOAD_CSV),
                             shape = RoundedCornerShape(8.dp),
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
@@ -197,7 +204,7 @@ fun History(
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                 }
-                                IconButton(onClick = { filtersExpanded = !filtersExpanded }) {
+                                IconButton(onClick = { filtersExpanded = !filtersExpanded }, modifier = Modifier.testTag(TestTags.HISTORY_EXPAND_FILTERS)) {
                                     Icon(
                                         imageVector = if (filtersExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                                         contentDescription = null,
@@ -223,7 +230,7 @@ fun History(
                                             onValueChange = { },
                                             readOnly = true,
                                             label = { Text(stringResource(R.string.from_date)) },
-                                            modifier = Modifier.weight(1f),
+                                            modifier = Modifier.weight(1f).testTag(TestTags.HISTORY_START_DATE_FIELD),
                                             interactionSource = startInteractionSource,
                                             enabled = true,
                                             colors = OutlinedTextFieldDefaults.colors(
@@ -241,7 +248,7 @@ fun History(
                                             onValueChange = { },
                                             readOnly = true,
                                             label = { Text(stringResource(R.string.to_date)) },
-                                            modifier = Modifier.weight(1f),
+                                            modifier = Modifier.weight(1f).testTag(TestTags.HISTORY_END_DATE_FIELD),
                                             interactionSource = endInteractionSource,
                                             enabled = true,
                                             colors = OutlinedTextFieldDefaults.colors(
@@ -271,19 +278,19 @@ fun History(
                                             label = stringResource(R.string.filter_all),
                                             selected = statusFilter == "all",
                                             onClick = { viewModel.setStatusFilter("all") },
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier.weight(1f).testTag(TestTags.HISTORY_FILTER_ALL)
                                         )
                                         StatusFilterButton(
                                             label = stringResource(R.string.filter_past),
                                             selected = statusFilter == "past",
                                             onClick = { viewModel.setStatusFilter("past") },
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier.weight(1f).testTag(TestTags.HISTORY_FILTER_PAST)
                                         )
                                         StatusFilterButton(
                                             label = stringResource(R.string.filter_future),
                                             selected = statusFilter == "future",
                                             onClick = { viewModel.setStatusFilter("future") },
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier.weight(1f).testTag(TestTags.HISTORY_FILTER_FUTURE)
                                         )
                                     }
                                 }
@@ -295,7 +302,7 @@ fun History(
                 if (statusFilter != "all" || startDateText.isNotEmpty() || endDateText.isNotEmpty()) {
                     item {
                         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                            TextButton(onClick = { viewModel.clearFilters() }) {
+                            TextButton(onClick = { viewModel.clearFilters() }, modifier = Modifier.testTag(TestTags.HISTORY_CLEAR_FILTERS)) {
                                 Icon(Icons.Default.Close, null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(stringResource(R.string.clear_filters), color = MaterialTheme.colorScheme.primary)
@@ -343,10 +350,10 @@ fun History(
                         viewModel.setStartDate(ParkingUtils.formatDate(selected.time))
                     }
                     showStartDatePicker = false
-                }) { Text(stringResource(R.string.save)) }
+                }, modifier = Modifier.testTag(TestTags.HISTORY_DATE_PICKER_SAVE)) { Text(stringResource(R.string.save)) }
             },
             dismissButton = {
-                TextButton(onClick = { showStartDatePicker = false }) { Text(stringResource(R.string.cancel)) }
+                TextButton(onClick = { showStartDatePicker = false }, modifier = Modifier.testTag(TestTags.HISTORY_DATE_PICKER_CANCEL)) { Text(stringResource(R.string.cancel)) }
             }
         ) {
             DatePicker(state = startDatePickerState)
@@ -363,10 +370,10 @@ fun History(
                         viewModel.setEndDate(ParkingUtils.formatDate(selected.time))
                     }
                     showEndDatePicker = false
-                }) { Text(stringResource(R.string.save)) }
+                }, modifier = Modifier.testTag(TestTags.HISTORY_DATE_PICKER_SAVE)) { Text(stringResource(R.string.save)) }
             },
             dismissButton = {
-                TextButton(onClick = { showEndDatePicker = false }) { Text(stringResource(R.string.cancel)) }
+                TextButton(onClick = { showEndDatePicker = false }, modifier = Modifier.testTag(TestTags.HISTORY_DATE_PICKER_CANCEL)) { Text(stringResource(R.string.cancel)) }
             }
         ) {
             DatePicker(state = endDatePickerState)
@@ -506,7 +513,7 @@ fun ReservationHistoryItem(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = reservation.licensePlate ?: vehicle?.licensePlate ?: "",
+                        text = (reservation.licensePlate ?: vehicle?.licensePlate).orEmpty(),
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.secondary,
                         fontWeight = FontWeight.Medium

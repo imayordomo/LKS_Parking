@@ -156,7 +156,7 @@ fun AppNavigation() {
         modifier = Modifier.fillMaxSize()
     ) {
         composable(ROUTE_LANDING) {
-            Landing(viewModel = viewModel(factory = factory), 
+            Landing(
                 onLoginClick = { navController.navigate(ROUTE_LOGIN) }, 
                 onRegisterClick = { navController.navigate(ROUTE_REGISTER) })
         }
@@ -211,7 +211,7 @@ fun AppNavigation() {
         }
         composable(ROUTE_HELP) {
             ProtectedRoute(currentUser, navController) {
-                Help(viewModel = viewModel(factory = factory), onNavigate = { navController.navigate(it) })
+                Help(onNavigate = { navController.navigate(it) })
             }
         }
         composable(ROUTE_ABOUT) {

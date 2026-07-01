@@ -17,7 +17,8 @@
         android:supportsRtl="true"
         android:enableOnBackInvokedCallback="true"
         android:theme="@style/Theme.LKS_Parking"
-        android:localeConfig="@xml/locales_config">
+        android:localeConfig="@xml/locales_config"
+        tools:targetApi="33">
 
         <!-- Required for AppCompatDelegate to persist locales -->
         <service
@@ -32,7 +33,6 @@
         <activity
             android:name="com.lksnext.ParkingIMayordomo.MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.LKS_Parking"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>

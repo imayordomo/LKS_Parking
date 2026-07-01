@@ -87,4 +87,32 @@ class ViewParkingViewModelTest {
         val userSpots = viewModel.getUserSpots(date).first()
         assertTrue(userSpots.isEmpty())
     }
+
+    @Test
+    fun `getCurrentReservations should return reservations for selected date`() = runTest {
+        val date = Calendar.getInstance()
+        date.set(2023, 4, 10)
+
+        allReservationsFlow.value = listOf(
+            Reservation(id = "1", spotNumber = 5, date = "2023-05-10", startTime = "09:00", endTime = "11:00"),
+            Reservation(id = "2", spotNumber = 10, date = "2023-05-10", startTime = "14:00", endTime = "16:00"),
+            Reservation(id = "3", spotNumber = 15, date = "2023-05-11")
+        )
+
+        val current = viewModel.getCurrentReservations(date).first()
+        assertEquals(2, current.size)
+    }
+
+    @Test
+    fun `getCurrentReservations should return empty for date with no reservations`() = runTest {
+        val date = Calendar.getInstance()
+        date.set(2023, 5, 15)
+
+        allReservationsFlow.value = listOf(
+            Reservation(id = "1", spotNumber = 5, date = "2023-05-10")
+        )
+
+        val current = viewModel.getCurrentReservations(date).first()
+        assertTrue(current.isEmpty())
+    }
 }

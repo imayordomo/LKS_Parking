@@ -1,4 +1,5 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="UnusedResources,PluralsCandidate,Typos">
     <string name="app_name">LKS Parking</string>
     <string name="landing_title">LKS Parking</string>
     <string name="landing_subtitle">Manage your parking reservations</string>
@@ -17,10 +18,8 @@
     <string name="login_link">Log in</string>
 
     <!-- Login -->
-    <string name="login_loading">Logging in…</string>
     <string name="error_required_fields">All fields are required</string>
     <string name="error_invalid_credentials">Invalid email or password</string>
-    <string name="corporate_suffix"> (@lksnext.com)</string>
     <string name="email_label_with_corporate">Email * (@lksnext.com)</string>
 
     <!-- Forgot Password -->
@@ -31,7 +30,6 @@
     <string name="email_sent_instructions">Check your inbox to reset your password</string>
     <string name="reset_email_sent_success">Recovery link sent</string>
     <string name="check_inbox_hint">If you don\'t receive the email in a few minutes, check your spam folder.</string>
-    <string name="error_enter_email">Please enter your email</string>
     <string name="error_corporate_only">Only corporate @lksnext.com emails are accepted</string>
     <string name="error_invalid_email_format">Invalid email format</string>
 
@@ -114,7 +112,6 @@
     <string name="notif_report_sent_msg">We have received your report. Thank you for helping us improve.</string>
 
     <!-- Profile Screen -->
-    <string name="profile_title">My Profile</string>
     <string name="edit_profile">Edit Profile</string>
     <string name="logout">Log Out</string>
     <string name="my_vehicles">My Vehicles</string>
@@ -127,7 +124,6 @@
     <string name="go_to_profile">GO TO PROFILE</string>
     <string name="logout_confirmation">Are you sure you want to log out?</string>
     <string name="vehicle_not_compatible_short">Not compatible</string>
-    <string name="save_profile">Save</string>
     <string name="license_plate_placeholder">ABC-1234</string>
     <string name="delete_vehicle_title">Delete vehicle?</string>
     <string name="delete_vehicle_msg">Are you sure you want to delete the vehicle with license plate %1$s?</string>
@@ -159,7 +155,7 @@
     <string name="csv_header_start">Start</string>
     <string name="csv_header_end">End</string>
     <string name="csv_header_license">License Plate</string>
-    <string name="csv_filename">historial-reservas.csv</string>
+    <string name="csv_filename">reservation-history.csv</string>
 
     <!-- Help Screen -->
     <string name="help_title">Help</string>
@@ -246,7 +242,6 @@
     <string name="mine_suffix"> (You)</string>
     <string name="schedule_format">Schedule: %1$s - %2$s</string>
     <string name="reserve_spot_btn">Reserve this spot</string>
-    <string name="error_date_out_of_range">Reservations cannot be made for past dates or more than 7 days in advance.</string>
     <string name="consultation_mode_info">Consultation mode: Viewing a day outside the reservation period (only next 7 days).</string>
     <string name="select_spot_prompt">Select spot</string>
     <string name="badge_mine">Yours</string>
@@ -268,10 +263,7 @@
     <string name="error_start_before_now">Start time cannot be in the past</string>
     <string name="error_end_after_start">End time must be after start time</string>
     <string name="error_max_9_hours">Reservation cannot exceed 9 hours</string>
-    <string name="error_spot_occupied">Spot #%1$d is already occupied at this time. Please select another one.</string>
-    <string name="error_spot_occupied_edit">Spot #%1$d is already occupied at this time</string>
     <string name="error_user_overlap">You already have another reservation for this time</string>
-    <string name="error_vehicle_not_compatible">Your vehicle is not compatible with this spot (%1$s)</string>
     <string name="error_select_vehicle">You must select a vehicle</string>
     <string name="error_spot_occupied_simple">Spot occupied</string>
     <string name="error_passwords_dont_match">Passwords do not match</string>
@@ -279,12 +271,15 @@
     <string name="error_password_complexity">Password must include at least one uppercase letter and one number</string>
     <string name="error_email_already_in_use">This email is already in use</string>
     <string name="register_loading">Creating account…</string>
+    <string name="error_network">Connection error. Check your internet connection</string>
+    <string name="error_user_disabled">This account has been disabled</string>
+    <string name="error_too_many_requests">Too many attempts. Please try again later</string>
     <string name="error_unknown">An unexpected error has occurred</string>
     <string name="incompatible_vehicle_title">Incompatible vehicle</string>
     <string name="incompatible_vehicle_msg">Your current vehicle is not compatible with the selected spot type (#%1$d). Do you want to add another vehicle?</string>
 
     <!-- Common Buttons -->
-    <string name="cancel">CANCEL</string>
+    <string name="cancel">Cancel</string>
     <string name="save">SAVE</string>
     <string name="add">ADD</string>
 
@@ -293,5 +288,4 @@
     <string name="language_english">English</string>
     <string name="language_spanish">Spanish</string>
     <string name="language_basque">Basque</string>
-    <string name="system_default">System</string>
 </resources>

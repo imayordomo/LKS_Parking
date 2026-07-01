@@ -21,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -29,11 +30,13 @@ import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.data.model.Report
 import com.lksnext.ParkingIMayordomo.data.model.ReportStatus
+import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.ReportViewModel
+import com.lksnext.ParkingIMayordomo.utils.TestTags
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
@@ -74,11 +77,14 @@ fun Report(
             )
         }
     ) {
+        val notifications by AuthManager.notifications.collectAsState()
+        val unreadCount = notifications.count { !it.read }
         Scaffold(
             topBar = {
                 ParkingTopAppBar(
                     onMenuClick = { scope.launch { drawerState.open() } },
-                    onNotificationsClick = { onNavigate(ROUTE_NOTIFICATIONS) }
+                    onNotificationsClick = { onNavigate(ROUTE_NOTIFICATIONS) },
+                    unreadNotificationsCount = unreadCount
                 )
             },
             bottomBar = {
@@ -214,7 +220,7 @@ private fun ReportForm(
             ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = { if (!loading) expanded = !expanded },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().testTag(TestTags.REPORT_TYPE_FIELD)
             ) {
                 OutlinedTextField(
                     value = reportType,
@@ -233,7 +239,7 @@ private fun ReportForm(
                 ExposedDropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
-                    modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                    modifier = Modifier.background(MaterialTheme.colorScheme.surface).testTag(TestTags.REPORT_TYPE_MENU)
                 ) {
                     options.forEach { selectionOption ->
                         DropdownMenuItem(
@@ -252,7 +258,7 @@ private fun ReportForm(
                 value = spotNumber,
                 onValueChange = { viewModel.onSpotNumberChange(it) },
                 label = { Text(stringResource(R.string.spot_number_optional_label)) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().testTag(TestTags.REPORT_SPOT_NUMBER_FIELD),
                 shape = RoundedCornerShape(4.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 isError = !isSpotValid,
@@ -269,7 +275,7 @@ private fun ReportForm(
                 onValueChange = { viewModel.onDescriptionChange(it) },
                 label = { Text(stringResource(R.string.problem_description_label)) },
                 placeholder = { Text(stringResource(R.string.problem_description_placeholder)) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().testTag(TestTags.REPORT_DESCRIPTION_FIELD),
                 minLines = 4,
                 shape = RoundedCornerShape(4.dp),
                 enabled = !loading
@@ -277,7 +283,7 @@ private fun ReportForm(
 
             Button(
                 onClick = { viewModel.sendReport() },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
+                modifier = Modifier.fillMaxWidth().height(56.dp).testTag(TestTags.REPORT_SEND_BUTTON),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(4.dp),
                 enabled = !loading && reportType.isNotEmpty() && description.isNotEmpty() && isSpotValid
@@ -311,6 +317,7 @@ private fun ReportHistorySection(reports: List<Report>) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { isHistoryExpanded = !isHistoryExpanded }
+                    .testTag(TestTags.REPORT_HISTORY_EXPAND)
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -419,7 +426,7 @@ private fun ReportHistoryItemCompact(report: Report) {
             )
             
             val sdf = remember { SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()) }
-            val formattedDate = report.timestamp?.let { sdf.format(it.toDate()) } ?: ""
+            val formattedDate = report.timestamp?.let { sdf.format(it.toDate()) }.orEmpty()
             if (formattedDate.isNotEmpty()) {
                 Text(
                     text = formattedDate,
