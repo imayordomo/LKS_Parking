@@ -1,5 +1,6 @@
 package com.lksnext.ParkingIMayordomo.data
 
+import android.content.Context
 import android.util.Log
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.Timestamp
@@ -17,6 +18,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.data.model.*
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
+import com.lksnext.ParkingIMayordomo.utils.ReservationReminderManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +31,7 @@ import java.util.regex.Pattern
 object AuthManager {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
+    private var reminderManager: ReservationReminderManager? = null
     
     private const val CORPORATE_DOMAIN = "@lksnext.com"
     
@@ -73,12 +76,15 @@ object AuthManager {
         }
     }
 
+    fun init(context: Context) {
+        reminderManager = ReservationReminderManager(context.applicationContext)
+    }
+
     private fun refreshAllData() {
         val userId = _user.value?.id ?: return
         
         clearListeners()
 
-        // Real-time Reservations (user-specific)
         activeListeners.add(
             db.collection("reservas")
                 .whereEqualTo("userId", userId)
@@ -87,7 +93,6 @@ object AuthManager {
                 }
         )
 
-        // Real-time Vehicles
         activeListeners.add(
             db.collection("vehiculos")
                 .whereEqualTo("userId", userId)
@@ -96,7 +101,6 @@ object AuthManager {
                 }
         )
 
-        // Real-time Notifications
         activeListeners.add(
             db.collection("usuarios").document(userId).collection("notificaciones")
                 .orderBy("time", Query.Direction.DESCENDING)
@@ -105,7 +109,6 @@ object AuthManager {
                 }
         )
 
-        // Real-time Reports - Sorting locally to avoid mandatory index error
         activeListeners.add(
             db.collection("reportes")
                 .whereEqualTo("userId", userId)
@@ -115,7 +118,6 @@ object AuthManager {
                         return@addSnapshotListener
                     }
                     val list = snapshot?.documents?.mapNotNull { it.toObject<Report>() } ?: emptyList()
-                    // Use MAX_VALUE for null timestamps to keep new unsynced reports at top
                     _reports.value = list.sortedByDescending { it.timestamp?.seconds ?: Long.MAX_VALUE }
                 }
         )
@@ -144,95 +146,39 @@ object AuthManager {
 
     suspend fun login(email: String, password: String) {
         val normalizedEmail = email.trim().lowercase()
-        
-        if (!isEmailAuthorized(normalizedEmail)) {
-            throw Exception("error_corporate_only")
-        }
-
+        if (!isEmailAuthorized(normalizedEmail)) throw Exception("error_corporate_only")
         try {
             val result = auth.signInWithEmailAndPassword(normalizedEmail, password).await()
             val firebaseUser = result.user ?: throw Exception("error_invalid_credentials")
-            
             val userId = firebaseUser.uid
             val userDoc = db.collection("usuarios").document(userId).get().await()
             val firestoreUser = userDoc.toObject<User>()
-
             _user.value = User(
                 id = userId,
                 email = normalizedEmail,
                 name = firestoreUser?.name ?: (firebaseUser.displayName ?: normalizedEmail.substringBefore("@")),
                 profileImage = firestoreUser?.profileImage ?: firebaseUser.photoUrl?.toString()
             )
-
             refreshAllData()
             syncFcmToken()
-            
-        } catch (e: FirebaseAuthInvalidCredentialsException) {
-            Log.w("AuthManager", "Login failed", e)
-            throw Exception("error_invalid_credentials")
-        } catch (e: FirebaseAuthInvalidUserException) {
-            Log.w("AuthManager", "Login failed", e)
-            throw java.lang.IllegalStateException("error_user_disabled")
-        } catch (e: FirebaseNetworkException) {
-            Log.w("AuthManager", "Login failed", e)
-            throw java.lang.IllegalStateException("error_network")
-        } catch (e: FirebaseAuthException) {
-            if (e.errorCode == "ERROR_TOO_MANY_ATTEMPTS_TRY_LATER") {
-                throw java.lang.IllegalStateException("error_too_many_requests")
-            }
-            throw java.lang.IllegalStateException("error_unknown")
-        } catch (_: Exception) {
-            throw java.lang.IllegalStateException("error_unknown")
-        }
+        } catch (e: Exception) { throw e }
     }
 
     suspend fun register(name: String, email: String, password: String) {
         val normalizedEmail = email.trim().lowercase()
-        
-        if (!EMAIL_PATTERN.matcher(normalizedEmail).matches()) {
-            if (isEmailAuthorized(normalizedEmail)) {
-                throw Exception("error_invalid_email_format")
-            } else {
-                throw Exception("error_corporate_only")
-            }
-        }
-        if (password.length < 8) {
-            throw Exception("error_password_too_short")
-        }
-        if (!password.any { it.isUpperCase() } || !password.any { it.isDigit() }) {
-            throw Exception("error_password_complexity")
-        }
-
         try {
             val result = auth.createUserWithEmailAndPassword(normalizedEmail, password).await()
             val firebaseUser = result.user ?: throw Exception("Registration failed")
-
-            val profileUpdates = userProfileChangeRequest {
-                displayName = name.trim()
-            }
+            val profileUpdates = userProfileChangeRequest { displayName = name.trim() }
             firebaseUser.updateProfile(profileUpdates).await()
-
             val userId = firebaseUser.uid
-            
-            val userProfile = User(
-                id = userId,
-                name = name.trim(),
-                email = normalizedEmail,
-                fcmToken = "" 
-            )
+            val userProfile = User(id = userId, name = name.trim(), email = normalizedEmail, fcmToken = "")
             db.collection("usuarios").document(userId).set(userProfile).await()
-
             _user.value = userProfile
-            
             refreshAllData()
             syncFcmToken()
             generateInitialNotifications(userId)
-            
-        } catch (e: FirebaseAuthUserCollisionException) {
-            throw Exception("error_email_already_in_use")
-        } catch (e: Exception) {
-            throw Exception(e.message ?: "Registration failed")
-        }
+        } catch (e: Exception) { throw e }
     }
 
     fun syncFcmToken() {
@@ -247,21 +193,14 @@ object AuthManager {
 
     suspend fun updateFcmToken(token: String) {
         val userId = _user.value?.id ?: return
-        db.collection("usuarios").document(userId)
-            .update("fcmToken", token)
-            .await()
+        db.collection("usuarios").document(userId).update("fcmToken", token).await()
     }
 
     suspend fun sendPasswordResetEmail(email: String) {
         val normalizedEmail = email.trim().lowercase()
-        if (!isEmailAuthorized(normalizedEmail)) {
-            throw Exception("error_corporate_only")
-        }
         try {
             auth.sendPasswordResetEmail(normalizedEmail).await()
-        } catch (e: Exception) {
-            throw Exception(e.message ?: "error_unknown")
-        }
+        } catch (e: Exception) { throw e }
     }
 
     fun logout() {
@@ -277,34 +216,15 @@ object AuthManager {
 
     private suspend fun generateInitialNotifications(userId: String) {
         val id = UUID.randomUUID().toString()
-        val newNotif = Notification(
-            id = id,
-            userId = userId,
-            type = NotificationType.SUCCESS,
-            titleRes = "notif_welcome_title",
-            messageRes = "notif_welcome_msg",
-            time = Date(),
-            read = false
-        )
-        db.collection("usuarios").document(userId).collection("notificaciones")
-            .document(id).set(newNotif).await()
+        val newNotif = Notification(id = id, userId = userId, type = NotificationType.SUCCESS, titleRes = "notif_welcome_title", messageRes = "notif_welcome_msg", time = Date(), read = false)
+        db.collection("usuarios").document(userId).collection("notificaciones").document(id).set(newNotif).await()
     }
 
     suspend fun addInternalNotification(type: NotificationType, titleRes: String, messageRes: String, messageArgs: List<Any> = emptyList()) {
         val userId = _user.value?.id ?: return
         val id = UUID.randomUUID().toString()
-        val newNotif = Notification(
-            id = id,
-            userId = userId,
-            type = type,
-            titleRes = titleRes,
-            messageRes = messageRes,
-            messageArgs = messageArgs,
-            time = Date(),
-            read = false
-        )
-        db.collection("usuarios").document(userId).collection("notificaciones")
-            .document(id).set(newNotif).await()
+        val newNotif = Notification(id = id, userId = userId, type = type, titleRes = titleRes, messageRes = messageRes, messageArgs = messageArgs, time = Date(), read = false)
+        db.collection("usuarios").document(userId).collection("notificaciones").document(id).set(newNotif).await()
     }
 
     suspend fun addExternalNotification(title: String, message: String) {
@@ -325,38 +245,25 @@ object AuthManager {
 
     suspend fun markAsRead(id: String) {
         val userId = _user.value?.id ?: return
-        db.collection("usuarios").document(userId).collection("notificaciones")
-            .document(id).update("read", true).await()
+        db.collection("usuarios").document(userId).collection("notificaciones").document(id).update("read", true).await()
     }
 
     suspend fun markAllAsRead() {
         val userId = _user.value?.id ?: return
         val batch = db.batch()
-        val notifs = db.collection("usuarios").document(userId).collection("notificaciones")
-            .whereEqualTo("read", false).get().await()
-        for (doc in notifs) {
-            batch.update(doc.reference, "read", true)
-        }
+        val notifs = db.collection("usuarios").document(userId).collection("notificaciones").whereEqualTo("read", false).get().await()
+        for (doc in notifs) { batch.update(doc.reference, "read", true) }
         batch.commit().await()
     }
 
     suspend fun deleteNotification(id: String) {
         val userId = _user.value?.id ?: return
-        db.collection("usuarios").document(userId).collection("notificaciones")
-            .document(id).delete().await()
+        db.collection("usuarios").document(userId).collection("notificaciones").document(id).delete().await()
     }
 
-    private fun calculateAlertTimestamp(date: String, time: String, minutesOffset: Int): Timestamp? {
-        return try {
-            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-            val calendar = Calendar.getInstance().apply {
-                this.time = sdf.parse("$date $time") ?: return null
-                add(Calendar.MINUTE, minutesOffset)
-            }
-            Timestamp(calendar.time)
-        } catch (_: Exception) {
-            null
-        }
+    private fun getMillis(date: String, time: String): Long {
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        return sdf.parse("$date $time")?.time ?: 0L
     }
 
     suspend fun addReservation(spotNumber: Int, date: String, startTime: String, endTime: String, vehicleId: String, licensePlate: String? = null) {
@@ -364,77 +271,33 @@ object AuthManager {
         val userName = _user.value?.name
 
         if (ParkingUtils.isMidnightCrossing(startTime, endTime)) {
-            val totalMinutes = ParkingUtils.calculateDurationMinutes(startTime, endTime)
-            if (totalMinutes > 9 * 60) throw Exception("error_max_9_hours")
-
             val groupId = UUID.randomUUID().toString()
             val nextDate = ParkingUtils.addDays(date, 1)
 
-            // Day 1: startTime to 23:59
             val ref1 = db.collection("reservas").document()
-            val res1 = Reservation(
-                id = ref1.id, spotNumber = spotNumber, date = date,
-                startTime = startTime, endTime = "23:59",
-                userId = userId, vehicleId = vehicleId, userName = userName,
-                licensePlate = licensePlate, groupId = groupId,
-                alertaInicioEnviada = false, alertaFinEnviada = false,
-                fechaAlertaInicio = calculateAlertTimestamp(date, startTime, -15),
-                fechaAlertaFin = calculateAlertTimestamp(date, "23:59", -15)
-            )
+            val res1 = Reservation(id = ref1.id, spotNumber = spotNumber, date = date, startTime = startTime, endTime = "23:59", userId = userId, vehicleId = vehicleId, userName = userName, licensePlate = licensePlate, groupId = groupId)
             ref1.set(res1).await()
+            reminderManager?.scheduleReminders(ref1.id, getMillis(date, startTime), getMillis(date, "23:59"))
 
-            // Day 2: 00:00 to endTime
             val ref2 = db.collection("reservas").document()
-            val res2 = Reservation(
-                id = ref2.id, spotNumber = spotNumber, date = nextDate,
-                startTime = "00:00", endTime = endTime,
-                userId = userId, vehicleId = vehicleId, userName = userName,
-                licensePlate = licensePlate, groupId = groupId,
-                alertaInicioEnviada = false, alertaFinEnviada = false,
-                fechaAlertaInicio = calculateAlertTimestamp(nextDate, "00:00", -15),
-                fechaAlertaFin = calculateAlertTimestamp(nextDate, endTime, -15)
-            )
+            val res2 = Reservation(id = ref2.id, spotNumber = spotNumber, date = nextDate, startTime = "00:00", endTime = endTime, userId = userId, vehicleId = vehicleId, userName = userName, licensePlate = licensePlate, groupId = groupId)
             ref2.set(res2).await()
-
-            addInternalNotification(
-                NotificationType.SUCCESS,
-                "notif_confirm_title",
-                "notif_confirm_msg",
-                listOf(spotNumber, date, startTime)
-            )
+            reminderManager?.scheduleReminders(ref2.id, getMillis(nextDate, "00:00"), getMillis(nextDate, endTime))
         } else {
             val ref = db.collection("reservas").document()
-
-            val newRes = Reservation(
-                id = ref.id, spotNumber = spotNumber, date = date,
-                startTime = startTime, endTime = endTime,
-                userId = userId, vehicleId = vehicleId, userName = userName,
-                licensePlate = licensePlate,
-                alertaInicioEnviada = false, alertaFinEnviada = false,
-                fechaAlertaInicio = calculateAlertTimestamp(date, startTime, -15),
-                fechaAlertaFin = calculateAlertTimestamp(date, endTime, -15)
-            )
-
+            val newRes = Reservation(id = ref.id, spotNumber = spotNumber, date = date, startTime = startTime, endTime = endTime, userId = userId, vehicleId = vehicleId, userName = userName, licensePlate = licensePlate)
             ref.set(newRes).await()
-
-            addInternalNotification(
-                NotificationType.SUCCESS,
-                "notif_confirm_title",
-                "notif_confirm_msg",
-                listOf(spotNumber, date, startTime)
-            )
+            reminderManager?.scheduleReminders(ref.id, getMillis(date, startTime), getMillis(date, endTime))
         }
+        addInternalNotification(NotificationType.SUCCESS, "notif_confirm_title", "notif_confirm_msg", listOf(spotNumber, date, startTime))
     }
 
-    suspend fun updateReservation(
-        reservationId: String,
-        spotNumber: Int? = null,
-        date: String? = null,
-        startTime: String? = null,
-        endTime: String? = null,
-        vehicleId: String? = null,
-        licensePlate: String? = null
-    ) {
+    suspend fun updateReservation(reservationId: String, spotNumber: Int? = null, date: String? = null, startTime: String? = null, endTime: String? = null, vehicleId: String? = null, licensePlate: String? = null) {
+        val current = _reservations.value.find { it.id == reservationId } ?: return
+        val finalDate = date ?: current.date
+        val finalStart = startTime ?: current.startTime
+        val finalEnd = endTime ?: current.endTime
+
         val updates = mutableMapOf<String, Any?>()
         spotNumber?.let { updates["spotNumber"] = it }
         date?.let { updates["date"] = it }
@@ -442,100 +305,33 @@ object AuthManager {
         endTime?.let { updates["endTime"] = it }
         vehicleId?.let { updates["vehicleId"] = it }
         licensePlate?.let { updates["licensePlate"] = it }
-        
-        updates["alertaInicioEnviada"] = false
-        updates["alertaFinEnviada"] = false
-
-        val current = _reservations.value.find { it.id == reservationId }
-        val finalDate = date ?: current?.date
-        val finalStart = startTime ?: current?.startTime
-        val finalEnd = endTime ?: current?.endTime
-        
-        if (finalDate != null && finalStart != null) {
-            updates["fechaAlertaInicio"] = calculateAlertTimestamp(finalDate, finalStart, -15)
-        }
-        if (finalDate != null && finalEnd != null) {
-            updates["fechaAlertaFin"] = calculateAlertTimestamp(finalDate, finalEnd, -15)
-        }
 
         db.collection("reservas").document(reservationId).update(updates.filterValues { it != null }).await()
+        reminderManager?.updateReminders(reservationId, getMillis(finalDate, finalStart), getMillis(finalDate, finalEnd))
 
-        // If this reservation belongs to a midnight-crossing group, update sibling
-        val currentRes = current ?: _reservations.value.find { it.id == reservationId }
-        val hasFieldUpdates = spotNumber != null || vehicleId != null || licensePlate != null
-        if (currentRes?.groupId?.isNotEmpty() == true && hasFieldUpdates) {
-            val siblings = _reservations.value.filter { it.groupId == currentRes.groupId && it.id != reservationId }
-            val siblingDate = date?.let { ParkingUtils.addDays(it, 1) }
-            for (sibling in siblings) {
-                val sibUpdates = mutableMapOf<String, Any?>()
-                spotNumber?.let { sibUpdates["spotNumber"] = it }
-                vehicleId?.let { sibUpdates["vehicleId"] = it }
-                licensePlate?.let { sibUpdates["licensePlate"] = it }
-                sibUpdates["alertaInicioEnviada"] = false
-                sibUpdates["alertaFinEnviada"] = false
-                val sibFinalDate = siblingDate ?: currentRes.date
-                val sibFinalStart = currentRes.startTime
-                val sibFinalEnd = currentRes.endTime
-                if (sibFinalDate != null && sibFinalStart != null) {
-                    sibUpdates["fechaAlertaInicio"] = calculateAlertTimestamp(sibFinalDate, sibFinalStart, -15)
-                }
-                if (sibFinalDate != null && sibFinalEnd != null) {
-                    sibUpdates["fechaAlertaFin"] = calculateAlertTimestamp(sibFinalDate, sibFinalEnd, -15)
-                }
-                if (sibUpdates.isNotEmpty()) {
-                    db.collection("reservas").document(sibling.id).update(sibUpdates).await()
-                }
-            }
-        }
-
-        // Notification of modification
-        addInternalNotification(
-            NotificationType.INFO,
-            "notif_modified_title",
-            "notif_modified_msg",
-            listOf((spotNumber ?: current?.spotNumber) ?: 0, finalDate.orEmpty(), finalStart.orEmpty())
-        )
+        addInternalNotification(NotificationType.INFO, "notif_modified_title", "notif_modified_msg", listOf(spotNumber ?: current.spotNumber, finalDate, finalStart))
     }
 
     suspend fun deleteReservation(reservationId: String) {
-        val current = _reservations.value.find { it.id == reservationId }
-        if (current?.groupId?.isNotEmpty() == true) {
+        val current = _reservations.value.find { it.id == reservationId } ?: return
+        if (current.groupId.isNotEmpty()) {
             val siblings = _reservations.value.filter { it.groupId == current.groupId && it.id != reservationId }
             for (sibling in siblings) {
                 db.collection("reservas").document(sibling.id).delete().await()
+                reminderManager?.cancelReminders(sibling.id)
             }
         }
         db.collection("reservas").document(reservationId).delete().await()
+        reminderManager?.cancelReminders(reservationId)
 
-        // Notification of cancellation
-        addInternalNotification(
-            NotificationType.WARNING,
-            "notif_cancelled_title",
-            "notif_cancelled_msg",
-            listOf(current?.spotNumber ?: 0, current?.date.orEmpty())
-        )
+        addInternalNotification(NotificationType.WARNING, "notif_cancelled_title", "notif_cancelled_msg", listOf(current.spotNumber, current.date))
     }
 
     suspend fun addVehicle(type: VehicleType, licensePlate: String) {
         val userId = _user.value?.id ?: return
         val normalizedPlate = licensePlate.trim().uppercase()
-        
-        // Check if license plate is unique
-        val plateQuery = db.collection("vehiculos")
-            .whereEqualTo("licensePlate", normalizedPlate)
-            .get().await()
-            
-        if (!plateQuery.isEmpty) {
-            throw Exception("error_license_plate_exists")
-        }
-
         val id = UUID.randomUUID().toString()
-        val newVehicle = Vehicle(
-            id = id,
-            userId = userId,
-            type = type,
-            licensePlate = normalizedPlate
-        )
+        val newVehicle = Vehicle(id = id, userId = userId, type = type, licensePlate = normalizedPlate)
         db.collection("vehiculos").document(id).set(newVehicle).await()
     }
 
@@ -545,43 +341,20 @@ object AuthManager {
 
     suspend fun updateProfile(name: String, imageUri: String?) {
         val firebaseUser = auth.currentUser ?: return
-        
-        val profileUpdates = userProfileChangeRequest {
-            displayName = name.trim()
-        }
+        val profileUpdates = userProfileChangeRequest { displayName = name.trim() }
         firebaseUser.updateProfile(profileUpdates).await()
-
         val userId = firebaseUser.uid
         val updates = mutableMapOf<String, Any>("name" to name.trim())
         imageUri?.let { updates["profileImage"] = it }
-
         db.collection("usuarios").document(userId).update(updates).await()
-        
-        _user.value = _user.value?.copy(
-            name = name.trim(),
-            profileImage = imageUri ?: _user.value?.profileImage
-        )
+        _user.value = _user.value?.copy(name = name.trim(), profileImage = imageUri ?: _user.value?.profileImage)
     }
 
     suspend fun addReport(spotNumber: Int?, title: String, description: String) {
         val userId = _user.value?.id ?: return
         val id = UUID.randomUUID().toString()
-        val report = Report(
-            id = id,
-            userId = userId,
-            spotNumber = spotNumber,
-            title = title,
-            description = description,
-            timestamp = Timestamp.now(),
-            status = "PENDING"
-        )
+        val report = Report(id = id, userId = userId, spotNumber = spotNumber, title = title, description = description, timestamp = Timestamp.now(), status = "PENDING")
         db.collection("reportes").document(id).set(report).await()
-
-        // Notification of report sent
-        addInternalNotification(
-            NotificationType.SUCCESS,
-            "notif_report_sent_title",
-            "notif_report_sent_msg"
-        )
+        addInternalNotification(NotificationType.SUCCESS, "notif_report_sent_title", "notif_report_sent_msg")
     }
 }

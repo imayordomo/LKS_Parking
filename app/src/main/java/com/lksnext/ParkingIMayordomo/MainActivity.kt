@@ -76,6 +76,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Initialize/Sync AppCompatDelegate with the saved preference for system-level strings
         LocaleManager.init(this)
+        
+        // Initialize AuthManager with context to enable local reminders
+        AuthManager.init(this)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setBackgroundDrawableResource(android.R.color.transparent)
