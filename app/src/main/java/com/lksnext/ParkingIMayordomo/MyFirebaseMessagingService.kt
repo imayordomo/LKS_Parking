@@ -21,11 +21,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        // Extraer el título y el cuerpo (de 'notification' o del mapa 'data')
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "Aviso de Parking"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: "Tienes una nueva actualización."
 
-        // Sync with local/UI DB of the app
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 AuthManager.addExternalNotification(title, body)
@@ -34,15 +32,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             }
         }
 
-        // Show system notifications
         mostrarNotificacion(title, body)
     }
 
-    @Suppress("InjectDispatcher")
+    @Suppress("DEPRECATION")
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d("FCM_TOKEN", "Nuevo token generado: $token")
-        // update the token on AuthManager if user is logged
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 AuthManager.updateFcmToken(token)
@@ -54,10 +50,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     private fun mostrarNotificacion(title: String, body: String) {
         val channelId = "parking_alerts_channel"
-        val context: Context = this.applicationContext
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
-        // Create a channel for Android 8.0+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
@@ -68,25 +62,22 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        // Conf the Intent to open the app touching it
-        val intent = Intent(context, MainActivity::class.java)
+        val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
         val pendingIntent = PendingIntent.getActivity(
-            context, 0, intent,
+            this, 0, intent,
             PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Build the notification
-        val builder = NotificationCompat.Builder(context, channelId)
-        builder.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-        builder.setContentTitle(title)
-        builder.setContentText(body)
-        builder.setAutoCancel(true)
-        builder.setPriority(NotificationCompat.PRIORITY_HIGH)
-        builder.setContentIntent(pendingIntent)
+        val builder = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.mipmap.ic_launcher) // Updated to app icon
+            .setContentTitle(title)
+            .setContentText(body)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
 
-        // Throw a notification with a unique ID based on time
         notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
     }
 }

@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:usesCleartextTraffic="false"
@@ -40,6 +41,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service
             android:name="com.lksnext.ParkingIMayordomo.MyFirebaseMessagingService"
             android:exported="false">
@@ -47,6 +49,10 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
+        <receiver android:name="com.lksnext.ParkingIMayordomo.utils.NotificationReceiver"
+            android:exported="false" />
+
     </application>
 
 </manifest>
