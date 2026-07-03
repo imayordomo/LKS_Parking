@@ -219,6 +219,7 @@
     <string name="select_spot_title">Select a spot</string>
     <string name="available_legend">Free</string>
     <string name="occupied_legend">Occupied</string>
+    <string name="partially_occupied_legend">Partially occupied</string>
     <string name="selection_legend">Selection</string>
     <string name="user_spot_legend">Your spot</string>
     <string name="confirm_reservation_btn">Confirm Reservation - Spot #%1$d</string>
@@ -237,6 +238,7 @@
     <string name="status_user_reserve">YOUR RESERVATION</string>
     <string name="status_occupied">OCCUPIED</string>
     <string name="status_available">AVAILABLE</string>
+    <string name="status_partially_occupied">PARTIALLY OCCUPIED</string>
     <string name="reservations_count_label">Reservations for this day (%1$d): </string>
     <string name="no_license_plate">No license plate</string>
     <string name="mine_suffix"> (You)</string>
@@ -263,6 +265,7 @@
     <string name="error_start_before_now">Start time cannot be in the past</string>
     <string name="error_end_after_start">End time must be after start time</string>
     <string name="error_max_9_hours">Reservation cannot exceed 9 hours</string>
+    <string name="error_max_advance_exceeded">Cannot book beyond 7th day from today</string>
     <string name="error_user_overlap">You already have another reservation for this time</string>
     <string name="error_select_vehicle">You must select a vehicle</string>
     <string name="error_spot_occupied_simple">Spot occupied</string>
@@ -288,4 +291,14 @@
     <string name="language_english">English</string>
     <string name="language_spanish">Spanish</string>
     <string name="language_basque">Basque</string>
+
+    <!-- Delete Account -->
+    <string name="delete_account">Delete Account</string>
+    <string name="delete_account_title">Delete account?</string>
+    <string name="delete_account_confirmation">This action will permanently delete all your data (vehicles, reservations, notifications and reports) and cannot be undone. Are you sure?</string>
+    <string name="delete_account_confirm_btn">DELETE MY ACCOUNT</string>
+    <string name="error_delete_account">Error deleting account. Try again later.</string>
+
+    <!-- Profile Image -->
+    <string name="change_image">Change image</string>
 </resources>

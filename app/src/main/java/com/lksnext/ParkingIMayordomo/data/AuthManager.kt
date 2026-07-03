@@ -44,6 +44,9 @@ object AuthManager {
     private val _allReservations = MutableStateFlow<List<Reservation>>(emptyList())
     val allReservations: StateFlow<List<Reservation>> = _allReservations.asStateFlow()
 
+    private val _allReservationsReady = MutableStateFlow(false)
+    val allReservationsReady: StateFlow<Boolean> = _allReservationsReady.asStateFlow()
+
     private var allReservationsStarted = false
 
     private val _vehicles = MutableStateFlow<List<Vehicle>?>(null)
@@ -90,6 +93,7 @@ object AuthManager {
                 .whereEqualTo("userId", userId)
                 .addSnapshotListener { snapshot, _ ->
                     _reservations.value = snapshot?.documents?.mapNotNull { it.toObject<Reservation>() } ?: emptyList()
+                    rescheduleAllReminders()
                 }
         )
 
@@ -140,6 +144,7 @@ object AuthManager {
             db.collection("reservas")
                 .addSnapshotListener { snapshot, _ ->
                     _allReservations.value = snapshot?.documents?.mapNotNull { it.toObject<Reservation>() } ?: emptyList()
+                    _allReservationsReady.value = true
                 }
         )
     }
@@ -166,6 +171,7 @@ object AuthManager {
 
     suspend fun register(name: String, email: String, password: String) {
         val normalizedEmail = email.trim().lowercase()
+        if (!isEmailAuthorized(normalizedEmail)) throw Exception("error_corporate_only")
         try {
             val result = auth.createUserWithEmailAndPassword(normalizedEmail, password).await()
             val firebaseUser = result.user ?: throw Exception("Registration failed")
@@ -181,8 +187,9 @@ object AuthManager {
         } catch (e: Exception) { throw e }
     }
 
+    @Suppress("DEPRECATION")
     fun syncFcmToken() {
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val token = task.result
                 val userId = _user.value?.id ?: return@addOnCompleteListener
@@ -205,6 +212,7 @@ object AuthManager {
 
     fun logout() {
         clearListeners()
+        allReservationsStarted = false
         auth.signOut()
         _user.value = null
         _reservations.value = emptyList()
@@ -228,7 +236,7 @@ object AuthManager {
     }
 
     suspend fun addExternalNotification(title: String, message: String) {
-        val userId = _user.value?.id ?: return
+        val userId = _user.value?.id ?: FirebaseAuth.getInstance().currentUser?.uid ?: return
         val id = UUID.randomUUID().toString()
         val newNotif = Notification(
             id = id,
@@ -259,6 +267,20 @@ object AuthManager {
     suspend fun deleteNotification(id: String) {
         val userId = _user.value?.id ?: return
         db.collection("usuarios").document(userId).collection("notificaciones").document(id).delete().await()
+    }
+
+    private fun rescheduleAllReminders() {
+        val now = System.currentTimeMillis()
+        for (reservation in _reservations.value) {
+            val startMillis = getMillis(reservation.date, reservation.startTime)
+            if (startMillis > now) {
+                reminderManager?.scheduleReminders(
+                    reservation.id,
+                    startMillis,
+                    getMillis(reservation.date, reservation.endTime)
+                )
+            }
+        }
     }
 
     private fun getMillis(date: String, time: String): Long {
@@ -309,6 +331,19 @@ object AuthManager {
         db.collection("reservas").document(reservationId).update(updates.filterValues { it != null }).await()
         reminderManager?.updateReminders(reservationId, getMillis(finalDate, finalStart), getMillis(finalDate, finalEnd))
 
+        if (current.groupId.isNotEmpty()) {
+            val siblings = _reservations.value.filter { it.groupId == current.groupId && it.id != reservationId }
+            for (sibling in siblings) {
+                val siblingUpdates = mutableMapOf<String, Any?>()
+                spotNumber?.let { siblingUpdates["spotNumber"] = it }
+                vehicleId?.let { siblingUpdates["vehicleId"] = it }
+                licensePlate?.let { siblingUpdates["licensePlate"] = it }
+                if (siblingUpdates.isNotEmpty()) {
+                    db.collection("reservas").document(sibling.id).update(siblingUpdates.filterValues { it != null }).await()
+                }
+            }
+        }
+
         addInternalNotification(NotificationType.INFO, "notif_modified_title", "notif_modified_msg", listOf(spotNumber ?: current.spotNumber, finalDate, finalStart))
     }
 
@@ -353,8 +388,38 @@ object AuthManager {
     suspend fun addReport(spotNumber: Int?, title: String, description: String) {
         val userId = _user.value?.id ?: return
         val id = UUID.randomUUID().toString()
-        val report = Report(id = id, userId = userId, spotNumber = spotNumber, title = title, description = description, timestamp = Timestamp.now(), status = "PENDING")
+        val report = Report(id = id, userId = userId, spotNumber = spotNumber, title = title, description = description, timestamp = Timestamp.now(), status = ReportStatus.PENDING)
         db.collection("reportes").document(id).set(report).await()
         addInternalNotification(NotificationType.SUCCESS, "notif_report_sent_title", "notif_report_sent_msg")
+    }
+
+    suspend fun deleteAccount() {
+        val userId = _user.value?.id ?: return
+        clearListeners()
+        allReservationsStarted = false
+
+        val vehiclesSnapshot = db.collection("vehiculos").whereEqualTo("userId", userId).get().await()
+        for (doc in vehiclesSnapshot.documents) { doc.reference.delete().await() }
+
+        val reservationsSnapshot = db.collection("reservas").whereEqualTo("userId", userId).get().await()
+        for (doc in reservationsSnapshot.documents) { doc.reference.delete().await() }
+
+        val reportsSnapshot = db.collection("reportes").whereEqualTo("userId", userId).get().await()
+        for (doc in reportsSnapshot.documents) { doc.reference.delete().await() }
+
+        val notifSnapshot = db.collection("usuarios").document(userId).collection("notificaciones").get().await()
+        for (doc in notifSnapshot.documents) { doc.reference.delete().await() }
+
+        db.collection("usuarios").document(userId).delete().await()
+
+        auth.currentUser?.delete()?.await()
+
+        auth.signOut()
+        _user.value = null
+        _reservations.value = emptyList()
+        _allReservations.value = emptyList()
+        _vehicles.value = null
+        _notifications.value = emptyList()
+        _reports.value = emptyList()
     }
 }

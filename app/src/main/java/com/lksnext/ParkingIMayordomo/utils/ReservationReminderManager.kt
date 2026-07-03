@@ -1,12 +1,13 @@
 package com.lksnext.ParkingIMayordomo.utils
 
+import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.provider.Settings
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 
 class ReservationReminderManager(private val context: Context) {
 
@@ -17,23 +18,21 @@ class ReservationReminderManager(private val context: Context) {
         private const val THIRTY_MINUTES_MILLIS = 30 * 60 * 1000L
         private const val FIFTEEN_MINUTES_MILLIS = 15 * 60 * 1000L
         
-        // Offset to distinguish start and end notification IDs for the same reservation
         private const val END_NOTIFICATION_ID_OFFSET = 1000000 
     }
 
-    /**
-     * Programa las notificaciones para una reserva.
-     * @param reservationId ID único de la reserva.
-     * @param startTimeMillis Fecha de inicio en milisegundos.
-     * @param endTimeMillis Fecha de finalización en milisegundos.
-     */
+    @VisibleForTesting
+    internal var currentTimeProvider: () -> Long = { System.currentTimeMillis() }
+
+    @VisibleForTesting
+    internal var sdkVersionProvider: () -> Int = { Build.VERSION.SDK_INT }
+
     fun scheduleReminders(reservationId: String, startTimeMillis: Long, endTimeMillis: Long) {
         val startReminderTime = startTimeMillis - THIRTY_MINUTES_MILLIS
         val endReminderTime = endTimeMillis - FIFTEEN_MINUTES_MILLIS
 
-        val currentTime = System.currentTimeMillis()
+        val currentTime = currentTimeProvider()
 
-        // Programar notificación de inicio (30 min antes)
         if (startReminderTime > currentTime) {
             val intent = createIntent(
                 reservationId,
@@ -44,7 +43,6 @@ class ReservationReminderManager(private val context: Context) {
             scheduleAlarm(startReminderTime, intent, getStartNotificationId(reservationId))
         }
 
-        // Programar notificación de fin (15 min antes)
         if (endReminderTime > currentTime) {
             val intent = createIntent(
                 reservationId,
@@ -56,22 +54,17 @@ class ReservationReminderManager(private val context: Context) {
         }
     }
 
-    /**
-     * Cancela las alarmas programadas para una reserva.
-     */
     fun cancelReminders(reservationId: String) {
         cancelAlarm(getStartNotificationId(reservationId))
         cancelAlarm(getEndNotificationId(reservationId))
     }
 
-    /**
-     * Actualiza las notificaciones cancelando las previas y programando las nuevas.
-     */
     fun updateReminders(reservationId: String, startTimeMillis: Long, endTimeMillis: Long) {
         cancelReminders(reservationId)
         scheduleReminders(reservationId, startTimeMillis, endTimeMillis)
     }
 
+    @SuppressLint("NewApi")
     private fun scheduleAlarm(triggerAtMillis: Long, intent: Intent, requestCode: Int) {
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -81,7 +74,8 @@ class ReservationReminderManager(private val context: Context) {
         )
 
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val sdkInt = sdkVersionProvider()
+            if (sdkInt >= Build.VERSION_CODES.S) {
                 if (alarmManager.canScheduleExactAlarms()) {
                     alarmManager.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
@@ -89,12 +83,17 @@ class ReservationReminderManager(private val context: Context) {
                         pendingIntent
                     )
                 } else {
-                    // Fallback to inexact or request permission
-                    alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
-                    Log.w(TAG, "Exact alarms not permitted, scheduled using set()")
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+                    Log.w(TAG, "Exact alarms not permitted, scheduled using setAndAllowWhileIdle()")
                 }
-            } else {
+            } else if (sdkInt >= Build.VERSION_CODES.M) {
                 alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerAtMillis,
+                    pendingIntent
+                )
+            } else {
+                alarmManager.set(
                     AlarmManager.RTC_WAKEUP,
                     triggerAtMillis,
                     pendingIntent
@@ -106,7 +105,9 @@ class ReservationReminderManager(private val context: Context) {
     }
 
     private fun cancelAlarm(requestCode: Int) {
-        val intent = Intent(context, NotificationReceiver::class.java)
+        val intent = Intent(context, NotificationReceiver::class.java).apply {
+            action = "com.lksnext.ParkingIMayordomo.ACTION_NOTIFY_$requestCode"
+        }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             requestCode,
@@ -121,6 +122,7 @@ class ReservationReminderManager(private val context: Context) {
 
     private fun createIntent(reservationId: String, title: String, message: String, notificationId: Int): Intent {
         return Intent(context, NotificationReceiver::class.java).apply {
+            action = "com.lksnext.ParkingIMayordomo.ACTION_NOTIFY_$notificationId"
             putExtra("reservation_id", reservationId)
             putExtra("title", title)
             putExtra("message", message)

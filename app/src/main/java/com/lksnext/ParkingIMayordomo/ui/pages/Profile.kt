@@ -1,9 +1,15 @@
 package com.lksnext.ParkingIMayordomo.ui.pages
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,7 +23,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -28,7 +36,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
-import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.data.model.Vehicle
 import com.lksnext.ParkingIMayordomo.data.model.VehicleType
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
@@ -63,11 +70,29 @@ fun Profile(
     val vehicles by viewModel.vehicles.collectAsState()
     val reservations by viewModel.reservations.collectAsState()
     val errorResId by viewModel.errorResId.collectAsState()
+    val notifications by viewModel.notifications.collectAsState()
 
     var showEditProfileDialog by rememberSaveable { mutableStateOf(false) }
     var showAddVehicleDialog by rememberSaveable { mutableStateOf(false) }
     var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
+    var showDeleteAccountDialog by rememberSaveable { mutableStateOf(false) }
     var showVehicleAlert by rememberSaveable { mutableStateOf(showVehicleAlertInit) }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            val inputStream = context.contentResolver.openInputStream(it)
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+            bitmap?.let { bmp ->
+                val bytes = java.io.ByteArrayOutputStream()
+                bmp.compress(Bitmap.CompressFormat.JPEG, 80, bytes)
+                val base64Image = Base64.encodeToString(bytes.toByteArray(), Base64.NO_WRAP)
+                viewModel.updateProfile(user?.name ?: "", base64Image)
+            }
+        }
+    }
     
     var vehicleToDeleteId by rememberSaveable { mutableStateOf<String?>(null) }
     var showCannotDeleteVehicleDialog by rememberSaveable { mutableStateOf(false) }
@@ -87,11 +112,11 @@ fun Profile(
                 onItemClick = { route ->
                     scope.launch { drawerState.close() }
                     onNavigate(route)
-                }
+                },
+                user = user
             )
         }
     ) {
-        val notifications by AuthManager.notifications.collectAsState()
         val unreadCount = notifications.count { !it.read }
         Scaffold(
             topBar = {
@@ -130,37 +155,82 @@ fun Profile(
                     ) {
                         Column(
                             modifier = Modifier
-                                .padding(24.dp)
+                                .padding(16.dp)
                                 .fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Surface(
-                                modifier = Modifier.size(120.dp),
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.primary
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        text = user?.name?.firstOrNull()?.toString()?.uppercase() ?: "",
-                                        color = MaterialTheme.colorScheme.onPrimary,
-                                        fontSize = 48.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                            val profileImageBase64 = user?.profileImage
+                            val profileBitmap = remember(profileImageBase64) {
+                                profileImageBase64?.let { base64 ->
+                                    try {
+                                        val bytes = Base64.decode(base64, Base64.NO_WRAP)
+                                        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                                    } catch (_: Exception) { null }
                                 }
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Box(contentAlignment = Alignment.BottomEnd) {
+                                if (profileBitmap != null) {
+                                    Image(
+                                        bitmap = profileBitmap.asImageBitmap(),
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .size(90.dp)
+                                            .clip(CircleShape)
+                                            .testTag(TestTags.PROFILE_IMAGE),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                } else {
+                                    Surface(
+                                        modifier = Modifier.size(90.dp),
+                                        shape = CircleShape,
+                                        color = MaterialTheme.colorScheme.primary
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(
+                                                text = user?.name?.firstOrNull()?.toString()?.uppercase() ?: "",
+                                                color = MaterialTheme.colorScheme.onPrimary,
+                                                fontSize = 36.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.testTag(TestTags.PROFILE_FALLBACK_LETTER)
+                                            )
+                                        }
+                                    }
+                                }
+                                IconButton(
+                                    onClick = { imagePickerLauncher.launch("image/*") },
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .testTag(TestTags.PROFILE_CHANGE_IMAGE_BUTTON)
+                                ) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(24.dp)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                Icons.Default.PhotoCamera,
+                                                contentDescription = stringResource(R.string.change_image),
+                                                tint = MaterialTheme.colorScheme.onPrimary,
+                                                modifier = Modifier.size(14.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = user?.name ?: "",
-                                fontSize = 28.sp,
+                                fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = user?.email ?: "",
-                                fontSize = 16.sp,
+                                fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.secondary
                             )
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
                             
                             // Edit Profile Button
                             OutlinedButton(
@@ -168,21 +238,21 @@ fun Profile(
                                 shape = RoundedCornerShape(8.dp),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF6D00)),
                                 border = BorderStroke(1.dp, Color(0xFFFF6D00)),
-                                modifier = Modifier.height(40.dp).testTag(TestTags.PROFILE_EDIT_PROFILE_BUTTON)
+                                modifier = Modifier.height(36.dp).testTag(TestTags.PROFILE_EDIT_PROFILE_BUTTON)
                             ) {
-                                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(stringResource(R.string.edit_profile), fontWeight = FontWeight.SemiBold)
+                                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(stringResource(R.string.edit_profile), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                             }
                             
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
 
                             // Language Selector
                             LanguageSelector(
                                 modifier = Modifier.testTag(TestTags.PROFILE_LANGUAGE_SELECTOR)
                             )
 
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
 
                             // Logout Button
                             TextButton(
@@ -190,9 +260,22 @@ fun Profile(
                                 modifier = Modifier.testTag(TestTags.PROFILE_LOGOUT_BUTTON),
                                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                             ) {
-                                Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(stringResource(R.string.logout))
+                                Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(stringResource(R.string.logout), fontSize = 14.sp)
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            // Delete Account Button
+                            TextButton(
+                                onClick = { showDeleteAccountDialog = true },
+                                modifier = Modifier.testTag(TestTags.PROFILE_DELETE_ACCOUNT_BUTTON),
+                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                            ) {
+                                Icon(Icons.Default.DeleteForever, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(stringResource(R.string.delete_account), fontSize = 14.sp)
                             }
                         }
                     }
@@ -254,7 +337,8 @@ fun Profile(
             onSave = { newName ->
                 viewModel.updateProfile(newName)
                 showEditProfileDialog = false
-            }
+            },
+            onChangeImage = { imagePickerLauncher.launch("image/*") }
         )
     }
 
@@ -298,6 +382,38 @@ fun Profile(
             containerColor = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier.testTag(TestTags.PROFILE_LOGOUT_DIALOG)
+        )
+    }
+
+    if (showDeleteAccountDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteAccountDialog = false },
+            modifier = Modifier.testTag(TestTags.PROFILE_DELETE_ACCOUNT_DIALOG),
+            title = { Text(stringResource(R.string.delete_account_title)) },
+            text = { Text(stringResource(R.string.delete_account_confirmation)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeleteAccountDialog = false
+                        viewModel.deleteAccount()
+                        onNavigate(ROUTE_LOGIN)
+                    },
+                    modifier = Modifier.testTag(TestTags.PROFILE_DELETE_ACCOUNT_CONFIRM),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.delete_account_confirm_btn), color = MaterialTheme.colorScheme.onError)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteAccountDialog = false },
+                    modifier = Modifier.testTag(TestTags.PROFILE_DELETE_ACCOUNT_CANCEL)
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(8.dp)
         )
     }
     
@@ -493,13 +609,13 @@ fun VehicleItem(vehicle: Vehicle, onDelete: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfileDialog(currentName: String, onDismiss: () -> Unit, onSave: (String) -> Unit) {
+fun EditProfileDialog(currentName: String, onDismiss: () -> Unit, onSave: (String) -> Unit, onChangeImage: () -> Unit) {
     var name by rememberSaveable { mutableStateOf(currentName) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.edit_profile), fontWeight = FontWeight.Bold) },
         text = {
-            Column(modifier = Modifier.padding(top = 8.dp)) {
+            Column(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
@@ -510,6 +626,14 @@ fun EditProfileDialog(currentName: String, onDismiss: () -> Unit, onSave: (Strin
                         focusedLabelColor = MaterialTheme.colorScheme.primary
                     )
                 )
+                TextButton(
+                    onClick = { onChangeImage(); onDismiss() },
+                    modifier = Modifier.testTag(TestTags.PROFILE_EDIT_DIALOG_CHANGE_IMAGE)
+                ) {
+                    Icon(Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.change_image))
+                }
             }
         },
         confirmButton = {

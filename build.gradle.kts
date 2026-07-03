@@ -13,5 +13,8 @@ sonar {
         property("sonar.projectKey", "imayordomo_LKS_Parking")
         property("sonar.organization", "imayordomo")
         property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.coverage.jacoco.xmlReportPaths", "${project.projectDir}/app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+        property("sonar.android.lint.reportPaths", "${project.projectDir}/app/build/reports/lint-results-debug.xml")
+        property("sonar.coverage.exclusions", "**/R.class,**/R\$*.class,**/BuildConfig.*,**/Manifest*.*,**/*Test*.*,android/**/*.*,**/ui/pages/**,**/ui/components/**,**/ui/theme/**,**/MainActivity.*,**/MyFirebaseMessagingService.*")
     }
 }

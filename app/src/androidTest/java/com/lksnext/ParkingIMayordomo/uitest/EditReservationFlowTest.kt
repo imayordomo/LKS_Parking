@@ -18,16 +18,26 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
+import java.text.SimpleDateFormat
+import java.util.*
 
 class EditReservationFlowTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    private val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+    private fun futureDate(daysFromNow: Int = 5): String {
+        val cal = Calendar.getInstance()
+        cal.add(Calendar.DAY_OF_YEAR, daysFromNow)
+        return sdf.format(cal.time)
+    }
+
     private fun createRepository(
         reservation: Reservation = Reservation(
-            id = "r1", spotNumber = 5, date = "2026-07-01",
-            startTime = "09:00", endTime = "23:59",
+            id = "r1", spotNumber = 10, date = futureDate(),
+            startTime = "09:00", endTime = "10:00",
             userId = "user1", vehicleId = "v1", licensePlate = "1234ABC"
         ),
         vehicles: List<Vehicle>? = listOf(Vehicle("v1", "user1", VehicleType.CAR, "1234ABC")),
@@ -38,7 +48,9 @@ class EditReservationFlowTest {
         every { repo.vehicles } returns MutableStateFlow(vehicles)
         every { repo.reservations } returns MutableStateFlow(listOf(reservation))
         every { repo.allReservations } returns MutableStateFlow(allReservations)
+        every { repo.allReservationsReady } returns MutableStateFlow(true)
         every { repo.user } returns MutableStateFlow(user)
+        every { repo.notifications } returns MutableStateFlow(emptyList())
         return repo
     }
 
@@ -92,7 +104,6 @@ class EditReservationFlowTest {
     @Test
     fun discardDialog_confirm_navigatesToDashboard() {
         var navigatedRoute: String? = null
-        // onNavigate passes route; dashboard pop is done by caller
         val repo = createRepository()
         composeTestRule.setContent {
             EditReservation(
@@ -139,8 +150,8 @@ class EditReservationFlowTest {
     fun vehicleField_showsWhenCompatibleVehiclesExist() {
         val repo = createRepository(
             reservation = Reservation(
-                id = "r1", spotNumber = 10, date = "2026-07-01",
-                startTime = "09:00", endTime = "23:59",
+                id = "r1", spotNumber = 10, date = futureDate(),
+                startTime = "09:00", endTime = "10:00",
                 userId = "user1", vehicleId = "v1", licensePlate = "1234ABC"
             ),
             vehicles = listOf(
@@ -163,7 +174,7 @@ class EditReservationFlowTest {
     fun vehicleField_isHidden_whenNoCompatibleVehicles() {
         val repo = createRepository(
             reservation = Reservation(
-                id = "r1", spotNumber = 10, date = "2026-07-01",
+                id = "r1", spotNumber = 10, date = futureDate(),
                 startTime = "09:00", endTime = "23:59",
                 userId = "user1", vehicleId = "v2", licensePlate = "5678DEF"
             ),
@@ -185,8 +196,8 @@ class EditReservationFlowTest {
     fun vehicleDropdown_expandsOnClick() {
         val repo = createRepository(
             reservation = Reservation(
-                id = "r1", spotNumber = 10, date = "2026-07-01",
-                startTime = "09:00", endTime = "23:59",
+                id = "r1", spotNumber = 10, date = futureDate(),
+                startTime = "09:00", endTime = "10:00",
                 userId = "user1", vehicleId = "v1", licensePlate = "1234ABC"
             ),
             vehicles = listOf(
@@ -249,5 +260,90 @@ class EditReservationFlowTest {
 
         composeTestRule.onNodeWithTag(TestTags.EDIT_RESERVATION_TIME_PICKER_SAVE).assertIsNotDisplayed()
         composeTestRule.onNodeWithTag(TestTags.EDIT_RESERVATION_TIME_PICKER_CANCEL).assertIsNotDisplayed()
+    }
+
+    // ── New: validation error tests ──
+
+    @Test
+    fun overlappingUserReservation_showsOverlapError() {
+        val date = futureDate()
+        val r1 = Reservation(
+            id = "r1", spotNumber = 5, date = date,
+            startTime = "09:00", endTime = "10:00",
+            userId = "user1", vehicleId = "v1", licensePlate = "1234ABC"
+        )
+        val r2 = Reservation(
+            id = "r2", spotNumber = 7, date = date,
+            startTime = "09:00", endTime = "10:00",
+            userId = "user1", vehicleId = "v1", licensePlate = "1234ABC"
+        )
+        val repo = createRepository(
+            reservation = r1,
+            allReservations = listOf(r1, r2)
+        )
+        composeTestRule.setContent {
+            EditReservation(
+                viewModel = EditReservationViewModel(repo),
+                reservationId = "r1",
+                onNavigate = { }
+            )
+        }
+
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag(TestTags.EDIT_RESERVATION_ERROR_MESSAGE).assertIsDisplayed()
+    }
+
+    @Test
+    fun occupiedSpot_showsOccupiedError() {
+        val date = futureDate()
+        val r1 = Reservation(
+            id = "r1", spotNumber = 5, date = date,
+            startTime = "09:00", endTime = "10:00",
+            userId = "user1", vehicleId = "v1", licensePlate = "1234ABC"
+        )
+        val r2 = Reservation(
+            id = "r2", spotNumber = 5, date = date,
+            startTime = "09:00", endTime = "10:00",
+            userId = "user2", vehicleId = "v2", licensePlate = "9999ZZZ"
+        )
+        val repo = createRepository(
+            reservation = r1,
+            allReservations = listOf(r1, r2)
+        )
+        composeTestRule.setContent {
+            EditReservation(
+                viewModel = EditReservationViewModel(repo),
+                reservationId = "r1",
+                onNavigate = { }
+            )
+        }
+
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag(TestTags.EDIT_RESERVATION_ERROR_MESSAGE).assertIsDisplayed()
+    }
+
+    @Test
+    fun noConflicts_saveButtonShown() {
+        val date = futureDate()
+        val r1 = Reservation(
+            id = "r1", spotNumber = 5, date = date,
+            startTime = "09:00", endTime = "10:00",
+            userId = "user1", vehicleId = "v1", licensePlate = "1234ABC"
+        )
+        val repo = createRepository(
+            reservation = r1,
+            allReservations = listOf(r1)
+        )
+        composeTestRule.setContent {
+            EditReservation(
+                viewModel = EditReservationViewModel(repo),
+                reservationId = "r1",
+                onNavigate = { }
+            )
+        }
+
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag(TestTags.EDIT_RESERVATION_ERROR_MESSAGE).assertIsNotDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.EDIT_RESERVATION_SAVE_BUTTON).assertIsDisplayed()
     }
 }

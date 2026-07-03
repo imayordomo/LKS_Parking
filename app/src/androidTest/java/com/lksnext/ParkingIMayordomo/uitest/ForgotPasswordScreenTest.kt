@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.ui.pages.ForgotPassword
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.ForgotPasswordViewModel
 import com.lksnext.ParkingIMayordomo.utils.TestTags
@@ -97,5 +98,29 @@ class ForgotPasswordScreenTest {
         composeTestRule.onNodeWithTag(TestTags.FORGOT_PASSWORD_EMAIL_FIELD).assertIsNotDisplayed()
         composeTestRule.onNodeWithTag(TestTags.FORGOT_PASSWORD_SEND_BUTTON).assertIsNotDisplayed()
         composeTestRule.onNodeWithTag(TestTags.FORGOT_PASSWORD_BACK_BUTTON).assertIsDisplayed()
+    }
+
+    @Test
+    fun error_corporateOnly_showsError() {
+        composeTestRule.setContent {
+            ForgotPassword(
+                viewModel = createViewModel(errorResId = R.string.error_corporate_only),
+                onBackToLogin = { }
+            )
+        }
+
+        composeTestRule.onNodeWithTag(TestTags.FORGOT_PASSWORD_ERROR_MESSAGE).assertIsDisplayed()
+    }
+
+    @Test
+    fun error_unknown_showsError() {
+        composeTestRule.setContent {
+            ForgotPassword(
+                viewModel = createViewModel(errorResId = R.string.error_unknown),
+                onBackToLogin = { }
+            )
+        }
+
+        composeTestRule.onNodeWithTag(TestTags.FORGOT_PASSWORD_ERROR_MESSAGE).assertIsDisplayed()
     }
 }

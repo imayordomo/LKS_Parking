@@ -1,9 +1,12 @@
 package com.lksnext.ParkingIMayordomo.uitest
 
+import android.graphics.Bitmap
+import android.util.Base64
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import com.lksnext.ParkingIMayordomo.data.model.Reservation
@@ -13,12 +16,15 @@ import com.lksnext.ParkingIMayordomo.data.model.VehicleType
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepository
 import com.lksnext.ParkingIMayordomo.ui.pages.Profile
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.ProfileViewModel
+import com.lksnext.ParkingIMayordomo.utils.LocaleManager
 import com.lksnext.ParkingIMayordomo.utils.TestTags
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import java.io.ByteArrayOutputStream
 
 class ProfileScreenTest {
 
@@ -34,6 +40,7 @@ class ProfileScreenTest {
         every { repo.user } returns MutableStateFlow(user)
         every { repo.vehicles } returns MutableStateFlow(vehicles)
         every { repo.reservations } returns MutableStateFlow(reservations)
+        every { repo.notifications } returns MutableStateFlow(emptyList())
         return repo
     }
 
@@ -310,5 +317,136 @@ class ProfileScreenTest {
         }
 
         composeTestRule.onNodeWithTag(TestTags.PROFILE_LANGUAGE_SELECTOR).performClick()
+    }
+
+    @Test
+    fun deleteAccountButton_isDisplayed() {
+        val repo = createRepository()
+        composeTestRule.setContent {
+            Profile(viewModel = ProfileViewModel(repo), onNavigate = { })
+        }
+
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_DELETE_ACCOUNT_BUTTON).assertIsDisplayed()
+    }
+
+    @Test
+    fun deleteAccountButton_opensDeleteDialog() {
+        val repo = createRepository()
+        composeTestRule.setContent {
+            Profile(viewModel = ProfileViewModel(repo), onNavigate = { })
+        }
+
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_DELETE_ACCOUNT_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_DELETE_ACCOUNT_DIALOG).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_DELETE_ACCOUNT_CONFIRM).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_DELETE_ACCOUNT_CANCEL).assertIsDisplayed()
+    }
+
+    @Test
+    fun deleteAccountDialog_cancel_dismisses() {
+        val repo = createRepository()
+        composeTestRule.setContent {
+            Profile(viewModel = ProfileViewModel(repo), onNavigate = { })
+        }
+
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_DELETE_ACCOUNT_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_DELETE_ACCOUNT_CANCEL).performClick()
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_DELETE_ACCOUNT_DIALOG).assertIsNotDisplayed()
+    }
+
+    @Test
+    fun deleteAccountDialog_confirm_callsDeleteAndNavigates() {
+        val repo = createRepository()
+        var navigatedRoute: String? = null
+        composeTestRule.setContent {
+            Profile(
+                viewModel = ProfileViewModel(repo),
+                onNavigate = { navigatedRoute = it }
+            )
+        }
+
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_DELETE_ACCOUNT_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_DELETE_ACCOUNT_CONFIRM).performClick()
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_DELETE_ACCOUNT_DIALOG).assertIsNotDisplayed()
+        assertEquals("login", navigatedRoute)
+    }
+
+    @Test
+    fun changeImageButton_isDisplayed() {
+        val repo = createRepository()
+        composeTestRule.setContent {
+            Profile(viewModel = ProfileViewModel(repo), onNavigate = { })
+        }
+
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_CHANGE_IMAGE_BUTTON).assertIsDisplayed()
+    }
+
+    // ── Profile image display tests ──
+
+    @Test
+    fun profile_withoutImage_showsFallbackLetter() {
+        val repo = createRepository(user = User("u1", "test@test.com", "Name"))
+        composeTestRule.setContent {
+            Profile(viewModel = ProfileViewModel(repo), onNavigate = { })
+        }
+
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_FALLBACK_LETTER).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_IMAGE).assertDoesNotExist()
+    }
+
+    @Test
+    fun profile_withImage_hidesFallbackAndShowsImage() {
+        val bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
+        val base64 = Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP)
+        val repo = createRepository(user = User("u1", "test@test.com", "Name", profileImage = base64))
+        composeTestRule.setContent {
+            Profile(viewModel = ProfileViewModel(repo), onNavigate = { })
+        }
+
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_IMAGE).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_FALLBACK_LETTER).assertDoesNotExist()
+    }
+
+    // ── Language selector tests ──
+
+    @Test
+    fun languageSelector_selectSpanish() {
+        val repo = createRepository()
+        composeTestRule.setContent {
+            Profile(viewModel = ProfileViewModel(repo), onNavigate = { })
+        }
+
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_LANGUAGE_SELECTOR).performClick()
+        composeTestRule.onNodeWithText("Español").performClick()
+
+        assertEquals("es", LocaleManager.localeFlow.value)
+    }
+
+    @Test
+    fun languageSelector_selectEnglish() {
+        val repo = createRepository()
+        composeTestRule.setContent {
+            Profile(viewModel = ProfileViewModel(repo), onNavigate = { })
+        }
+
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_LANGUAGE_SELECTOR).performClick()
+        composeTestRule.onNodeWithText("Inglés").performClick()
+
+        assertEquals("en", LocaleManager.localeFlow.value)
+    }
+
+    @Test
+    fun languageSelector_selectBasque() {
+        val repo = createRepository()
+        composeTestRule.setContent {
+            Profile(viewModel = ProfileViewModel(repo), onNavigate = { })
+        }
+
+        composeTestRule.onNodeWithTag(TestTags.PROFILE_LANGUAGE_SELECTOR).performClick()
+        composeTestRule.onNodeWithText("Vasco").performClick()
+
+        assertEquals("eu", LocaleManager.localeFlow.value)
     }
 }

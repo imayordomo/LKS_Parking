@@ -28,6 +28,8 @@ class EditReservationViewModel(private val repository: ParkingRepository) : View
     val user = repository.user
     val reservations = repository.reservations
     val allReservations = repository.allReservations
+    val allReservationsReady = repository.allReservationsReady
+    val notifications = repository.notifications
 
     private val sdfDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     private val sdfTime = SimpleDateFormat("HH:mm", Locale.getDefault())

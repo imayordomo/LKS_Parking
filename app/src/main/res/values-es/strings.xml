@@ -219,6 +219,7 @@
     <string name="select_spot_title">Selecciona una plaza</string>
     <string name="available_legend">Libre</string>
     <string name="occupied_legend">Ocupada</string>
+    <string name="partially_occupied_legend">Parcialmente ocupada</string>
     <string name="selection_legend">Selección</string>
     <string name="user_spot_legend">Tu plaza</string>
     <string name="confirm_reservation_btn">Confirmar Reserva - Plaza #%1$d</string>
@@ -237,6 +238,7 @@
     <string name="status_user_reserve">TU RESERVA</string>
     <string name="status_occupied">OCUPADA</string>
     <string name="status_available">DISPONIBLE</string>
+    <string name="status_partially_occupied">PARCIALMENTE OCUPADA</string>
     <string name="reservations_count_label">Reservas para este día (%1$d): </string>
     <string name="no_license_plate">Sin matrícula</string>
     <string name="mine_suffix"> (Tú)</string>
@@ -263,6 +265,7 @@
     <string name="error_start_before_now">La hora de inicio no puede ser anterior a la actual</string>
     <string name="error_end_after_start">La hora de fin debe ser posterior a la de inicio</string>
     <string name="error_max_9_hours">La reserva no puede superar las 9 horas</string>
+    <string name="error_max_advance_exceeded">No se puede reservar más allá de 7 días desde hoy</string>
     <string name="error_user_overlap">Ya tienes otra reserva realizada para este horario</string>
     <string name="error_select_vehicle">Debes seleccionar un vehículo</string>
     <string name="error_spot_occupied_simple">Plaza ocupada</string>
@@ -289,4 +292,14 @@
     <string name="language_spanish">Español</string>
     <string name="language_basque">Vasco</string>
 
+
+    <!-- Delete Account -->
+    <string name="delete_account">Eliminar Cuenta</string>
+    <string name="delete_account_title">¿Eliminar cuenta?</string>
+    <string name="delete_account_confirmation">Esta acción eliminará permanentemente todos tus datos (vehículos, reservas, notificaciones e informes) y no se puede deshacer. ¿Estás seguro?</string>
+    <string name="delete_account_confirm_btn">ELIMINAR MI CUENTA</string>
+    <string name="error_delete_account">Error al eliminar la cuenta. Inténtalo de nuevo más tarde.</string>
+
+    <!-- Profile Image -->
+    <string name="change_image">Cambiar imagen</string>
 </resources>

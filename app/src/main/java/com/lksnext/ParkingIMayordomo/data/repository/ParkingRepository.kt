@@ -7,6 +7,7 @@ interface ParkingRepository {
     val user: StateFlow<User?>
     val reservations: StateFlow<List<Reservation>>
     val allReservations: StateFlow<List<Reservation>>
+    val allReservationsReady: StateFlow<Boolean>
     val vehicles: StateFlow<List<Vehicle>?>
     val notifications: StateFlow<List<Notification>>
     val reports: StateFlow<List<Report>>
@@ -30,4 +31,5 @@ interface ParkingRepository {
     suspend fun updateFcmToken(token: String)
 
     suspend fun addReport(spotNumber: Int?, title: String, description: String)
+    suspend fun deleteAccount()
 }

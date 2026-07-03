@@ -4,8 +4,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
 import com.lksnext.ParkingIMayordomo.data.model.Reservation
 import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.model.Vehicle
@@ -16,15 +17,24 @@ import com.lksnext.ParkingIMayordomo.ui.viewmodel.NewReservationViewModel
 import com.lksnext.ParkingIMayordomo.utils.TestTags
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
+import java.text.SimpleDateFormat
+import java.util.*
 
 class NewReservationFlowTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    private val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+    private fun futureDate(daysFromNow: Int = 5): String {
+        val cal = Calendar.getInstance()
+        cal.add(Calendar.DAY_OF_YEAR, daysFromNow)
+        return sdf.format(cal.time)
+    }
 
     private fun createRepository(
         vehicles: List<Vehicle>? = listOf(Vehicle("v1", "user1", VehicleType.CAR, "1234ABC")),
@@ -36,9 +46,25 @@ class NewReservationFlowTest {
         every { repo.vehicles } returns MutableStateFlow(vehicles)
         every { repo.reservations } returns MutableStateFlow(reservations)
         every { repo.allReservations } returns MutableStateFlow(allReservations)
+        every { repo.allReservationsReady } returns MutableStateFlow(true)
         every { repo.user } returns MutableStateFlow(user)
+        every { repo.notifications } returns MutableStateFlow(emptyList())
         return repo
     }
+
+    private fun setDefaultTimes01() {
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_START_TIME_FIELD).performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_TIME_PICKER_SAVE).performClick()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_END_TIME_FIELD).performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_TIME_PICKER_SAVE).performClick()
+        composeTestRule.waitForIdle()
+    }
+
+    // ── Existing tests (preserved) ──
 
     @Test
     fun allFormFields_areDisplayed() {
@@ -155,23 +181,75 @@ class NewReservationFlowTest {
     }
 
     @Test
-    fun noVehicleDialog_shows_whenNoVehiclesAndConfirmClicked() {
-        val repo = createRepository(vehicles = emptyList())
-        val viewModel = NewReservationViewModel(repo)
-
-        // To make confirm button visible, we need a spot and times selected.
-        // Since we can't easily set internal composable state, we verify the dialog tag is absent initially.
+    fun prefilledSpotAndDate_showsForm() {
+        val repo = createRepository()
+        val date = futureDate()
         composeTestRule.setContent {
-            NewReservation(viewModel = viewModel, onNavigate = { })
+            NewReservation(
+                viewModel = NewReservationViewModel(repo),
+                onNavigate = { },
+                prefilledDate = date,
+                prefilledSpot = 20
+            )
         }
 
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_BACK).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_DATE_FIELD).assertIsDisplayed()
+    }
+
+    // ── New: validation error scenarios ──
+
+    @Test
+    fun confirmWithNoVehicles_showsNoVehicleDialog() {
+        val repo = createRepository(vehicles = emptyList())
+        var navigatedRoute: String? = null
+        composeTestRule.setContent {
+            NewReservation(
+                viewModel = NewReservationViewModel(repo),
+                onNavigate = { navigatedRoute = it },
+                prefilledDate = futureDate(),
+                prefilledSpot = 10
+            )
+        }
+
+        setDefaultTimes01()
+
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_CONFIRM_BUTTON).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_NO_VEHICLE_DIALOG).assertIsNotDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_NO_VEHICLE_PROFILE).assertIsNotDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_NO_VEHICLE_CANCEL).assertIsNotDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_ERROR_MESSAGE).assertIsNotDisplayed()
+
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_CONFIRM_BUTTON).performClick()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_NO_VEHICLE_DIALOG).assertIsDisplayed()
     }
 
     @Test
-    fun vehicleSelectionDialog_navigatesToProfile() {
+    fun confirmWithIncompatibleVehicle_showsIncompatibleDialog() {
+        val repo = createRepository(
+            vehicles = listOf(Vehicle("v1", "user1", VehicleType.MOTORCYCLE, "1234ABC"))
+        )
+        composeTestRule.setContent {
+            NewReservation(
+                viewModel = NewReservationViewModel(repo),
+                onNavigate = { },
+                prefilledDate = futureDate(),
+                prefilledSpot = 10
+            )
+        }
+
+        setDefaultTimes01()
+
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_CONFIRM_BUTTON).assertIsDisplayed()
+
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_CONFIRM_BUTTON).performClick()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_INCOMPATIBLE_DIALOG).assertIsDisplayed()
+    }
+
+    @Test
+    fun confirmWithMultipleVehicles_showsSelectionDialog() {
         val repo = createRepository(
             vehicles = listOf(
                 Vehicle("v1", "user1", VehicleType.CAR, "1234ABC"),
@@ -182,36 +260,125 @@ class NewReservationFlowTest {
         composeTestRule.setContent {
             NewReservation(
                 viewModel = NewReservationViewModel(repo),
-                onNavigate = { navigatedRoute = it }
+                onNavigate = { navigatedRoute = it },
+                prefilledDate = futureDate(),
+                prefilledSpot = 10
             )
         }
 
-        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_VEHICLE_SELECT_DIALOG).assertIsNotDisplayed()
+        setDefaultTimes01()
+
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_CONFIRM_BUTTON).assertIsDisplayed()
+
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_CONFIRM_BUTTON).performClick()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_VEHICLE_SELECT_DIALOG).assertIsDisplayed()
     }
 
     @Test
-    fun prefilledSpotAndDate_showsInfoBanner() {
-        val repo = createRepository()
+    fun confirmWithOneCompatibleVehicle_autoSubmits() {
+        val repo = createRepository(
+            vehicles = listOf(Vehicle("v1", "user1", VehicleType.CAR, "1234ABC"))
+        )
+        var navigatedRoute: String? = null
+        composeTestRule.setContent {
+            NewReservation(
+                viewModel = NewReservationViewModel(repo),
+                onNavigate = { navigatedRoute = it },
+                prefilledDate = futureDate(),
+                prefilledSpot = 10
+            )
+        }
+
+        setDefaultTimes01()
+
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_CONFIRM_BUTTON).assertIsDisplayed()
+
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_CONFIRM_BUTTON).performClick()
+        composeTestRule.waitForIdle()
+
+        assert(navigatedRoute != null) { "Should navigate after auto-submit" }
+    }
+
+    @Test
+    fun overlappingReservation_showsUserOverlapError() {
+        val date = futureDate()
+        val repo = createRepository(
+            reservations = listOf(
+                Reservation(
+                    id = "r1", spotNumber = 5, date = date,
+                    startTime = "09:00", endTime = "10:00",
+                    userId = "user1", vehicleId = "v1", licensePlate = "1234ABC"
+                )
+            ),
+            vehicles = listOf(Vehicle("v1", "user1", VehicleType.CAR, "1234ABC"))
+        )
         composeTestRule.setContent {
             NewReservation(
                 viewModel = NewReservationViewModel(repo),
                 onNavigate = { },
-                prefilledDate = "2026-07-01",
-                prefilledSpot = 5
+                prefilledDate = date,
+                prefilledSpot = 10
             )
         }
 
-        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_BACK).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_DATE_FIELD).assertIsDisplayed()
+        setDefaultTimes01()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_ERROR_MESSAGE).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_CONFIRM_BUTTON).assertIsNotDisplayed()
     }
 
     @Test
-    fun confirmReservationWithoutVehicles_showsNoVehicleDialog() {
-        val repo = createRepository(vehicles = null)
+    fun occupiedSpot_showsSpotOccupiedError() {
+        val date = futureDate()
+        val repo = createRepository(
+            reservations = emptyList(),
+            allReservations = listOf(
+                Reservation(
+                    id = "r1", spotNumber = 10, date = date,
+                    startTime = "09:00", endTime = "10:00",
+                    userId = "user2", vehicleId = "v2", licensePlate = "9999ZZZ"
+                )
+            ),
+            vehicles = listOf(Vehicle("v1", "user1", VehicleType.CAR, "1234ABC"))
+        )
         composeTestRule.setContent {
-            NewReservation(viewModel = NewReservationViewModel(repo), onNavigate = { })
+            NewReservation(
+                viewModel = NewReservationViewModel(repo),
+                onNavigate = { },
+                prefilledDate = date,
+                prefilledSpot = 10
+            )
         }
 
-        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_NO_VEHICLE_DIALOG).assertIsNotDisplayed()
+        setDefaultTimes01()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_ERROR_MESSAGE).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_CONFIRM_BUTTON).assertIsNotDisplayed()
+    }
+
+    @Test
+    fun noOverlapNoOccupied_confirmButtonShown() {
+        val date = futureDate()
+        val repo = createRepository(
+            vehicles = listOf(Vehicle("v1", "user1", VehicleType.CAR, "1234ABC"))
+        )
+        composeTestRule.setContent {
+            NewReservation(
+                viewModel = NewReservationViewModel(repo),
+                onNavigate = { },
+                prefilledDate = date,
+                prefilledSpot = 10
+            )
+        }
+
+        setDefaultTimes01()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_ERROR_MESSAGE).assertIsNotDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_CONFIRM_BUTTON).assertIsDisplayed()
     }
 }

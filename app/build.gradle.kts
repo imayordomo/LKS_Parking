@@ -26,8 +26,8 @@ android {
         applicationId = "com.lksnext.ParkingIMayordomo"
         minSdk = 24
         targetSdk = 36
-        versionCode = 14
-        versionName = "1.12.0"
+        versionCode = 15
+        versionName = "1.12.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -57,6 +57,12 @@ android {
         compose = true
     }
 
+    lint {
+        abortOnError = true
+        xmlReport = true
+        htmlReport = true
+    }
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
@@ -71,6 +77,10 @@ detekt {
     ignoreFailures = false
     config.setFrom(files("../config/detekt/detekt.yml"))
     baseline = file("detekt-baseline.xml")
+}
+
+tasks.withType<Test> {
+    jvmArgs("--add-opens", "java.base/java.lang.reflect=ALL-UNNAMED")
 }
 
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
@@ -89,13 +99,26 @@ tasks.withType<JacocoReport> {
 
 val jacocoTestReport by tasks.registering(JacocoReport::class) {
     dependsOn("testDebugUnitTest")
-    
-    val fileFilter = listOf(
-        "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
-        "**/*Test*.*", "android/**/*.*", "**/data/model/*",
-        "**/*Fragment*.*", "**/*Activity*.*", "**/*Adapter*.*",
-        "**/*Factory*.*"
+    reports {
+        xml.required.set(true)
+        xml.outputLocation.set(layout.buildDirectory.file("reports/jacoco/jacocoTestReport/jacocoTestReport.xml"))
+        html.required.set(true)
+    }
+
+    val coverageExclusions = listOf(
+        "**/R.class",
+        "**/R$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*Test*.*",
+        "android/**/*.*",
+        "**/ui/pages/**",
+        "**/ui/components/**",
+        "**/ui/theme/**",
+        "**/MainActivity.*",
+        "**/MyFirebaseMessagingService.*"
     )
+    val fileFilter = coverageExclusions
     val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
         exclude(fileFilter)
     }

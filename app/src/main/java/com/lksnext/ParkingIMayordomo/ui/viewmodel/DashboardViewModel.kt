@@ -14,6 +14,7 @@ class DashboardViewModel(private val repository: ParkingRepository) : ViewModel(
 
     val user = repository.user
     val vehicles = repository.vehicles
+    val notifications = repository.notifications
 
     val userReservations: StateFlow<List<Reservation>> = combine(
         repository.reservations,

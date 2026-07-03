@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.*
 import java.util.*
 
 class HistoryViewModel(private val repository: ParkingRepository) : ViewModel() {
+    val notifications = repository.notifications
+    val user = repository.user
 
     private val _statusFilter = MutableStateFlow("all")
     val statusFilter: StateFlow<String> = _statusFilter.asStateFlow()

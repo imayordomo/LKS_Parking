@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
-import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.utils.TestTags
 import com.lksnext.ParkingIMayordomo.data.model.Vehicle
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
@@ -65,6 +64,7 @@ fun NewReservation(
     val scope = rememberCoroutineScope()
     
     val vehicles by viewModel.vehicles.collectAsState()
+    val notifications by viewModel.notifications.collectAsState()
 
     val displayDateSdf = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
     val sdfTime = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
@@ -131,6 +131,8 @@ fun NewReservation(
         viewModel.hasExistingUserReservation(selectedDate, startTime, endTime) 
     }.collectAsState(initial = false)
 
+    val allReservationsReady by viewModel.allReservationsReady.collectAsState()
+
     val validationErrorResId by remember(selectedDateMillis, startTimeMillis, endTimeMillis, selectedSpot, hasExistingUserReservation, occupiedSpots) {
         derivedStateOf {
             viewModel.getValidationErrorResId(
@@ -166,8 +168,14 @@ fun NewReservation(
                 val weekLater = Calendar.getInstance().apply {
                     timeInMillis = today.timeInMillis
                     add(Calendar.DAY_OF_YEAR, 7)
+                    set(Calendar.HOUR_OF_DAY, 23); set(Calendar.MINUTE, 59); set(Calendar.SECOND, 59)
                 }
-                return utcTimeMillis >= today.timeInMillis && utcTimeMillis <= weekLater.timeInMillis
+                val candidateLocal = Calendar.getInstance().apply { timeInMillis = utcTimeMillis }
+                val candidateDayStart = Calendar.getInstance().apply {
+                    timeInMillis = candidateLocal.timeInMillis
+                    set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+                }
+                return candidateDayStart.timeInMillis >= today.timeInMillis && candidateDayStart.timeInMillis <= weekLater.timeInMillis
             }
         }
     )
@@ -191,11 +199,11 @@ fun NewReservation(
                 onItemClick = { route ->
                     scope.launch { drawerState.close() }
                     onNavigate(route)
-                }
+                },
+                user = viewModel.user.collectAsState().value
             )
         }
     ) {
-        val notifications by AuthManager.notifications.collectAsState()
         val unreadCount = notifications.count { !it.read }
         Scaffold(
             topBar = {
@@ -274,7 +282,7 @@ fun NewReservation(
                 }
 
                 ConfirmButtonSection(
-                    canConfirm = selectedSpot != null && startTime != null && endTime != null && validationErrorResId == null,
+                    canConfirm = selectedSpot != null && startTime != null && endTime != null && validationErrorResId == null && allReservationsReady,
                     vehicles = vehicles,
                     selectedSpot = selectedSpot,
                     selectedDate = selectedDate,
@@ -595,7 +603,12 @@ private fun SpotSelectionCard(
             }
         }
 
-    validationErrorResId?.let { AlertError(stringResource(it)) }
+    validationErrorResId?.let {
+        AlertError(
+            message = stringResource(it),
+            modifier = Modifier.testTag(TestTags.NEW_RESERVATION_ERROR_MESSAGE)
+        )
+    }
 }
 
 @Composable
@@ -953,7 +966,7 @@ fun SpotGrid(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, occupiedSpots: L
     Column(modifier = Modifier.testTag(TestTags.NEW_RESERVATION_SPOT_GRID)) {
         Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             LegendItem(stringResource(R.string.available_legend), SuccessGreen)
-            LegendItem(stringResource(R.string.occupied_legend), LightBorderGray)
+            LegendItem(stringResource(R.string.occupied_legend), OccupiedGray)
             LegendItem(stringResource(R.string.selection_legend), InfoBlue)
         }
 
@@ -975,7 +988,7 @@ fun SpotGrid(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, occupiedSpots: L
                         .background(
                             when {
                                 isSelected -> InfoBlue
-                                isOccupied -> LightBorderGray
+                                isOccupied -> OccupiedGray
                                 else -> SuccessGreen
                             },
                             RoundedCornerShape(8.dp)
@@ -1003,9 +1016,9 @@ fun LegendItem(label: String, color: Color) {
 }
 
 @Composable
-fun AlertError(message: String) {
+fun AlertError(message: String, modifier: Modifier = Modifier) {
     Surface(
-        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+        modifier = modifier.fillMaxWidth().padding(top = 16.dp),
         color = ErrorBackground,
         shape = RoundedCornerShape(4.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.error)

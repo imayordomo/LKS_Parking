@@ -4,8 +4,11 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import com.lksnext.ParkingIMayordomo.R
+import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepository
 import com.lksnext.ParkingIMayordomo.ui.pages.Report
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.ReportViewModel
@@ -23,6 +26,8 @@ class ReportScreenTest {
 
     private fun createRepository(): ParkingRepository {
         val repo = mockk<ParkingRepository>(relaxed = true)
+        every { repo.user } returns MutableStateFlow(User("user1", "test@test.com", "User"))
+        every { repo.notifications } returns MutableStateFlow(emptyList())
         every { repo.reports } returns MutableStateFlow(emptyList())
         return repo
     }
@@ -115,5 +120,57 @@ class ReportScreenTest {
         }
 
         composeTestRule.onNodeWithTag(TestTags.REPORT_SEND_BUTTON).performClick()
+    }
+
+    @Test
+    fun invalidSpotNumber_showsError() {
+        val vm = ReportViewModel(createRepository())
+        composeTestRule.setContent {
+            Report(viewModel = vm, onNavigate = { })
+        }
+
+        composeTestRule.onNodeWithTag(TestTags.REPORT_SPOT_NUMBER_FIELD).performTextInput("0")
+        composeTestRule.onNodeWithText("Número de plaza inválido (1–50)").assertIsDisplayed()
+    }
+
+    @Test
+    fun validSpotNumber_hidesError() {
+        val vm = ReportViewModel(createRepository())
+        composeTestRule.setContent {
+            Report(viewModel = vm, onNavigate = { })
+        }
+
+        composeTestRule.onNodeWithTag(TestTags.REPORT_SPOT_NUMBER_FIELD).performTextInput("25")
+        composeTestRule.onNodeWithText("Número de plaza inválido (1–50)").assertIsNotDisplayed()
+    }
+
+    @Test
+    fun sendWithInvalidSpotNumber_showsErrorInSendButton() {
+        val repo = createRepository()
+        val vm = ReportViewModel(repo)
+        vm.onReportTypeChange("Daño")
+        vm.onDescriptionChange("Test description")
+        composeTestRule.setContent {
+            Report(viewModel = vm, onNavigate = { })
+        }
+
+        // Type an invalid spot number
+        composeTestRule.onNodeWithTag(TestTags.REPORT_SPOT_NUMBER_FIELD).performTextInput("51")
+        composeTestRule.onNodeWithText("Número de plaza inválido (1–50)").assertIsDisplayed()
+    }
+
+    @Test
+    fun successState_showsSuccessMessage() {
+        val repo = createRepository()
+        val vm = ReportViewModel(repo)
+        vm.onReportTypeChange("Daño")
+        vm.onDescriptionChange("Test description")
+        vm.onSpotNumberChange("5")
+        vm.sendReport()
+        composeTestRule.setContent {
+            Report(viewModel = vm, onNavigate = { })
+        }
+
+        composeTestRule.onNodeWithText("Reporte enviado correctamente. Gracias por tu colaboración.").assertIsDisplayed()
     }
 }

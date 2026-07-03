@@ -219,6 +219,7 @@
     <string name="select_spot_title">Hautatu plaza bat</string>
     <string name="available_legend">Libre</string>
     <string name="occupied_legend">Beteta</string>
+    <string name="partially_occupied_legend">Partzialki beteta</string>
     <string name="selection_legend">Hautapena</string>
     <string name="user_spot_legend">Zure plaza</string>
     <string name="confirm_reservation_btn">Baieztatu Erreserba - #%1$d Plaza</string>
@@ -237,6 +238,7 @@
     <string name="status_user_reserve">ZURE ERRESERBA</string>
     <string name="status_occupied">BETETA</string>
     <string name="status_available">LIBRE</string>
+    <string name="status_partially_occupied">PARTZIALKI BETETA</string>
     <string name="reservations_count_label">Egun honetarako erreserbak (%1$d): </string>
     <string name="no_license_plate">Matrikularik gabe</string>
     <string name="mine_suffix"> (Zu)</string>
@@ -263,6 +265,7 @@
     <string name="error_start_before_now">Hasiera ordua ezin da unekoa baino lehenago izan</string>
     <string name="error_end_after_start">Amaiera orduak hasierakoa baino beranduago izan behar du</string>
     <string name="error_max_9_hours">Erreserba ezin da 9 ordu baino luzeagoa izan</string>
+    <string name="error_max_advance_exceeded">Ezin da gaurtik 7 egun baino haratago erreserbatu</string>
     <string name="error_user_overlap">Dagoeneko baduzu beste erreserba bat ordutegi honetan</string>
     <string name="error_select_vehicle">Ibilgailu bat hautatu behar duzu</string>
     <string name="error_spot_occupied_simple">Plaza beteta</string>
@@ -288,4 +291,14 @@
     <string name="language_english">Ingelesa</string>
     <string name="language_spanish">Gaztelera</string>
     <string name="language_basque">Euskara</string>
+
+    <!-- Delete Account -->
+    <string name="delete_account">Kontua Ezabatu</string>
+    <string name="delete_account_title">Kontua ezabatu?</string>
+    <string name="delete_account_confirmation">Ekintza honek zure datu guztiak betirako ezabatuko ditu (ibilgailuak, erreserbak, jakinarazpenak eta txostenak) eta ezin da desegin. Ziur zaude?</string>
+    <string name="delete_account_confirm_btn">EZABATU NIRE KONTUA</string>
+    <string name="error_delete_account">Errorea kontua ezabatzean. Saiatu berriro geroago.</string>
+
+    <!-- Profile Image -->
+    <string name="change_image">Irudia aldatu</string>
 </resources>

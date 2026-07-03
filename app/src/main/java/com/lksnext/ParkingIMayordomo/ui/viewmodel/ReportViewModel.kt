@@ -13,6 +13,8 @@ import kotlinx.coroutines.launch
 
 class ReportViewModel(private val repository: ParkingRepository) : ViewModel() {
     val reports: StateFlow<List<Report>> = repository.reports
+    val notifications = repository.notifications
+    val user = repository.user
 
     private val _reportType = MutableStateFlow("")
     val reportType: StateFlow<String> = _reportType.asStateFlow()
