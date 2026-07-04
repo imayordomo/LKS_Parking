@@ -75,7 +75,7 @@ jobs:
 
     strategy:
       matrix:
-        api-level: [35]
+        api-level: [29]
         target: [google_apis]
 
     steps:
