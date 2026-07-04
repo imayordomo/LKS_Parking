@@ -12,6 +12,11 @@ class ParkingRepositoryImpl : ParkingRepository {
             AuthManager.startAllReservationsListener()
             return AuthManager.allReservations
         }
+    override val allReservationsReady: StateFlow<Boolean>
+        get() {
+            AuthManager.startAllReservationsListener()
+            return AuthManager.allReservationsReady
+        }
     override val vehicles: StateFlow<List<Vehicle>?> = AuthManager.vehicles
     override val notifications: StateFlow<List<Notification>> = AuthManager.notifications
     override val reports: StateFlow<List<Report>> = AuthManager.reports
@@ -74,5 +79,9 @@ class ParkingRepositoryImpl : ParkingRepository {
 
     override suspend fun addReport(spotNumber: Int?, title: String, description: String) {
         AuthManager.addReport(spotNumber, title, description)
+    }
+
+    override suspend fun deleteAccount() {
+        AuthManager.deleteAccount()
     }
 }

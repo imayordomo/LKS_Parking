@@ -23,7 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
-import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.data.model.Reservation
 import com.lksnext.ParkingIMayordomo.data.model.Vehicle
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
@@ -59,6 +58,7 @@ fun Dashboard(
     val user by viewModel.user.collectAsState()
     val vehicles by viewModel.vehicles.collectAsState()
     val userReservations by viewModel.userReservations.collectAsState()
+    val notifications by viewModel.notifications.collectAsState()
 
     var reservationToDeleteId by rememberSaveable { mutableStateOf<String?>(null) }
 
@@ -81,11 +81,11 @@ fun Dashboard(
                 onItemClick = { route ->
                     scope.launch { drawerState.close() }
                     onNavigate(route)
-                }
+                },
+                user = user
             )
         }
     ) {
-        val notifications by AuthManager.notifications.collectAsState()
         val unreadCount = notifications.count { !it.read }
         Scaffold(
             modifier = modifier,

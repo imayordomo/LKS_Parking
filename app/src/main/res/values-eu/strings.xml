@@ -30,7 +30,7 @@
     <string name="email_sent_instructions">Egiaztatu zure sarrera-ontzia pasahitza berrezartzeko</string>
     <string name="reset_email_sent_success">Berreskuratze-esteka bidali da</string>
     <string name="check_inbox_hint">Minutu gutxiren buruan mezu elektronikoa jasotzen ez baduzu, egiaztatu spam karpeta.</string>
-    <string name="error_corporate_only">@lksnext.com posta korporatiboak bakarrik onartzen dira</string>
+    <string name="error_corporate_only">\@lksnext.com posta korporatiboak bakarrik onartzen dira</string>
     <string name="error_invalid_email_format">Email formatu baliogabea</string>
 
     <!-- Home Screen (Dashboard) -->
@@ -133,7 +133,7 @@
 
     <!-- About Screen -->
     <string name="about_title">Aplikazioari buruz</string>
-    <string name="about_version">Parking App > 1.0.0 bertsioa</string>
+    <string name="about_version">Parking App > %s bertsioa</string>
     <string name="about_description">LKS Next-ekin eta Euskal Herriko Unibertsitatearekin (UPV/EHU) lankidetzan, Produktu Digitalen Kontzeptualizazio eta Garapeneko Enpresa Gelarako garatutako proiektu akademikoa.</string>
     <string name="about_developed_by">Garatzailea: imayordomo</string>
     <string name="about_acknowledgments_title">Esker onak eta Aitortzak:</string>
@@ -191,7 +191,7 @@
     <string name="faq_q9">Erreserba bat bertan behera utzi dezaket?</string>
     <string name="faq_a9">Bai, zure erreserbak bertan behera utzi ditzakezu \"Erreserbak\" ataletik. Hedatu bertan behera utzi nahi duzun erreserba eta sakatu ezabatzeko botoia. Kontuan izan ekintza hau ezin dela desegin.</string>
     <string name="faq_q10">Zer egiten dut nire emaila @lksnext.com ez bada?</string>
-    <string name="faq_a10">@lksnext.com posta korporatiboa duten langileek bakarrik erregistratu daitezke sisteman. Sarbidea behar baduzu eta posta hori ez baduzu, jarri harremanetan facilities sailarekin.</string>
+    <string name="faq_a10">\@lksnext.com posta korporatiboa duten langileek bakarrik erregistratu daitezke sisteman. Sarbidea behar baduzu eta posta hori ez baduzu, jarri harremanetan facilities sailarekin.</string>
     <string name="faq_q11">Zer esan nahi dute koloreek Aparkalekua Kontsultatu atalean?</string>
     <string name="faq_a11">Aparkalekuaren ikuspegian, plazak hiru koloretan agertzen dira:\n\n• Berdea = Eskuragarri: inork ez du plaza erreserbatu ordu horretan.\n• Horia = Zure erreserba: erreserba aktibo bat duzu plaza horretan.\n• Grisa = Okupatua: beste erabiltzaile batek plaza hori erreserbatu du.</string>
     <string name="faq_q12">Zergatik aldatzen dira plaza okupatuak gaur eta beste egun batean ikustean?</string>
@@ -219,6 +219,7 @@
     <string name="select_spot_title">Hautatu plaza bat</string>
     <string name="available_legend">Libre</string>
     <string name="occupied_legend">Beteta</string>
+    <string name="partially_occupied_legend">Partzialki beteta</string>
     <string name="selection_legend">Hautapena</string>
     <string name="user_spot_legend">Zure plaza</string>
     <string name="confirm_reservation_btn">Baieztatu Erreserba - #%1$d Plaza</string>
@@ -227,7 +228,10 @@
     <string name="spot_type_electric">Elektrikoa</string>
     <string name="spot_type_motorcycle">Motoa</string>
     <string name="spot_type_disabled">Desgaitua</string>
-    <string name="spots_available_count">%1$d plaza libre</string>
+    <plurals name="spots_available_count">
+        <item quantity="one">%1$d plaza libre</item>
+        <item quantity="other">%1$d plaza libre</item>
+    </plurals>
     <string name="no_spots_available">Ez dago plazarik libre</string>
     <string name="view_parking_title">Aparkalekua Kontsultatu</string>
     <string name="view_parking_subtitle">Ikusi aparkalekuaren egoera dataren arabera</string>
@@ -237,6 +241,7 @@
     <string name="status_user_reserve">ZURE ERRESERBA</string>
     <string name="status_occupied">BETETA</string>
     <string name="status_available">LIBRE</string>
+    <string name="status_partially_occupied">PARTZIALKI BETETA</string>
     <string name="reservations_count_label">Egun honetarako erreserbak (%1$d): </string>
     <string name="no_license_plate">Matrikularik gabe</string>
     <string name="mine_suffix"> (Zu)</string>
@@ -263,6 +268,7 @@
     <string name="error_start_before_now">Hasiera ordua ezin da unekoa baino lehenago izan</string>
     <string name="error_end_after_start">Amaiera orduak hasierakoa baino beranduago izan behar du</string>
     <string name="error_max_9_hours">Erreserba ezin da 9 ordu baino luzeagoa izan</string>
+    <string name="error_max_advance_exceeded">Ezin da gaurtik 7 egun baino haratago erreserbatu</string>
     <string name="error_user_overlap">Dagoeneko baduzu beste erreserba bat ordutegi honetan</string>
     <string name="error_select_vehicle">Ibilgailu bat hautatu behar duzu</string>
     <string name="error_spot_occupied_simple">Plaza beteta</string>
@@ -288,4 +294,14 @@
     <string name="language_english">Ingelesa</string>
     <string name="language_spanish">Gaztelera</string>
     <string name="language_basque">Euskara</string>
+
+    <!-- Delete Account -->
+    <string name="delete_account">Kontua Ezabatu</string>
+    <string name="delete_account_title">Kontua ezabatu?</string>
+    <string name="delete_account_confirmation">Ekintza honek zure datu guztiak betirako ezabatuko ditu (ibilgailuak, erreserbak, jakinarazpenak eta txostenak) eta ezin da desegin. Ziur zaude?</string>
+    <string name="delete_account_confirm_btn">EZABATU NIRE KONTUA</string>
+    <string name="error_delete_account">Errorea kontua ezabatzean. Saiatu berriro geroago.</string>
+
+    <!-- Profile Image -->
+    <string name="change_image">Irudia aldatu</string>
 </resources>

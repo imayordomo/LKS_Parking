@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.data.model.Report
 import com.lksnext.ParkingIMayordomo.data.model.ReportStatus
-import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
@@ -62,6 +61,8 @@ fun Report(
     val success by viewModel.success.collectAsState()
     val errorResId by viewModel.errorResId.collectAsState()
     val reports by viewModel.reports.collectAsState()
+    val currentUser by viewModel.user.collectAsState()
+    val notifications by viewModel.notifications.collectAsState()
 
     val isSpotValid = remember(spotNumber) { viewModel.isSpotNumberValid() }
 
@@ -73,11 +74,11 @@ fun Report(
                 onItemClick = { route ->
                     scope.launch { drawerState.close() }
                     onNavigate(route)
-                }
+                },
+                user = currentUser
             )
         }
     ) {
-        val notifications by AuthManager.notifications.collectAsState()
         val unreadCount = notifications.count { !it.read }
         Scaffold(
             topBar = {
@@ -389,7 +390,7 @@ private fun ReportHistoryItemCompact(report: Report) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 
-                val (statusText, statusColor) = when (ReportStatus.fromString(report.status)) {
+                val (statusText, statusColor) = when (report.status) {
                     ReportStatus.PENDING -> stringResource(R.string.status_pending) to MaterialTheme.colorScheme.secondary
                     ReportStatus.IN_REVIEW -> stringResource(R.string.status_in_review) to UserSpotYellow
                     ReportStatus.RESOLVED -> stringResource(R.string.status_resolved) to SuccessGreen

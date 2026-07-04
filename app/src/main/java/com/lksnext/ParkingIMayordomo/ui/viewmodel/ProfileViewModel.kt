@@ -14,6 +14,7 @@ class ProfileViewModel(private val repository: ParkingRepository) : ViewModel() 
     val user = repository.user
     val vehicles = repository.vehicles
     val reservations = repository.reservations
+    val notifications = repository.notifications
 
     private val _errorResId = MutableStateFlow<Int?>(null)
     val errorResId: StateFlow<Int?> = _errorResId.asStateFlow()
@@ -51,5 +52,15 @@ class ProfileViewModel(private val repository: ParkingRepository) : ViewModel() 
 
     fun logout() {
         repository.logout()
+    }
+
+    fun deleteAccount() {
+        viewModelScope.launch {
+            try {
+                repository.deleteAccount()
+            } catch (e: Exception) {
+                _errorResId.value = R.string.error_delete_account
+            }
+        }
     }
 }

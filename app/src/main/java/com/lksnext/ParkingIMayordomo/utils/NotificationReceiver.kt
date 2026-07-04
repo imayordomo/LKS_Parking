@@ -18,20 +18,21 @@ import kotlinx.coroutines.launch
 class NotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+        val pendingResult = goAsync()
         val title = intent.getStringExtra("title") ?: "Recordatorio de Reserva"
         val message = intent.getStringExtra("message") ?: "Tienes una reserva pronto."
         val notificationId = intent.getIntExtra("notification_id", 0)
 
-        // Add to in-app notification page
+        showNotification(context, title, message, notificationId)
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 AuthManager.addExternalNotification(title, message)
-            } catch (e: Exception) {
-                // Ignore error if it fails to save in-app
+            } catch (_: Exception) {
+            } finally {
+                pendingResult.finish()
             }
         }
-
-        showNotification(context, title, message, notificationId)
     }
 
     private fun showNotification(context: Context, title: String, message: String, notificationId: Int) {

@@ -16,18 +16,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
-import com.lksnext.ParkingIMayordomo.data.AuthManager
+import com.lksnext.ParkingIMayordomo.data.model.Notification
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
-import com.lksnext.ParkingIMayordomo.ui.theme.*
-import com.lksnext.ParkingIMayordomo.ui.viewmodel.HelpViewModel
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HELP
@@ -43,8 +40,10 @@ private data class FAQ(val question: String, val answer: String)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Help(
+    modifier: Modifier = Modifier,
     onNavigate: (String) -> Unit,
-    modifier: Modifier = Modifier
+    user: com.lksnext.ParkingIMayordomo.data.model.User? = null,
+    notifications: List<Notification> = emptyList(),
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -72,11 +71,11 @@ fun Help(
                 onItemClick = { route ->
                     scope.launch { drawerState.close() }
                     onNavigate(route)
-                }
+                },
+                user = user
             )
         }
     ) {
-        val notifications by AuthManager.notifications.collectAsState()
         val unreadCount = notifications.count { !it.read }
         Scaffold(
             topBar = {

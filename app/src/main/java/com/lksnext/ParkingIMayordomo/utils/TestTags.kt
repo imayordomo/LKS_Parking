@@ -14,6 +14,7 @@ object TestTags {
     const val LOGIN_FORGOT_PASSWORD = "login_forgot_password"
     const val LOGIN_LOGIN_BUTTON = "login_login_button"
     const val LOGIN_REGISTER_LINK = "login_register_link"
+    const val LOGIN_ERROR_MESSAGE = "login_error_message"
 
     // ── Register ──
     const val REGISTER_NAME_FIELD = "register_name_field"
@@ -24,11 +25,13 @@ object TestTags {
     const val REGISTER_TOGGLE_CONFIRM_PASSWORD = "register_toggle_confirm_password"
     const val REGISTER_REGISTER_BUTTON = "register_register_button"
     const val REGISTER_LOGIN_LINK = "register_login_link"
+    const val REGISTER_ERROR_MESSAGE = "register_error_message"
 
     // ── Forgot Password ──
     const val FORGOT_PASSWORD_EMAIL_FIELD = "forgot_password_email_field"
     const val FORGOT_PASSWORD_SEND_BUTTON = "forgot_password_send_button"
     const val FORGOT_PASSWORD_BACK_BUTTON = "forgot_password_back_button"
+    const val FORGOT_PASSWORD_ERROR_MESSAGE = "forgot_password_error_message"
 
     const val DASHBOARD_ADD_FAB = "dashboard_add_fab"
     const val DASHBOARD_ADD_VEHICLE_ALERT = "dashboard_add_vehicle_alert"
@@ -59,11 +62,19 @@ object TestTags {
     const val PROFILE_EDIT_DIALOG_NAME_FIELD = "profile_edit_dialog_name_field"
     const val PROFILE_EDIT_DIALOG_SAVE = "profile_edit_dialog_save"
     const val PROFILE_EDIT_DIALOG_CANCEL = "profile_edit_dialog_cancel"
+    const val PROFILE_EDIT_DIALOG_CHANGE_IMAGE = "profile_edit_dialog_change_image"
     const val PROFILE_ADD_VEHICLE_TYPE_FIELD = "profile_add_vehicle_type_field"
     const val PROFILE_ADD_VEHICLE_TYPE_MENU = "profile_add_vehicle_type_menu"
     const val PROFILE_ADD_VEHICLE_PLATE_FIELD = "profile_add_vehicle_plate_field"
     const val PROFILE_ADD_VEHICLE_ADD_BUTTON = "profile_add_vehicle_add_button"
     const val PROFILE_ADD_VEHICLE_CANCEL = "profile_add_vehicle_cancel"
+    const val PROFILE_DELETE_ACCOUNT_BUTTON = "profile_delete_account_button"
+    const val PROFILE_DELETE_ACCOUNT_DIALOG = "profile_delete_account_dialog"
+    const val PROFILE_DELETE_ACCOUNT_CONFIRM = "profile_delete_account_confirm"
+    const val PROFILE_DELETE_ACCOUNT_CANCEL = "profile_delete_account_cancel"
+    const val PROFILE_CHANGE_IMAGE_BUTTON = "profile_change_image_button"
+    const val PROFILE_IMAGE = "profile_image"
+    const val PROFILE_FALLBACK_LETTER = "profile_fallback_letter"
 
     // NewReservation
     const val NEW_RESERVATION_BACK = "new_reservation_back"
@@ -90,6 +101,7 @@ object TestTags {
     const val NEW_RESERVATION_VEHICLE_SELECT_CANCEL = "new_reservation_vehicle_select_cancel"
     const val NEW_RESERVATION_SPOT_DROPDOWN = "new_reservation_spot_dropdown"
     const val NEW_RESERVATION_SPOT_GRID = "new_reservation_spot_grid"
+    const val NEW_RESERVATION_ERROR_MESSAGE = "new_reservation_error_message"
 
     // EditReservation
     const val EDIT_RESERVATION_BACK = "edit_reservation_back"
@@ -107,6 +119,7 @@ object TestTags {
     const val EDIT_RESERVATION_DATE_PICKER_CANCEL = "edit_reservation_date_picker_cancel"
     const val EDIT_RESERVATION_TIME_PICKER_SAVE = "edit_reservation_time_picker_save"
     const val EDIT_RESERVATION_TIME_PICKER_CANCEL = "edit_reservation_time_picker_cancel"
+    const val EDIT_RESERVATION_ERROR_MESSAGE = "edit_reservation_error_message"
 
     // History
     const val HISTORY_DOWNLOAD_CSV = "history_download_csv"

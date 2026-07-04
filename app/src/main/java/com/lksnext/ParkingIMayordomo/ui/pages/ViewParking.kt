@@ -29,11 +29,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
-import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.theme.*
+import com.lksnext.ParkingIMayordomo.ui.viewmodel.SpotOccupancyState
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.ViewParkingViewModel
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
 import com.lksnext.ParkingIMayordomo.utils.TestTags
@@ -55,16 +55,24 @@ import java.util.*
 fun ViewParking(
     viewModel: ViewParkingViewModel,
     onNavigate: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    prefilledDate: String? = null
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     
     val currentUser by viewModel.user.collectAsState()
+    val notifications by viewModel.notifications.collectAsState()
 
     // Use Long to preserve state across rotation
     var selectedDateMillis by rememberSaveable { 
-        mutableLongStateOf(Calendar.getInstance().timeInMillis) 
+        mutableLongStateOf(
+            prefilledDate?.let { dateStr ->
+                try {
+                    SimpleDateFormat(ParkingUtils.DATE_FORMAT, Locale.getDefault()).parse(dateStr)?.time
+                } catch (_: Exception) { null }
+            } ?: Calendar.getInstance().timeInMillis
+        ) 
     }
     val selectedDate = remember(selectedDateMillis) {
         Calendar.getInstance().apply { timeInMillis = selectedDateMillis }
@@ -82,9 +90,9 @@ fun ViewParking(
 
     val dateStr = sdfDate.format(selectedDate.time)
     
-    val occupiedSpots by remember(selectedDateMillis) { 
+    val spotOccupancy by remember(selectedDateMillis) { 
         viewModel.getOccupiedSpots(selectedDate) 
-    }.collectAsState(initial = emptyList())
+    }.collectAsState(initial = emptyMap())
     
     val userSpots by remember(selectedDateMillis) { 
         viewModel.getUserSpots(selectedDate) 
@@ -93,6 +101,13 @@ fun ViewParking(
     val currentReservations by remember(selectedDateMillis) {
         viewModel.getCurrentReservations(selectedDate)
     }.collectAsState(initial = emptyList())
+
+    val isCurrentDay = remember(selectedDateMillis) {
+        val today = Calendar.getInstance()
+        val checkDate = Calendar.getInstance().apply { timeInMillis = selectedDateMillis }
+        today.get(Calendar.YEAR) == checkDate.get(Calendar.YEAR) &&
+        today.get(Calendar.DAY_OF_YEAR) == checkDate.get(Calendar.DAY_OF_YEAR)
+    }
 
     val isDateInReservationRange = remember(selectedDateMillis) {
         val today = Calendar.getInstance().apply {
@@ -128,11 +143,11 @@ fun ViewParking(
                 onItemClick = { route ->
                     scope.launch { drawerState.close() }
                     onNavigate(route)
-                }
+                },
+                user = currentUser
             )
         }
     ) {
-        val notifications by AuthManager.notifications.collectAsState()
         val unreadCount = notifications.count { !it.read }
         Scaffold(
             topBar = {
@@ -170,8 +185,9 @@ fun ViewParking(
                     viewMode = viewMode,
                     spotTypeFilter = spotTypeFilter,
                     selectedSpot = selectedSpot,
-                    occupiedSpots = occupiedSpots,
+                    spotOccupancy = spotOccupancy,
                     userSpots = userSpots,
+                    isCurrentDay = isCurrentDay,
                     onToggleExpanded = { spotsExpanded = !spotsExpanded },
                     onViewModeChange = { viewMode = it },
                     onSpotTypeSelected = { spotTypeFilter = it; selectedSpot = null },
@@ -183,6 +199,7 @@ fun ViewParking(
                     val spotReservations = currentReservations.filter { it.spotNumber == spotNonNull }
                     val isUserSpot = userSpots.contains(spotNonNull)
                     val spotType = ParkingUtils.getSpotType(spotNonNull)
+                    val occupancyState = spotOccupancy[spotNonNull] ?: SpotOccupancyState.FREE
                     ViewParkingSpotDetail(
                         selectedSpot = spotNonNull,
                         spotReservations = spotReservations,
@@ -191,6 +208,7 @@ fun ViewParking(
                         currentUser = currentUser,
                         isDateInReservationRange = isDateInReservationRange,
                         dateStr = dateStr,
+                        occupancyState = occupancyState,
                         onNavigate = onNavigate
                     )
                 }
@@ -247,8 +265,9 @@ private fun ViewParkingSpotSection(
     viewMode: String,
     spotTypeFilter: SpotType?,
     selectedSpot: Int?,
-    occupiedSpots: List<Int>,
+    spotOccupancy: Map<Int, SpotOccupancyState>,
     userSpots: List<Int>,
+    isCurrentDay: Boolean,
     onToggleExpanded: () -> Unit,
     onViewModeChange: (String) -> Unit,
     onSpotTypeSelected: (SpotType?) -> Unit,
@@ -299,15 +318,19 @@ private fun ViewParkingSpotSection(
                 Column {
                     ViewParkingFilterChips(selectedType = spotTypeFilter, onTypeSelected = onSpotTypeSelected)
                     if (viewMode == "dropdown") {
-                        ViewSpotDropdown(selectedSpot = selectedSpot, onSpotSelected = onSpotSelected, occupiedSpots = occupiedSpots, userSpots = userSpots, spotTypeFilter = spotTypeFilter)
+                        ViewSpotDropdown(selectedSpot = selectedSpot, onSpotSelected = onSpotSelected, spotOccupancy = spotOccupancy, userSpots = userSpots, spotTypeFilter = spotTypeFilter)
                     } else {
                         Column {
                             Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 ViewLegendItem(stringResource(R.string.available_legend), SuccessGreen)
-                                ViewLegendItem(stringResource(R.string.occupied_legend), MaterialTheme.colorScheme.outlineVariant)
+                                ViewLegendItem(
+                                    stringResource(R.string.partially_occupied_legend),
+                                    PartiallyOccupiedGreen
+                                )
+                                ViewLegendItem(stringResource(R.string.occupied_legend), OccupiedGray)
                                 ViewLegendItem(stringResource(R.string.user_spot_legend), UserSpotYellow)
                             }
-                            ViewSpotGrid(selectedSpot = selectedSpot, onSpotSelected = onSpotSelected, occupiedSpots = occupiedSpots, userSpots = userSpots, spotTypeFilter = spotTypeFilter)
+                            ViewSpotGrid(selectedSpot = selectedSpot, onSpotSelected = onSpotSelected, spotOccupancy = spotOccupancy, userSpots = userSpots, spotTypeFilter = spotTypeFilter)
                         }
                     }
                 }
@@ -325,6 +348,7 @@ private fun ViewParkingSpotDetail(
     currentUser: com.lksnext.ParkingIMayordomo.data.model.User?,
     isDateInReservationRange: Boolean,
     dateStr: String,
+    occupancyState: SpotOccupancyState,
     onNavigate: (String) -> Unit
 ) {
     Card(
@@ -339,7 +363,8 @@ private fun ViewParkingSpotDetail(
                     Surface(
                         color = when {
                             isUserSpot -> UserSpotYellow
-                            spotReservations.isNotEmpty() -> MaterialTheme.colorScheme.outlineVariant
+                            occupancyState == SpotOccupancyState.FULLY_OCCUPIED -> OccupiedGray
+                            occupancyState == SpotOccupancyState.PARTIALLY_OCCUPIED -> PartiallyOccupiedGreen
                             else -> SuccessGreen
                         },
                         shape = RoundedCornerShape(8.dp), modifier = Modifier.size(40.dp)
@@ -493,7 +518,7 @@ fun ViewParkingFilterChip(selected: Boolean, onClick: () -> Unit, label: String,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ViewSpotDropdown(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, occupiedSpots: List<Int>, userSpots: List<Int>, spotTypeFilter: SpotType?) {
+fun ViewSpotDropdown(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, spotOccupancy: Map<Int, SpotOccupancyState>, userSpots: List<Int>, spotTypeFilter: SpotType?) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     val spots = (1..50).filter { spotTypeFilter == null || ParkingUtils.getSpotType(it) == spotTypeFilter }
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag(TestTags.VIEW_PARKING_SPOT_DROPDOWN)) {
@@ -508,7 +533,8 @@ fun ViewSpotDropdown(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, occupied
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }, modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
             spots.forEach { spot ->
-                val isOccupied = occupiedSpots.contains(spot); val isUserSpot = userSpots.contains(spot)
+                val occupancy = spotOccupancy[spot] ?: SpotOccupancyState.FREE
+                val isUserSpot = userSpots.contains(spot)
                 val spotType = ParkingUtils.getSpotType(spot)
                 DropdownMenuItem(
                     text = {
@@ -517,7 +543,8 @@ fun ViewSpotDropdown(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, occupied
                             Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.spot_number_with_prefix, stringResource(R.string.available_legend), spot), color = MaterialTheme.colorScheme.onSurface)
                             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
                                 if (isUserSpot) Badge(containerColor = UserSpotYellow) { Text(stringResource(R.string.badge_mine), modifier = Modifier.padding(2.dp), color = Color.White) }
-                                else if (isOccupied) Badge(containerColor = MaterialTheme.colorScheme.outlineVariant) { Text(stringResource(R.string.status_occupied), modifier = Modifier.padding(2.dp)) }
+                                else if (occupancy == SpotOccupancyState.FULLY_OCCUPIED) Badge(containerColor = OccupiedGray) { Text(stringResource(R.string.status_occupied), modifier = Modifier.padding(2.dp), color = Color.White) }
+                                else if (occupancy == SpotOccupancyState.PARTIALLY_OCCUPIED) Badge(containerColor = PartiallyOccupiedGreen) { Text(stringResource(R.string.status_partially_occupied), modifier = Modifier.padding(2.dp), color = Color.White) }
                                 else Badge(containerColor = SuccessGreen) { Text(stringResource(R.string.status_available), modifier = Modifier.padding(2.dp), color = Color.White) }
                             }
                         }
@@ -531,15 +558,25 @@ fun ViewSpotDropdown(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, occupied
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ViewSpotGrid(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, occupiedSpots: List<Int>, userSpots: List<Int>, spotTypeFilter: SpotType?) {
+fun ViewSpotGrid(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, spotOccupancy: Map<Int, SpotOccupancyState>, userSpots: List<Int>, spotTypeFilter: SpotType?) {
     val spots = (1..50).filter { spotTypeFilter == null || ParkingUtils.getSpotType(it) == spotTypeFilter }
     FlowRow(modifier = Modifier.fillMaxWidth().testTag(TestTags.VIEW_PARKING_SPOT_GRID), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         spots.forEach { spot ->
-            val isOccupied = occupiedSpots.contains(spot); val isUserSpot = userSpots.contains(spot); val isSelected = selectedSpot == spot
+            val occupancy = spotOccupancy[spot] ?: SpotOccupancyState.FREE
+            val isUserSpot = userSpots.contains(spot)
+            val isSelected = selectedSpot == spot
             val spotType = ParkingUtils.getSpotType(spot)
             Box(
                 modifier = Modifier.size(60.dp)
-                    .background(when { isUserSpot -> UserSpotYellow; isOccupied -> MaterialTheme.colorScheme.outlineVariant; else -> SuccessGreen }, RoundedCornerShape(8.dp))
+                    .background(
+                        when {
+                            isUserSpot -> UserSpotYellow
+                            occupancy == SpotOccupancyState.FULLY_OCCUPIED -> OccupiedGray
+                            occupancy == SpotOccupancyState.PARTIALLY_OCCUPIED -> PartiallyOccupiedGreen
+                            else -> SuccessGreen
+                        },
+                        RoundedCornerShape(8.dp)
+                    )
                     .border(width = if (isSelected) 3.dp else 0.dp, color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent, shape = RoundedCornerShape(8.dp))
                     .clickable { onSpotSelected(spot) },
                 contentAlignment = Alignment.Center

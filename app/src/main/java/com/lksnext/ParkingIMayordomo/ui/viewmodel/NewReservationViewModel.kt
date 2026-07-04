@@ -18,6 +18,8 @@ class NewReservationViewModel(private val repository: ParkingRepository) : ViewM
     val vehicles = repository.vehicles
     val reservations = repository.reservations
     val user = repository.user
+    val allReservationsReady = repository.allReservationsReady
+    val notifications = repository.notifications
 
     private val sdfDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     private val sdfTime = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -124,11 +126,34 @@ class NewReservationViewModel(private val repository: ParkingRepository) : ViewM
         val endStr = sdfTime.format(endTime.time)
         val crossesMidnight = ParkingUtils.isMidnightCrossing(startStr, endStr)
 
+        val weekLater = Calendar.getInstance().apply {
+            time = now.time
+            add(Calendar.DAY_OF_YEAR, 7)
+            set(Calendar.HOUR_OF_DAY, 23)
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+        }
+
         if (crossesMidnight) {
+            val nextDate = Calendar.getInstance().apply {
+                time = selectedDate.time
+                add(Calendar.DAY_OF_YEAR, 1)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+            }
+            if (nextDate.after(weekLater)) return R.string.error_max_advance_exceeded
+
             val totalMinutes = ParkingUtils.calculateDurationMinutes(startStr, endStr)
             if (totalMinutes > 9 * 60) return R.string.error_max_9_hours
             if (startCal.before(now)) return R.string.error_start_before_now
         } else {
+            val endCal = Calendar.getInstance().apply {
+                time = selectedDate.time
+                set(Calendar.HOUR_OF_DAY, endTime.get(Calendar.HOUR_OF_DAY))
+                set(Calendar.MINUTE, endTime.get(Calendar.MINUTE))
+            }
+            if (endCal.after(weekLater)) return R.string.error_max_advance_exceeded
+
             val diff = endTime.timeInMillis - startTime.timeInMillis
             val hours = diff / (1000 * 60 * 60.0)
             if (startCal.before(now)) return R.string.error_start_before_now

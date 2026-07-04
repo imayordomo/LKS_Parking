@@ -29,7 +29,7 @@ import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepositoryImpl
 import com.lksnext.ParkingIMayordomo.ui.pages.*
-import com.lksnext.ParkingIMayordomo.ui.theme.LKS_ParkingTheme
+import com.lksnext.ParkingIMayordomo.ui.theme.LksParkingTheme
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.*
 import com.lksnext.ParkingIMayordomo.utils.LocaleManager
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.PARAM_SHOW_VEHICLE_ALERT
@@ -88,7 +88,7 @@ class MainActivity : ComponentActivity() {
         askNotificationPermission()
 
         setContent {
-            LKS_ParkingTheme {
+            LksParkingTheme {
                 AppNavigation()
             }
         }
@@ -108,8 +108,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun obtenerFCMToken() {
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener { task ->
             if (!task.isSuccessful) {
                 Log.w("FCM_PARKING", "Error al obtener el token de Firebase", task.exception)
                 return@addOnCompleteListener
@@ -214,12 +215,14 @@ fun AppNavigation() {
         }
         composable(ROUTE_HELP) {
             ProtectedRoute(currentUser, navController) {
-                Help(onNavigate = { navController.navigate(it) })
+                val notifications by repository.notifications.collectAsState()
+                Help(onNavigate = { navController.navigate(it) }, user = currentUser, notifications = notifications)
             }
         }
         composable(ROUTE_ABOUT) {
             ProtectedRoute(currentUser, navController) {
-                About(onNavigate = { navController.navigate(it) })
+                val notifications by repository.notifications.collectAsState()
+                About(onNavigate = { navController.navigate(it) }, user = currentUser, notifications = notifications)
             }
         }
         composable("${ROUTE_NEW_RESERVATION}?spot={spot}&date={date}",

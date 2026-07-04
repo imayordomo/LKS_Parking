@@ -66,7 +66,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun LKS_ParkingTheme(
+fun LksParkingTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit

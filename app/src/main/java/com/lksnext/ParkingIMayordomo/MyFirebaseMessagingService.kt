@@ -13,9 +13,19 @@ import com.google.firebase.messaging.RemoteMessage
 import com.lksnext.ParkingIMayordomo.data.AuthManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
+@Suppress("DEPRECATION")
 class MyFirebaseMessagingService : FirebaseMessagingService() {
+
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override fun onDestroy() {
+        super.onDestroy()
+        serviceScope.cancel()
+    }
 
     @Suppress("InjectDispatcher")
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
@@ -24,7 +34,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "Aviso de Parking"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: "Tienes una nueva actualización."
 
-        CoroutineScope(Dispatchers.IO).launch {
+        serviceScope.launch {
             try {
                 AuthManager.addExternalNotification(title, body)
             } catch (e: Exception) {
@@ -35,11 +45,11 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         mostrarNotificacion(title, body)
     }
 
-    @Suppress("DEPRECATION")
+    @Deprecated("Deprecated in FirebaseMessagingService; token refresh handled via getToken()", ReplaceWith(""))
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d("FCM_TOKEN", "Nuevo token generado: $token")
-        CoroutineScope(Dispatchers.IO).launch {
+        serviceScope.launch {
             try {
                 AuthManager.updateFcmToken(token)
             } catch (e: Exception) {

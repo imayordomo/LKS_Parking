@@ -120,4 +120,39 @@ class ProfileViewModelTest {
         viewModel.clearError()
         assertNull(viewModel.errorResId.value)
     }
+
+    @Test
+    fun `deleteAccount should call repository and clear error on success`() = runTest {
+        coEvery { repository.deleteAccount() } returns Unit
+
+        viewModel.deleteAccount()
+
+        coVerify { repository.deleteAccount() }
+    }
+
+    @Test
+    fun `deleteAccount should set error on failure`() = runTest {
+        coEvery { repository.deleteAccount() } throws Exception("delete failed")
+
+        viewModel.deleteAccount()
+
+        assertEquals(R.string.error_delete_account, viewModel.errorResId.value)
+    }
+
+    @Test
+    fun `deleteAccount success should not set error`() = runTest {
+        coEvery { repository.deleteAccount() } returns Unit
+
+        viewModel.deleteAccount()
+
+        assertNull(viewModel.errorResId.value)
+    }
+
+    @Test
+    fun `updateProfile with image should call repository with base64`() = runTest {
+        val name = "Test User"
+        val image = "base64encodedstring"
+        viewModel.updateProfile(name, image)
+        coVerify { repository.updateProfile(name, image) }
+    }
 }

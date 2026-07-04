@@ -88,5 +88,5 @@ data class Report(
     val title: String = "",
     val description: String = "",
     val timestamp: Timestamp? = null,
-    val status: String = "PENDING"
+    val status: ReportStatus = ReportStatus.PENDING
 )

@@ -1,41 +1,37 @@
 package com.lksnext.ParkingIMayordomo.ui.viewmodel
 
-import com.lksnext.ParkingIMayordomo.MainDispatcherRule
+import com.lksnext.ParkingIMayordomo.data.model.Notification
 import com.lksnext.ParkingIMayordomo.data.model.Reservation
 import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepository
-import io.mockk.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import java.util.*
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class ViewParkingViewModelTest {
-
-    @get:Rule
-    val mainDispatcherRule = MainDispatcherRule()
 
     private lateinit var repository: ParkingRepository
     private lateinit var viewModel: ViewParkingViewModel
-
-    private val userFlow = MutableStateFlow<User?>(null)
+    
     private val reservationsFlow = MutableStateFlow<List<Reservation>>(emptyList())
     private val allReservationsFlow = MutableStateFlow<List<Reservation>>(emptyList())
+    private val userFlow = MutableStateFlow<User?>(null)
+    private val notificationsFlow = MutableStateFlow<List<Notification>>(emptyList())
 
     @Before
     fun setup() {
-        repository = mockk(relaxed = true)
-        every { repository.user } returns (userFlow as StateFlow<User?>)
-        every { repository.reservations } returns (reservationsFlow as StateFlow<List<Reservation>>)
-        every { repository.allReservations } returns (allReservationsFlow as StateFlow<List<Reservation>>)
+        repository = mockk()
+        every { repository.reservations } returns reservationsFlow
+        every { repository.allReservations } returns allReservationsFlow
+        every { repository.user } returns userFlow
+        every { repository.notifications } returns notificationsFlow
         
         viewModel = ViewParkingViewModel(repository)
     }
@@ -46,16 +42,17 @@ class ViewParkingViewModelTest {
         date.set(2023, 4, 10) // 2023-05-10
         
         allReservationsFlow.value = listOf(
-            Reservation(id = "1", spotNumber = 5, date = "2023-05-10"),
-            Reservation(id = "2", spotNumber = 10, date = "2023-05-10"),
-            Reservation(id = "3", spotNumber = 5, date = "2023-05-10"),
-            Reservation(id = "4", spotNumber = 15, date = "2023-05-11")
+            Reservation(id = "1", spotNumber = 5, date = "2023-05-10", startTime = "08:00", endTime = "10:00"),
+            Reservation(id = "2", spotNumber = 10, date = "2023-05-10", startTime = "09:00", endTime = "11:00"),
+            Reservation(id = "3", spotNumber = 5, date = "2023-05-10", startTime = "12:00", endTime = "14:00"),
+            Reservation(id = "4", spotNumber = 15, date = "2023-05-11", startTime = "08:00", endTime = "10:00")
         )
 
         val occupied = viewModel.getOccupiedSpots(date).first()
         
+        // occupied is Map<Int, SpotOccupancyState>
         assertEquals(2, occupied.size)
-        assertEquals(listOf(5, 10), occupied.sorted())
+        assertEquals(listOf(5, 10), occupied.keys.sorted())
     }
 
     @Test
@@ -67,9 +64,9 @@ class ViewParkingViewModelTest {
         userFlow.value = User(id = userId)
         
         reservationsFlow.value = listOf(
-            Reservation(id = "1", spotNumber = 5, date = "2023-05-10", userId = userId),
-            Reservation(id = "2", spotNumber = 10, date = "2023-05-10", userId = "other"),
-            Reservation(id = "3", spotNumber = 5, date = "2023-05-10", userId = userId)
+            Reservation(id = "1", spotNumber = 5, date = "2023-05-10", userId = userId, startTime = "08:00", endTime = "10:00"),
+            Reservation(id = "2", spotNumber = 10, date = "2023-05-10", userId = "other", startTime = "08:00", endTime = "10:00"),
+            Reservation(id = "3", spotNumber = 5, date = "2023-05-10", userId = userId, startTime = "12:00", endTime = "14:00")
         )
 
         val userSpots = viewModel.getUserSpots(date).first()
@@ -82,7 +79,7 @@ class ViewParkingViewModelTest {
     fun `getUserSpots should return empty list if user is null`() = runTest {
         val date = Calendar.getInstance()
         userFlow.value = null
-        reservationsFlow.value = listOf(Reservation(id = "1", spotNumber = 5, date = "2023-01-01", userId = "some_id"))
+        reservationsFlow.value = listOf(Reservation(id = "1", spotNumber = 5, date = "2023-01-01", userId = "some_id", startTime = "08:00", endTime = "10:00"))
 
         val userSpots = viewModel.getUserSpots(date).first()
         assertTrue(userSpots.isEmpty())
@@ -96,7 +93,7 @@ class ViewParkingViewModelTest {
         allReservationsFlow.value = listOf(
             Reservation(id = "1", spotNumber = 5, date = "2023-05-10", startTime = "09:00", endTime = "11:00"),
             Reservation(id = "2", spotNumber = 10, date = "2023-05-10", startTime = "14:00", endTime = "16:00"),
-            Reservation(id = "3", spotNumber = 15, date = "2023-05-11")
+            Reservation(id = "3", spotNumber = 15, date = "2023-05-11", startTime = "09:00", endTime = "11:00")
         )
 
         val current = viewModel.getCurrentReservations(date).first()
@@ -109,7 +106,7 @@ class ViewParkingViewModelTest {
         date.set(2023, 5, 15)
 
         allReservationsFlow.value = listOf(
-            Reservation(id = "1", spotNumber = 5, date = "2023-05-10")
+            Reservation(id = "1", spotNumber = 5, date = "2023-05-10", startTime = "09:00", endTime = "11:00")
         )
 
         val current = viewModel.getCurrentReservations(date).first()

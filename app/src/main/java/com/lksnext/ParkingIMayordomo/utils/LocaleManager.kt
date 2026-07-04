@@ -25,13 +25,13 @@ object LocaleManager {
     val localeFlow: StateFlow<String> = _localeFlow.asStateFlow()
 
     private var systemLocaleCode: String = "es"
-    private var systemLocale: Locale = Locale("es")
+    private var systemLocale: Locale = Locale.forLanguageTag("es")
 
     fun captureSystemLocale(context: Context) {
         val raw = context.resources.configuration.locales[0]
         // Fallback to Spanish if system language isn't supported
         systemLocaleCode = if (raw.language in supportedLanguages) raw.language else "es"
-        systemLocale = Locale(systemLocaleCode)
+        systemLocale = Locale.forLanguageTag(systemLocaleCode)
     }
 
     /**
@@ -99,7 +99,7 @@ object LocaleManager {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val language = prefs.getString(KEY_LOCALE, "es") ?: "es"
         
-        val locale = Locale(language)
+        val locale = Locale.forLanguageTag(language)
         Locale.setDefault(locale)
         
         val configuration = Configuration(context.resources.configuration)

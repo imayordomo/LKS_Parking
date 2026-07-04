@@ -174,7 +174,8 @@ private fun RegisterErrorBanner(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
+                .padding(bottom = 16.dp)
+                .testTag(TestTags.REGISTER_ERROR_MESSAGE),
             color = MaterialTheme.colorScheme.errorContainer,
             shape = RoundedCornerShape(4.dp),
             border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error)

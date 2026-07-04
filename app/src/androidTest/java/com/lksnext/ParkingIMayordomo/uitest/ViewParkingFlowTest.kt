@@ -31,6 +31,7 @@ class ViewParkingFlowTest {
         every { repo.user } returns MutableStateFlow(user)
         every { repo.reservations } returns MutableStateFlow(reservations)
         every { repo.allReservations } returns MutableStateFlow(allReservations)
+        every { repo.notifications } returns MutableStateFlow(emptyList())
         return repo
     }
 

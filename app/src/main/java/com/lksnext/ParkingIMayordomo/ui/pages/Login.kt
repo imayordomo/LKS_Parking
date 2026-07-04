@@ -95,7 +95,8 @@ fun Login(
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp),
+                        .padding(bottom = 16.dp)
+                        .testTag(TestTags.LOGIN_ERROR_MESSAGE),
                     color = MaterialTheme.colorScheme.surface,
                     border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error),
                     shape = RoundedCornerShape(4.dp)

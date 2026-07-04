@@ -25,7 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
-import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.data.model.Vehicle
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
@@ -315,7 +314,7 @@ private fun ValidationErrorSection(
 ) {
     validationErrorResId?.let { resId ->
         Surface(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth().testTag(TestTags.EDIT_RESERVATION_ERROR_MESSAGE),
             color = MaterialTheme.colorScheme.errorContainer,
             shape = RoundedCornerShape(4.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.error)
@@ -441,7 +440,9 @@ fun EditReservation(
     
     val vehicles by viewModel.vehicles.collectAsState()
     val currentUser by viewModel.user.collectAsState()
-     val allReservations by viewModel.allReservations.collectAsState()
+    val allReservations by viewModel.allReservations.collectAsState()
+    val allReservationsReady by viewModel.allReservationsReady.collectAsState()
+    val notifications by viewModel.notifications.collectAsState()
 
     var showDiscardDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -545,11 +546,11 @@ fun EditReservation(
                 onItemClick = { route ->
                     scope.launch { drawerState.close() }
                     onNavigate(route)
-                }
+                },
+                user = currentUser
             )
         }
     ) {
-        val notifications by AuthManager.notifications.collectAsState()
         val unreadCount = notifications.count { !it.read }
         Scaffold(
             topBar = {
@@ -657,7 +658,7 @@ fun EditReservation(
                                     onNavigate(ROUTE_DASHBOARD)
                                 }
                             },
-                            isSaveEnabled = validationErrorResId == null && selectedVehicleId.isNotBlank() && !loading,
+                            isSaveEnabled = validationErrorResId == null && selectedVehicleId.isNotBlank() && !loading && allReservationsReady,
                             isLoading = loading
                         )
                     }

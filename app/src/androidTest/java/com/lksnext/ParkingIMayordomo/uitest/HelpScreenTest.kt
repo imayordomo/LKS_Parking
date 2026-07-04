@@ -23,4 +23,24 @@ class HelpScreenTest {
         composeTestRule.onAllNodesWithTag(TestTags.HELP_FAQ_ACCORDION)[0].performClick()
         composeTestRule.onAllNodesWithTag(TestTags.HELP_FAQ_ACCORDION)[0].performClick()
     }
+
+    @Test
+    fun faqAccordion_multipleItems_allToggle() {
+        composeTestRule.setContent {
+            Help(onNavigate = { })
+        }
+
+        composeTestRule.onAllNodesWithTag(TestTags.HELP_FAQ_ACCORDION)[0].performClick()
+        composeTestRule.onAllNodesWithTag(TestTags.HELP_FAQ_ACCORDION)[1].performClick()
+        composeTestRule.onAllNodesWithTag(TestTags.HELP_FAQ_ACCORDION)[0].performClick()
+    }
+
+    @Test
+    fun faqAccordion_toggleDownArrow() {
+        composeTestRule.setContent {
+            Help(onNavigate = { })
+        }
+
+        composeTestRule.onAllNodesWithTag(TestTags.HELP_FAQ_ACCORDION)[0].performClick()
+    }
 }
