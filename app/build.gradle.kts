@@ -43,6 +43,10 @@ android {
         }
         debug {
             enableUnitTestCoverage = true
+            // Disable Firebase Performance instrumentation in debug to avoid conflicts with JaCoCo
+            configure<com.google.firebase.perf.plugin.FirebasePerfExtension> {
+                setInstrumentationEnabled(false)
+            }
         }
     }
     compileOptions {
