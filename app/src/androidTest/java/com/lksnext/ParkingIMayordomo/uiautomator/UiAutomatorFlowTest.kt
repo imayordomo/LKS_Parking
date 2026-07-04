@@ -62,7 +62,7 @@ class UiAutomatorFlowTest {
     fun navigateFromLandingToRegister() {
         val registerText = findText(getRegisterTexts())
         assertNotNull("Register button should be displayed. Tried: ${getRegisterTexts()}", registerText)
-        device.findObject(UiSelector().textContains(registerText)).click()
+        device.findObject(UiSelector().textContains(registerText ?: "")).click()
 
         val nameText = findText(getNameTexts())
         assertNotNull("Name field after Register. Tried: ${getNameTexts()}", nameText)
@@ -72,7 +72,7 @@ class UiAutomatorFlowTest {
     fun navigateFromLandingToLogin() {
         val loginText = findText(getLoginTexts())
         assertNotNull("Login button should be displayed. Tried: ${getLoginTexts()}", loginText)
-        device.findObject(UiSelector().textContains(loginText)).click()
+        device.findObject(UiSelector().textContains(loginText ?: "")).click()
 
         val emailText = findText(getEmailTexts())
         assertNotNull("Email field after Login. Tried: ${getEmailTexts()}", emailText)
