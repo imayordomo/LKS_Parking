@@ -5,8 +5,8 @@ import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
 import org.junit.Assert.assertNotNull
 import org.junit.Before
@@ -31,49 +31,41 @@ class UiAutomatorFlowTest {
         assertNotNull("Launch intent should not be null", intent)
         context.startActivity(intent)
 
-        device.wait(Until.hasObject(By.pkg(packageName).depth(0)), timeout)
+        device.wait(Until.hasObject(androidx.test.uiautomator.By.pkg(packageName).depth(0)), timeout)
     }
 
     @Test
     fun landingScreen_hasLoginAndRegisterButtons() {
-        val loginButton = device.wait(
-            Until.findObject(By.textContains("Iniciar Sesión")),
-            timeout
-        )
+        val loginButton = device.findObject(UiSelector().textContains("Iniciar Sesión"))
+        loginButton.waitForExists(timeout)
         assertNotNull("Login button should be displayed", loginButton)
 
-        val registerButton = device.wait(
-            Until.findObject(By.textContains("Registrarse")),
-            timeout
-        )
+        val registerButton = device.findObject(UiSelector().textContains("Registrarse"))
+        registerButton.waitForExists(timeout)
         assertNotNull("Register button should be displayed", registerButton)
     }
 
     @Test
     fun navigateFromLandingToRegister() {
-        val registerButton = device.wait(
-            Until.findObject(By.textContains("Registrarse")),
-            timeout
-        )
+        val registerButton = device.findObject(UiSelector().textContains("Registrarse"))
+        registerButton.waitForExists(timeout)
         assertNotNull(registerButton)
         registerButton.click()
 
-        device.wait(Until.hasObject(By.textContains("Nombre")), timeout)
-        val nameField = device.findObject(By.textContains("Nombre"))
+        device.wait(Until.hasObject(androidx.test.uiautomator.By.textContains("Nombre")), timeout)
+        val nameField = device.findObject(androidx.test.uiautomator.By.textContains("Nombre"))
         assertNotNull("Name field should be visible after clicking Register", nameField)
     }
 
     @Test
     fun navigateFromLandingToLogin() {
-        val loginButton = device.wait(
-            Until.findObject(By.textContains("Iniciar Sesión")),
-            timeout
-        )
+        val loginButton = device.findObject(UiSelector().textContains("Iniciar Sesión"))
+        loginButton.waitForExists(timeout)
         assertNotNull(loginButton)
         loginButton.click()
 
-        device.wait(Until.hasObject(By.textContains("Email")), timeout)
-        val emailField = device.findObject(By.textContains("Email"))
+        device.wait(Until.hasObject(androidx.test.uiautomator.By.textContains("Email")), timeout)
+        val emailField = device.findObject(androidx.test.uiautomator.By.textContains("Email"))
         assertNotNull("Email field should be visible after clicking Login", emailField)
     }
 }

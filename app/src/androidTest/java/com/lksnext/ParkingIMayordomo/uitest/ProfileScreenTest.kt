@@ -4,11 +4,14 @@ import android.graphics.Bitmap
 import android.util.Base64
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.waitUntilExactlyOneExists
 import com.lksnext.ParkingIMayordomo.data.model.Reservation
 import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.model.Vehicle
@@ -26,6 +29,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.io.ByteArrayOutputStream
 
+@OptIn(ExperimentalTestApi::class)
 class ProfileScreenTest {
 
     @get:Rule
@@ -419,6 +423,7 @@ class ProfileScreenTest {
         }
 
         composeTestRule.onNodeWithTag(TestTags.PROFILE_LANGUAGE_SELECTOR).performClick()
+        composeTestRule.waitUntilExactlyOneExists(hasText("Español"), timeoutMillis = 5000)
         composeTestRule.onNodeWithText("Español").performClick()
 
         assertEquals("es", LocaleManager.localeFlow.value)
@@ -432,6 +437,7 @@ class ProfileScreenTest {
         }
 
         composeTestRule.onNodeWithTag(TestTags.PROFILE_LANGUAGE_SELECTOR).performClick()
+        composeTestRule.waitUntilExactlyOneExists(hasText("Inglés"), timeoutMillis = 5000)
         composeTestRule.onNodeWithText("Inglés").performClick()
 
         assertEquals("en", LocaleManager.localeFlow.value)
@@ -445,6 +451,7 @@ class ProfileScreenTest {
         }
 
         composeTestRule.onNodeWithTag(TestTags.PROFILE_LANGUAGE_SELECTOR).performClick()
+        composeTestRule.waitUntilExactlyOneExists(hasText("Vasco"), timeoutMillis = 5000)
         composeTestRule.onNodeWithText("Vasco").performClick()
 
         assertEquals("eu", LocaleManager.localeFlow.value)

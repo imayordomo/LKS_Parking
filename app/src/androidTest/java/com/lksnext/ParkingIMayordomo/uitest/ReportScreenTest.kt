@@ -2,11 +2,14 @@ package com.lksnext.ParkingIMayordomo.uitest
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.waitUntilExactlyOneExists
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepository
@@ -19,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalTestApi::class)
 class ReportScreenTest {
 
     @get:Rule
@@ -130,6 +134,10 @@ class ReportScreenTest {
         }
 
         composeTestRule.onNodeWithTag(TestTags.REPORT_SPOT_NUMBER_FIELD).performTextInput("0")
+        composeTestRule.waitUntilExactlyOneExists(
+            hasText("N\u00famero de plaza inv\u00e1lido (1\u201350)"),
+            timeoutMillis = 5000
+        )
         composeTestRule.onNodeWithText("Número de plaza inválido (1–50)").assertIsDisplayed()
     }
 
@@ -156,6 +164,10 @@ class ReportScreenTest {
 
         // Type an invalid spot number
         composeTestRule.onNodeWithTag(TestTags.REPORT_SPOT_NUMBER_FIELD).performTextInput("51")
+        composeTestRule.waitUntilExactlyOneExists(
+            hasText("N\u00famero de plaza inv\u00e1lido (1\u201350)"),
+            timeoutMillis = 5000
+        )
         composeTestRule.onNodeWithText("Número de plaza inválido (1–50)").assertIsDisplayed()
     }
 
@@ -171,6 +183,10 @@ class ReportScreenTest {
             Report(viewModel = vm, onNavigate = { })
         }
 
+        composeTestRule.waitUntilExactlyOneExists(
+            hasText("Reporte enviado correctamente. Gracias por tu colaboraci\u00f3n."),
+            timeoutMillis = 5000
+        )
         composeTestRule.onNodeWithText("Reporte enviado correctamente. Gracias por tu colaboración.").assertIsDisplayed()
     }
 }

@@ -3,6 +3,7 @@ package com.lksnext.ParkingIMayordomo.uitest
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.hasTestTag
@@ -13,6 +14,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.waitUntilExactlyOneExists
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.lksnext.ParkingIMayordomo.data.model.Notification
 import com.lksnext.ParkingIMayordomo.data.model.Report
@@ -68,6 +70,7 @@ import org.junit.runner.RunWith
 import java.util.UUID
 
 @RunWith(AndroidJUnit4::class)
+@OptIn(ExperimentalTestApi::class)
 class EndToEndFlowTest {
 
     @get:Rule
@@ -426,6 +429,7 @@ class EndToEndFlowTest {
         composeTestRule.waitForIdle()
 
         composeTestRule.onNodeWithTag(TestTags.REPORT_TYPE_FIELD).performClick()
+        composeTestRule.waitUntilExactlyOneExists(hasText("Da\u00f1o en la plaza"), timeoutMillis = 5000)
         composeTestRule.onNodeWithText("Da\u00f1o en la plaza").performClick()
         composeTestRule.waitForIdle()
 
@@ -571,6 +575,7 @@ class EndToEndFlowTest {
         composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_SPOT_DROPDOWN).assertIsDisplayed()
 
         // Open the dropdown by clicking the "Libre" label (menuAnchor on the text field)
+        composeTestRule.waitUntilExactlyOneExists(hasText("Libre"), timeoutMillis = 5000)
         composeTestRule.onNodeWithText("Libre").performClick()
         composeTestRule.waitForIdle()
 
@@ -602,6 +607,7 @@ class EndToEndFlowTest {
         composeTestRule.waitForIdle()
 
         // Open the dropdown by clicking the prompt text (menuAnchor on the text field)
+        composeTestRule.waitUntilExactlyOneExists(hasText("Seleccionar plaza"), timeoutMillis = 5000)
         composeTestRule.onNodeWithText("Seleccionar plaza").performClick()
         composeTestRule.waitForIdle()
 
@@ -729,6 +735,7 @@ class EndToEndFlowTest {
             )
         }
         composeTestRule.waitForIdle()
+        composeTestRule.waitUntilExactlyOneExists(hasText("Libre"), timeoutMillis = 5000)
         composeTestRule.onNodeWithText("Libre").assertIsDisplayed()
         composeTestRule.onNodeWithText("Ocupada").assertIsDisplayed()
         composeTestRule.onNodeWithText("Tu plaza").assertIsDisplayed()
@@ -749,6 +756,7 @@ class EndToEndFlowTest {
             )
         }
         composeTestRule.waitForIdle()
+        composeTestRule.waitUntilExactlyOneExists(hasText("Libre"), timeoutMillis = 5000)
         composeTestRule.onNodeWithText("Libre").assertIsDisplayed()
         composeTestRule.onNodeWithText("Parcialmente ocupada").assertIsDisplayed()
         composeTestRule.onNodeWithText("Tu plaza").assertIsDisplayed()

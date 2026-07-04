@@ -2,11 +2,13 @@ package com.lksnext.ParkingIMayordomo.uitest
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
-import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.waitUntilExactlyOneExists
 import com.lksnext.ParkingIMayordomo.data.model.Reservation
 import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepository
@@ -21,6 +23,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.Calendar
 
+@OptIn(ExperimentalTestApi::class)
 class HistoryScreenTest {
 
     @get:Rule
@@ -192,8 +195,8 @@ class HistoryScreenTest {
         }
 
         // Default filter is "all" – both reservations displayed
-        composeTestRule.onNodeWithText("P 5").assertIsDisplayed()
-        composeTestRule.onNodeWithText("P 10").assertIsDisplayed()
+        composeTestRule.waitUntilExactlyOneExists(hasText("P 5"), timeoutMillis = 5000)
+        composeTestRule.waitUntilExactlyOneExists(hasText("P 10"), timeoutMillis = 5000)
     }
 
     @Test
@@ -217,7 +220,8 @@ class HistoryScreenTest {
         composeTestRule.onNodeWithTag(TestTags.HISTORY_EXPAND_FILTERS).performClick()
         composeTestRule.onNodeWithTag(TestTags.HISTORY_FILTER_PAST).performClick()
 
-        composeTestRule.onNodeWithText("P 5").assertIsDisplayed()
+        composeTestRule.waitUntilExactlyOneExists(hasText("P 5"), timeoutMillis = 5000)
+        composeTestRule.onNodeWithText("P 5").assertExists()
         composeTestRule.onNodeWithText("P 10").assertDoesNotExist()
     }
 
@@ -242,7 +246,8 @@ class HistoryScreenTest {
         composeTestRule.onNodeWithTag(TestTags.HISTORY_EXPAND_FILTERS).performClick()
         composeTestRule.onNodeWithTag(TestTags.HISTORY_FILTER_FUTURE).performClick()
 
-        composeTestRule.onNodeWithText("P 10").assertIsDisplayed()
+        composeTestRule.waitUntilExactlyOneExists(hasText("P 10"), timeoutMillis = 5000)
+        composeTestRule.onNodeWithText("P 10").assertExists()
         composeTestRule.onNodeWithText("P 5").assertDoesNotExist()
     }
 }
