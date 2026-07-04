@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.firebase.crashlytics)
     id("jacoco")
     alias(libs.plugins.detekt)
+    alias(libs.plugins.firebase.perf)
 }
 
 jacoco {
@@ -26,8 +27,8 @@ android {
         applicationId = "com.lksnext.ParkingIMayordomo"
         minSdk = 24
         targetSdk = 36
-        versionCode = 15
-        versionName = "1.12.1"
+        versionCode = 16
+        versionName = "1.13.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -152,6 +153,7 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.perf)
     implementation(libs.androidx.fragment)
     
     testImplementation(libs.junit)
