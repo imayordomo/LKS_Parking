@@ -84,6 +84,7 @@ class EditReservationFlowTest {
             )
         }
 
+        composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag(TestTags.EDIT_RESERVATION_SAVE_BUTTON).assertIsDisplayed()
     }
 
@@ -103,13 +104,12 @@ class EditReservationFlowTest {
 
     @Test
     fun discardDialog_confirm_navigatesToDashboard() {
-        var navigatedRoute: String? = null
         val repo = createRepository()
         composeTestRule.setContent {
             EditReservation(
                 viewModel = EditReservationViewModel(repo),
                 reservationId = "r1",
-                onNavigate = { navigatedRoute = it }
+                onNavigate = { }
             )
         }
 

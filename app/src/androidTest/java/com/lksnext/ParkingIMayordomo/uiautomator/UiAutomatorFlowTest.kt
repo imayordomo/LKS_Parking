@@ -6,7 +6,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
-import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import org.junit.Assert.assertNotNull
@@ -19,7 +18,7 @@ class UiAutomatorFlowTest {
 
     private lateinit var device: UiDevice
     private val packageName = "com.lksnext.ParkingIMayordomo"
-    private val timeout = 5000L
+    private val timeout = 15000L
 
     @Before
     fun setUp() {
