@@ -111,7 +111,7 @@ jobs:
           ram-size: 2048M
           heap-size: 512M
           disk-size: 4096M
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot -camera-back none -locale es-ES -timezone Europe/Madrid
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot -camera-back none -prop persist.sys.language=es -prop persist.sys.country=ES -prop persist.sys.locale=es-ES
           disable-animations: true
           disable-spellchecker: true
           emulator-boot-timeout: 600
