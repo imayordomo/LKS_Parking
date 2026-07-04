@@ -107,13 +107,13 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: x86_64
+          avd-device: pixel_6_pro
           ram-size: 2048M
           heap-size: 512M
           disk-size: 4096M
-          avd-name: Pixel6Pro
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-window -noaudio -no-boot-anim -no-snapshot -camera-back none
           disable-animations: true
           disable-spellchecker: true
           emulator-boot-timeout: 600
-          script: ./gradlew connectedDebugAndroidTest --stacktrace
+          script: ./gradlew connectedDebugAndroidTest --stacktrace -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
 
