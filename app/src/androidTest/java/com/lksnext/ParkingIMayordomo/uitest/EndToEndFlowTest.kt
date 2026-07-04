@@ -16,6 +16,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.waitUntilExactlyOneExists
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.data.model.Notification
 import com.lksnext.ParkingIMayordomo.data.model.Report
 import com.lksnext.ParkingIMayordomo.data.model.Reservation
@@ -75,6 +77,8 @@ class EndToEndFlowTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    private val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
 
     private fun createMockRepository(
         user: User? = null,
@@ -429,8 +433,9 @@ class EndToEndFlowTest {
         composeTestRule.waitForIdle()
 
         composeTestRule.onNodeWithTag(TestTags.REPORT_TYPE_FIELD).performClick()
-        composeTestRule.waitUntilExactlyOneExists(hasText("Da\u00f1o en la plaza"), timeoutMillis = 5000)
-        composeTestRule.onNodeWithText("Da\u00f1o en la plaza").performClick()
+        val damageText = targetContext.getString(R.string.report_type_damage)
+        composeTestRule.waitUntilExactlyOneExists(hasText(damageText), timeoutMillis = 5000)
+        composeTestRule.onNodeWithText(damageText).performClick()
         composeTestRule.waitForIdle()
 
         composeTestRule.onNodeWithTag(TestTags.REPORT_SPOT_NUMBER_FIELD).performTextInput("5")
@@ -575,12 +580,14 @@ class EndToEndFlowTest {
         composeTestRule.onNodeWithTag(TestTags.NEW_RESERVATION_SPOT_DROPDOWN).assertIsDisplayed()
 
         // Open the dropdown by clicking the "Libre" label (menuAnchor on the text field)
-        composeTestRule.waitUntilExactlyOneExists(hasText("Libre"), timeoutMillis = 5000)
-        composeTestRule.onNodeWithText("Libre").performClick()
+        val libreText = targetContext.getString(R.string.available_legend)
+        composeTestRule.waitUntilExactlyOneExists(hasText(libreText), timeoutMillis = 5000)
+        composeTestRule.onNodeWithText(libreText).performClick()
         composeTestRule.waitForIdle()
 
         // Select spot 5 from the dropdown menu items (spots 1-5 are MOTORCYCLE type)
-        composeTestRule.onNodeWithText("Libre #5 (Moto)").performClick()
+        val libre5Moto = targetContext.getString(R.string.spot_with_type_format, targetContext.getString(R.string.available_legend), 5, targetContext.getString(R.string.spot_type_motorcycle))
+        composeTestRule.onNodeWithText(libre5Moto).performClick()
         composeTestRule.waitForIdle()
     }
 
@@ -607,12 +614,14 @@ class EndToEndFlowTest {
         composeTestRule.waitForIdle()
 
         // Open the dropdown by clicking the prompt text (menuAnchor on the text field)
-        composeTestRule.waitUntilExactlyOneExists(hasText("Seleccionar plaza"), timeoutMillis = 5000)
-        composeTestRule.onNodeWithText("Seleccionar plaza").performClick()
+        val selectSpotText = targetContext.getString(R.string.select_spot_prompt)
+        composeTestRule.waitUntilExactlyOneExists(hasText(selectSpotText), timeoutMillis = 5000)
+        composeTestRule.onNodeWithText(selectSpotText).performClick()
         composeTestRule.waitForIdle()
 
-        // Select spot 5 from the dropdown menu items ("Libre #5" in Spanish local)
-        composeTestRule.onNodeWithText("Libre #5").performClick()
+        // Select spot 5 from the dropdown menu items
+        val libre5 = targetContext.getString(R.string.spot_number_with_prefix, targetContext.getString(R.string.available_legend), 5)
+        composeTestRule.onNodeWithText(libre5).performClick()
         composeTestRule.waitForIdle()
 
         // Reserve button should appear
@@ -735,10 +744,11 @@ class EndToEndFlowTest {
             )
         }
         composeTestRule.waitForIdle()
-        composeTestRule.waitUntilExactlyOneExists(hasText("Libre"), timeoutMillis = 5000)
-        composeTestRule.onNodeWithText("Libre").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Ocupada").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Tu plaza").assertIsDisplayed()
+        val libreText = targetContext.getString(R.string.available_legend)
+        composeTestRule.waitUntilExactlyOneExists(hasText(libreText), timeoutMillis = 5000)
+        composeTestRule.onNodeWithText(libreText).assertIsDisplayed()
+        composeTestRule.onNodeWithText(targetContext.getString(R.string.occupied_legend)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(targetContext.getString(R.string.user_spot_legend)).assertIsDisplayed()
     }
 
     @Test
@@ -756,9 +766,10 @@ class EndToEndFlowTest {
             )
         }
         composeTestRule.waitForIdle()
-        composeTestRule.waitUntilExactlyOneExists(hasText("Libre"), timeoutMillis = 5000)
-        composeTestRule.onNodeWithText("Libre").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Parcialmente ocupada").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Tu plaza").assertIsDisplayed()
+        val libreText = targetContext.getString(R.string.available_legend)
+        composeTestRule.waitUntilExactlyOneExists(hasText(libreText), timeoutMillis = 5000)
+        composeTestRule.onNodeWithText(libreText).assertIsDisplayed()
+        composeTestRule.onNodeWithText(targetContext.getString(R.string.partially_occupied_legend)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(targetContext.getString(R.string.user_spot_legend)).assertIsDisplayed()
     }
 }

@@ -12,6 +12,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.waitUntilExactlyOneExists
+import androidx.test.platform.app.InstrumentationRegistry
+import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.data.model.Reservation
 import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.model.Vehicle
@@ -34,6 +36,8 @@ class ProfileScreenTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    private val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
 
     private fun createRepository(
         user: User? = User("u1", "test@test.com", "Test User"),
@@ -423,8 +427,9 @@ class ProfileScreenTest {
         }
 
         composeTestRule.onNodeWithTag(TestTags.PROFILE_LANGUAGE_SELECTOR).performClick()
-        composeTestRule.waitUntilExactlyOneExists(hasText("Español"), timeoutMillis = 5000)
-        composeTestRule.onNodeWithText("Español").performClick()
+        val spanishText = targetContext.getString(R.string.language_spanish)
+        composeTestRule.waitUntilExactlyOneExists(hasText(spanishText), timeoutMillis = 5000)
+        composeTestRule.onNodeWithText(spanishText).performClick()
 
         assertEquals("es", LocaleManager.localeFlow.value)
     }
@@ -437,8 +442,9 @@ class ProfileScreenTest {
         }
 
         composeTestRule.onNodeWithTag(TestTags.PROFILE_LANGUAGE_SELECTOR).performClick()
-        composeTestRule.waitUntilExactlyOneExists(hasText("Inglés"), timeoutMillis = 5000)
-        composeTestRule.onNodeWithText("Inglés").performClick()
+        val englishText = targetContext.getString(R.string.language_english)
+        composeTestRule.waitUntilExactlyOneExists(hasText(englishText), timeoutMillis = 5000)
+        composeTestRule.onNodeWithText(englishText).performClick()
 
         assertEquals("en", LocaleManager.localeFlow.value)
     }
@@ -451,8 +457,9 @@ class ProfileScreenTest {
         }
 
         composeTestRule.onNodeWithTag(TestTags.PROFILE_LANGUAGE_SELECTOR).performClick()
-        composeTestRule.waitUntilExactlyOneExists(hasText("Vasco"), timeoutMillis = 5000)
-        composeTestRule.onNodeWithText("Vasco").performClick()
+        val basqueText = targetContext.getString(R.string.language_basque)
+        composeTestRule.waitUntilExactlyOneExists(hasText(basqueText), timeoutMillis = 5000)
+        composeTestRule.onNodeWithText(basqueText).performClick()
 
         assertEquals("eu", LocaleManager.localeFlow.value)
     }

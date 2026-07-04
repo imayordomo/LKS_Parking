@@ -9,6 +9,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.waitUntilExactlyOneExists
+import androidx.test.platform.app.InstrumentationRegistry
+import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.data.model.Reservation
 import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepository
@@ -28,6 +30,8 @@ class HistoryScreenTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    private val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
 
     private fun createRepository(
         reservations: List<Reservation> = emptyList(),
@@ -195,8 +199,10 @@ class HistoryScreenTest {
         }
 
         // Default filter is "all" – both reservations displayed
-        composeTestRule.waitUntilExactlyOneExists(hasText("P 5"), timeoutMillis = 5000)
-        composeTestRule.waitUntilExactlyOneExists(hasText("P 10"), timeoutMillis = 5000)
+        val p5 = targetContext.getString(R.string.spot_label_format, targetContext.getString(R.string.spot_short_prefix), 5)
+        val p10 = targetContext.getString(R.string.spot_label_format, targetContext.getString(R.string.spot_short_prefix), 10)
+        composeTestRule.waitUntilExactlyOneExists(hasText(p5), timeoutMillis = 5000)
+        composeTestRule.waitUntilExactlyOneExists(hasText(p10), timeoutMillis = 5000)
     }
 
     @Test
@@ -220,9 +226,11 @@ class HistoryScreenTest {
         composeTestRule.onNodeWithTag(TestTags.HISTORY_EXPAND_FILTERS).performClick()
         composeTestRule.onNodeWithTag(TestTags.HISTORY_FILTER_PAST).performClick()
 
-        composeTestRule.waitUntilExactlyOneExists(hasText("P 5"), timeoutMillis = 5000)
-        composeTestRule.onNodeWithText("P 5").assertExists()
-        composeTestRule.onNodeWithText("P 10").assertDoesNotExist()
+        val p5 = targetContext.getString(R.string.spot_label_format, targetContext.getString(R.string.spot_short_prefix), 5)
+        val p10 = targetContext.getString(R.string.spot_label_format, targetContext.getString(R.string.spot_short_prefix), 10)
+        composeTestRule.waitUntilExactlyOneExists(hasText(p5), timeoutMillis = 5000)
+        composeTestRule.onNodeWithText(p5).assertExists()
+        composeTestRule.onNodeWithText(p10).assertDoesNotExist()
     }
 
     @Test
@@ -246,8 +254,10 @@ class HistoryScreenTest {
         composeTestRule.onNodeWithTag(TestTags.HISTORY_EXPAND_FILTERS).performClick()
         composeTestRule.onNodeWithTag(TestTags.HISTORY_FILTER_FUTURE).performClick()
 
-        composeTestRule.waitUntilExactlyOneExists(hasText("P 10"), timeoutMillis = 5000)
-        composeTestRule.onNodeWithText("P 10").assertExists()
-        composeTestRule.onNodeWithText("P 5").assertDoesNotExist()
+        val p5 = targetContext.getString(R.string.spot_label_format, targetContext.getString(R.string.spot_short_prefix), 5)
+        val p10 = targetContext.getString(R.string.spot_label_format, targetContext.getString(R.string.spot_short_prefix), 10)
+        composeTestRule.waitUntilExactlyOneExists(hasText(p10), timeoutMillis = 5000)
+        composeTestRule.onNodeWithText(p10).assertExists()
+        composeTestRule.onNodeWithText(p5).assertDoesNotExist()
     }
 }

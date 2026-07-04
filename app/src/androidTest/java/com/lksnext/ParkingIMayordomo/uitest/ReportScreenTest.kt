@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.waitUntilExactlyOneExists
+import androidx.test.platform.app.InstrumentationRegistry
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepository
@@ -27,6 +28,8 @@ class ReportScreenTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    private val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
 
     private fun createRepository(): ParkingRepository {
         val repo = mockk<ParkingRepository>(relaxed = true)
@@ -134,11 +137,12 @@ class ReportScreenTest {
         }
 
         composeTestRule.onNodeWithTag(TestTags.REPORT_SPOT_NUMBER_FIELD).performTextInput("0")
+        val errorText = targetContext.getString(R.string.error_invalid_spot_number)
         composeTestRule.waitUntilExactlyOneExists(
-            hasText("N\u00famero de plaza inv\u00e1lido (1\u201350)"),
+            hasText(errorText),
             timeoutMillis = 5000
         )
-        composeTestRule.onNodeWithText("Número de plaza inválido (1–50)").assertIsDisplayed()
+        composeTestRule.onNodeWithText(errorText).assertIsDisplayed()
     }
 
     @Test
@@ -149,7 +153,7 @@ class ReportScreenTest {
         }
 
         composeTestRule.onNodeWithTag(TestTags.REPORT_SPOT_NUMBER_FIELD).performTextInput("25")
-        composeTestRule.onNodeWithText("Número de plaza inválido (1–50)").assertIsNotDisplayed()
+        composeTestRule.onNodeWithText(targetContext.getString(R.string.error_invalid_spot_number)).assertIsNotDisplayed()
     }
 
     @Test
@@ -164,11 +168,12 @@ class ReportScreenTest {
 
         // Type an invalid spot number
         composeTestRule.onNodeWithTag(TestTags.REPORT_SPOT_NUMBER_FIELD).performTextInput("51")
+        val errorText = targetContext.getString(R.string.error_invalid_spot_number)
         composeTestRule.waitUntilExactlyOneExists(
-            hasText("N\u00famero de plaza inv\u00e1lido (1\u201350)"),
+            hasText(errorText),
             timeoutMillis = 5000
         )
-        composeTestRule.onNodeWithText("Número de plaza inválido (1–50)").assertIsDisplayed()
+        composeTestRule.onNodeWithText(errorText).assertIsDisplayed()
     }
 
     @Test
@@ -183,10 +188,11 @@ class ReportScreenTest {
             Report(viewModel = vm, onNavigate = { })
         }
 
+        val successText = targetContext.getString(R.string.report_success_message)
         composeTestRule.waitUntilExactlyOneExists(
-            hasText("Reporte enviado correctamente. Gracias por tu colaboraci\u00f3n."),
+            hasText(successText),
             timeoutMillis = 5000
         )
-        composeTestRule.onNodeWithText("Reporte enviado correctamente. Gracias por tu colaboración.").assertIsDisplayed()
+        composeTestRule.onNodeWithText(successText).assertIsDisplayed()
     }
 }
