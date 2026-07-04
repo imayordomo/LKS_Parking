@@ -24,6 +24,9 @@ class UiAutomatorFlowTest {
     fun setUp() {
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
+        device.executeShellCommand("settings put global system_locales es-ES")
+        device.executeShellCommand("am broadcast -a android.intent.action.LOCALE_CHANGED")
+
         val context = ApplicationProvider.getApplicationContext<Context>()
         val intent = context.packageManager.getLaunchIntentForPackage(packageName)?.apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -34,38 +37,44 @@ class UiAutomatorFlowTest {
         device.wait(Until.hasObject(androidx.test.uiautomator.By.pkg(packageName).depth(0)), timeout)
     }
 
+    private fun findText(texts: List<String>): String? {
+        for (text in texts) {
+            val obj = device.findObject(UiSelector().textContains(text))
+            if (obj.waitForExists(3000)) return text
+        }
+        return null
+    }
+
+    private fun getRegisterTexts() = listOf("Registrarse", "Register", "Sign up")
+    private fun getLoginTexts() = listOf("Iniciar Sesión", "Log in", "Sign in")
+    private fun getNameTexts() = listOf("Nombre", "Name")
+    private fun getEmailTexts() = listOf("Email", "Correo electrónico", "Correo")
+
     @Test
     fun landingScreen_hasLoginAndRegisterButtons() {
-        val loginButton = device.findObject(UiSelector().textContains("Iniciar Sesión"))
-        loginButton.waitForExists(timeout)
-        assertNotNull("Login button should be displayed", loginButton)
-
-        val registerButton = device.findObject(UiSelector().textContains("Registrarse"))
-        registerButton.waitForExists(timeout)
-        assertNotNull("Register button should be displayed", registerButton)
+        val loginText = findText(getLoginTexts())
+        assertNotNull("Login button should be displayed. Tried: ${getLoginTexts()}", loginText)
+        val registerText = findText(getRegisterTexts())
+        assertNotNull("Register button should be displayed. Tried: ${getRegisterTexts()}", registerText)
     }
 
     @Test
     fun navigateFromLandingToRegister() {
-        val registerButton = device.findObject(UiSelector().textContains("Registrarse"))
-        registerButton.waitForExists(timeout)
-        assertNotNull(registerButton)
-        registerButton.click()
+        val registerText = findText(getRegisterTexts())
+        assertNotNull("Register button should be displayed. Tried: ${getRegisterTexts()}", registerText)
+        device.findObject(UiSelector().textContains(registerText)).click()
 
-        device.wait(Until.hasObject(androidx.test.uiautomator.By.textContains("Nombre")), timeout)
-        val nameField = device.findObject(androidx.test.uiautomator.By.textContains("Nombre"))
-        assertNotNull("Name field should be visible after clicking Register", nameField)
+        val nameText = findText(getNameTexts())
+        assertNotNull("Name field after Register. Tried: ${getNameTexts()}", nameText)
     }
 
     @Test
     fun navigateFromLandingToLogin() {
-        val loginButton = device.findObject(UiSelector().textContains("Iniciar Sesión"))
-        loginButton.waitForExists(timeout)
-        assertNotNull(loginButton)
-        loginButton.click()
+        val loginText = findText(getLoginTexts())
+        assertNotNull("Login button should be displayed. Tried: ${getLoginTexts()}", loginText)
+        device.findObject(UiSelector().textContains(loginText)).click()
 
-        device.wait(Until.hasObject(androidx.test.uiautomator.By.textContains("Email")), timeout)
-        val emailField = device.findObject(androidx.test.uiautomator.By.textContains("Email"))
-        assertNotNull("Email field should be visible after clicking Login", emailField)
+        val emailText = findText(getEmailTexts())
+        assertNotNull("Email field after Login. Tried: ${getEmailTexts()}", emailText)
     }
 }
