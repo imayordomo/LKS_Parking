@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
@@ -51,6 +52,86 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
+private const val GRID_VIEW = "grid"
+private const val DROPDOWN_VIEW = "dropdown"
+private const val NO_TIME_SELECTED = -1L
+private const val TOTAL_SPOTS = 50
+
+private data class DateTimeDisplay(
+    val dateText: String,
+    val startTimeText: String?,
+    val endTimeText: String?
+)
+
+private data class SpotSelectionState(
+    val selectedSpot: Int?,
+    val spotsExpanded: Boolean,
+    val viewMode: String,
+    val spotTypeFilter: SpotType?,
+    val occupiedSpots: List<Int>,
+    val availableSpotsCount: Int,
+    val validationErrorResId: Int?
+)
+
+private data class ReservationConfirmData(
+    val canConfirm: Boolean,
+    val selectedSpot: Int?,
+    val selectedDate: Calendar,
+    val startTime: Calendar?,
+    val endTime: Calendar?
+)
+
+private fun getFilteredSpots(occupiedSpots: List<Int>, spotTypeFilter: SpotType?): List<Int> =
+    (1..TOTAL_SPOTS).filter { !occupiedSpots.contains(it) && (spotTypeFilter == null || ParkingUtils.getSpotType(it) == spotTypeFilter) }
+
+private fun getSpotsByType(spotTypeFilter: SpotType?): List<Int> =
+    (1..TOTAL_SPOTS).filter { spotTypeFilter == null || ParkingUtils.getSpotType(it) == spotTypeFilter }
+
+private fun parsePrefilledDate(prefilledDate: String?, sdfDate: SimpleDateFormat): Long {
+    val cal = Calendar.getInstance()
+    if (prefilledDate != null) {
+        try {
+            sdfDate.parse(prefilledDate)?.let { cal.time = it }
+        } catch (_: Exception) { android.util.Log.w("NewReservation", "Date parse failed, using default") }
+    }
+    cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0)
+    return cal.timeInMillis
+}
+
+private fun isDateWithinRange(utcTimeMillis: Long): Boolean {
+    val today = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+    }
+    val weekLater = Calendar.getInstance().apply {
+        timeInMillis = today.timeInMillis
+        add(Calendar.DAY_OF_YEAR, 7)
+        set(Calendar.HOUR_OF_DAY, 23); set(Calendar.MINUTE, 59); set(Calendar.SECOND, 59)
+    }
+    val candidateLocal = Calendar.getInstance().apply { timeInMillis = utcTimeMillis }
+    val candidateDayStart = Calendar.getInstance().apply {
+        timeInMillis = candidateLocal.timeInMillis
+        set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+    }
+    return candidateDayStart.timeInMillis >= today.timeInMillis && candidateDayStart.timeInMillis <= weekLater.timeInMillis
+}
+
+@Composable
+private fun NewReservationHeader(
+    hasChanges: Boolean,
+    onNavigate: (String) -> Unit,
+    onShowDiscard: () -> Unit
+) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 24.dp)) {
+        IconButton(onClick = {
+            if (hasChanges) onShowDiscard()
+            else onNavigate(ROUTE_DASHBOARD)
+        }, modifier = Modifier.testTag(TestTags.NEW_RESERVATION_BACK)) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.content_desc_back))
+        }
+        Text(stringResource(R.string.new_reservation_title), fontSize = 28.sp, fontWeight = FontWeight.Normal)
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun NewReservation(
@@ -71,33 +152,26 @@ fun NewReservation(
     val sdfDate = remember { SimpleDateFormat(ParkingUtils.DATE_FORMAT, Locale.getDefault()) }
 
     var selectedDateMillis by rememberSaveable(prefilledDate) { 
-        mutableLongStateOf(Calendar.getInstance().apply {
-            prefilledDate?.let { dateStr ->
-                try {
-                    sdfDate.parse(dateStr)?.let { time = it }
-                } catch (_: Exception) { /* date parse failed, keep default */ }
-            }
-            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-        }.timeInMillis)
+        mutableLongStateOf(parsePrefilledDate(prefilledDate, sdfDate))
     }
     val selectedDate = remember(selectedDateMillis) {
         Calendar.getInstance().apply { timeInMillis = selectedDateMillis }
     }
 
-    var startTimeMillis by rememberSaveable { mutableLongStateOf(-1L) }
+    var startTimeMillis by rememberSaveable { mutableLongStateOf(NO_TIME_SELECTED) }
     val startTime = remember(startTimeMillis) {
-        if (startTimeMillis == -1L) null 
+        if (startTimeMillis == NO_TIME_SELECTED) null 
         else Calendar.getInstance().apply { timeInMillis = startTimeMillis }
     }
 
-    var endTimeMillis by rememberSaveable { mutableLongStateOf(-1L) }
+    var endTimeMillis by rememberSaveable { mutableLongStateOf(NO_TIME_SELECTED) }
     val endTime = remember(endTimeMillis) {
-        if (endTimeMillis == -1L) null 
+        if (endTimeMillis == NO_TIME_SELECTED) null 
         else Calendar.getInstance().apply { timeInMillis = endTimeMillis }
     }
     
     var selectedSpot by rememberSaveable(prefilledSpot) { mutableStateOf(prefilledSpot) }
-    var viewMode by rememberSaveable { mutableStateOf("grid") } 
+    var viewMode by rememberSaveable { mutableStateOf(GRID_VIEW) } 
     var spotTypeFilter by rememberSaveable { mutableStateOf<SpotType?>(null) }
     var spotsExpanded by rememberSaveable { mutableStateOf(true) }
     
@@ -115,7 +189,7 @@ fun NewReservation(
 
     val hasChanges by remember(startTimeMillis, endTimeMillis, selectedSpot) {
         derivedStateOf {
-            startTimeMillis != -1L || endTimeMillis != -1L || (selectedSpot != null && selectedSpot != prefilledSpot)
+            startTimeMillis != NO_TIME_SELECTED || endTimeMillis != NO_TIME_SELECTED || (selectedSpot != null && selectedSpot != prefilledSpot)
         }
     }
 
@@ -154,29 +228,13 @@ fun NewReservation(
         }
     }
 
-    val availableSpotsCount = (1..50).count { spot ->
-        !occupiedSpots.contains(spot) && (spotTypeFilter == null || ParkingUtils.getSpotType(spot) == spotTypeFilter)
-    }
+    val filteredSpots = getFilteredSpots(occupiedSpots, spotTypeFilter)
+    val availableSpotsCount = filteredSpots.size
 
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = selectedDateMillis,
         selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                val today = Calendar.getInstance().apply {
-                    set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-                }
-                val weekLater = Calendar.getInstance().apply {
-                    timeInMillis = today.timeInMillis
-                    add(Calendar.DAY_OF_YEAR, 7)
-                    set(Calendar.HOUR_OF_DAY, 23); set(Calendar.MINUTE, 59); set(Calendar.SECOND, 59)
-                }
-                val candidateLocal = Calendar.getInstance().apply { timeInMillis = utcTimeMillis }
-                val candidateDayStart = Calendar.getInstance().apply {
-                    timeInMillis = candidateLocal.timeInMillis
-                    set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-                }
-                return candidateDayStart.timeInMillis >= today.timeInMillis && candidateDayStart.timeInMillis <= weekLater.timeInMillis
-            }
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean = isDateWithinRange(utcTimeMillis)
         }
     )
 
@@ -231,15 +289,11 @@ fun NewReservation(
                         .verticalScroll(rememberScrollState())
                         .padding(16.dp)
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 24.dp)) {
-                        IconButton(onClick = { 
-                            if (hasChanges) showDiscardDialog = true
-                            else onNavigate(ROUTE_DASHBOARD)
-                        }, modifier = Modifier.testTag(TestTags.NEW_RESERVATION_BACK)) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.content_desc_back))
-                        }
-                        Text(stringResource(R.string.new_reservation_title), fontSize = 28.sp, fontWeight = FontWeight.Normal)
-                    }
+                    NewReservationHeader(
+                        hasChanges = hasChanges,
+                        onNavigate = onNavigate,
+                        onShowDiscard = { showDiscardDialog = true }
+                    )
 
                     PrefilledInfoBanner(
                         showPrefilledInfo = showPrefilledInfo,
@@ -249,12 +303,15 @@ fun NewReservation(
                         onDismiss = { showPrefilledInfo = false }
                     )
 
+                    val dateTimeDisplay = remember(selectedDate, startTime, endTime) {
+                        DateTimeDisplay(
+                            dateText = displayDateSdf.format(selectedDate.time),
+                            startTimeText = startTime?.let { sdfTime.format(it.time) },
+                            endTimeText = endTime?.let { sdfTime.format(it.time) }
+                        )
+                    }
                     DateTimeCard(
-                        displayDateSdf = displayDateSdf,
-                        selectedDate = selectedDate,
-                        sdfTime = sdfTime,
-                        startTime = startTime,
-                        endTime = endTime,
+                        display = dateTimeDisplay,
                         onDateClick = { showDatePicker = true },
                         onStartTimeClick = { showStartTimePicker = true },
                         onEndTimeClick = { showEndTimePicker = true }
@@ -262,16 +319,19 @@ fun NewReservation(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
+                    val spotState = remember(selectedSpot, spotsExpanded, viewMode, spotTypeFilter, occupiedSpots, availableSpotsCount, validationErrorResId) {
+                        SpotSelectionState(
+                            selectedSpot = selectedSpot,
+                            spotsExpanded = spotsExpanded,
+                            viewMode = viewMode,
+                            spotTypeFilter = spotTypeFilter,
+                            occupiedSpots = occupiedSpots,
+                            availableSpotsCount = availableSpotsCount,
+                            validationErrorResId = validationErrorResId
+                        )
+                    }
                     SpotSelectionCard(
-                        selectedSpot = selectedSpot,
-                        startTime = startTime,
-                        endTime = endTime,
-                        spotsExpanded = spotsExpanded,
-                        viewMode = viewMode,
-                        spotTypeFilter = spotTypeFilter,
-                        occupiedSpots = occupiedSpots,
-                        availableSpotsCount = availableSpotsCount,
-                        validationErrorResId = validationErrorResId,
+                        state = spotState,
                         onSpotSelected = { selectedSpot = it },
                         onSpotTypeFilterChange = { spotTypeFilter = it; selectedSpot = null },
                         onToggleExpanded = { spotsExpanded = !spotsExpanded },
@@ -281,13 +341,18 @@ fun NewReservation(
                     Spacer(modifier = Modifier.height(140.dp))
                 }
 
+                val confirmData = remember(selectedSpot, selectedDate, startTime, endTime, validationErrorResId, allReservationsReady) {
+                    ReservationConfirmData(
+                        canConfirm = selectedSpot != null && startTime != null && endTime != null && validationErrorResId == null && allReservationsReady,
+                        selectedSpot = selectedSpot,
+                        selectedDate = selectedDate,
+                        startTime = startTime,
+                        endTime = endTime
+                    )
+                }
                 ConfirmButtonSection(
-                    canConfirm = selectedSpot != null && startTime != null && endTime != null && validationErrorResId == null && allReservationsReady,
+                    data = confirmData,
                     vehicles = vehicles,
-                    selectedSpot = selectedSpot,
-                    selectedDate = selectedDate,
-                    startTime = startTime,
-                    endTime = endTime,
                     viewModel = viewModel,
                     onNavigate = onNavigate,
                     onShowNoVehicleDialog = { showNoVehicleDialog = true },
@@ -301,33 +366,26 @@ fun NewReservation(
     DiscardDialog(
         showDiscardDialog = showDiscardDialog,
         onDismiss = { showDiscardDialog = false },
-        onDiscard = {
-            showDiscardDialog = false
-            onNavigate(ROUTE_DASHBOARD)
-        }
+        onDiscard = { showDiscardDialog = false; onNavigate(ROUTE_DASHBOARD) }
     )
-
     DatePickerSection(
         showDatePicker = showDatePicker,
         datePickerState = datePickerState,
         onDateSelected = { selectedDateMillis = it },
         onDismiss = { showDatePicker = false }
     )
-
     StartTimePickerSection(
         showStartTimePicker = showStartTimePicker,
         startTimePickerState = startTimePickerState,
         onStartTimeSelected = { startTimeMillis = it },
         onDismiss = { showStartTimePicker = false }
     )
-
     EndTimePickerSection(
         showEndTimePicker = showEndTimePicker,
         endTimePickerState = endTimePickerState,
         onEndTimeSelected = { endTimeMillis = it },
         onDismiss = { showEndTimePicker = false }
     )
-
     NoVehicleDialog(
         showNoVehicleDialog = showNoVehicleDialog,
         onDismiss = { showNoVehicleDialog = false },
@@ -336,7 +394,6 @@ fun NewReservation(
             onNavigate("${ROUTE_PROFILE}?${PARAM_SHOW_VEHICLE_ALERT}=true")
         }
     )
-
     IncompatibleVehicleDialog(
         showIncompatibleVehicleDialog = showIncompatibleVehicleDialog,
         selectedSpot = selectedSpot,
@@ -346,28 +403,22 @@ fun NewReservation(
             onNavigate("${ROUTE_PROFILE}?${PARAM_SHOW_VEHICLE_ALERT}=true")
         }
     )
-
     if (showVehicleDialog) {
-        val spot = selectedSpot ?: return
-        val sTime = startTime ?: return
-        val eTime = endTime ?: return
-        VehicleSelectionDialog(
-            vehicles = vehicles.orEmpty(),
-            selectedSpot = spot,
-            onDismiss = { showVehicleDialog = false },
-            onConfirm = { vehicle ->
-                viewModel.addReservation(
-                    spot,
-                    selectedDate,
-                    sTime,
-                    eTime,
-                    vehicle.id,
-                    vehicle.licensePlate
-                )
-                showVehicleDialog = false
-                onNavigate(ROUTE_DASHBOARD)
-            }
-        )
+        val spot = selectedSpot
+        val sTime = startTime
+        val eTime = endTime
+        if (spot != null && sTime != null && eTime != null) {
+            VehicleSelectionDialog(
+                vehicles = vehicles.orEmpty(),
+                selectedSpot = spot,
+                onDismiss = { showVehicleDialog = false },
+                onConfirm = { vehicle ->
+                    viewModel.addReservation(spot, selectedDate, sTime, eTime, vehicle.id, vehicle.licensePlate)
+                    showVehicleDialog = false
+                    onNavigate(ROUTE_DASHBOARD)
+                }
+            )
+        }
     }
 }
 
@@ -420,11 +471,7 @@ private fun PrefilledInfoBanner(
 
 @Composable
 private fun DateTimeCard(
-    displayDateSdf: SimpleDateFormat,
-    selectedDate: Calendar,
-    sdfTime: SimpleDateFormat,
-    startTime: Calendar?,
-    endTime: Calendar?,
+    display: DateTimeDisplay,
     onDateClick: () -> Unit,
     onStartTimeClick: () -> Unit,
     onEndTimeClick: () -> Unit
@@ -442,7 +489,7 @@ private fun DateTimeCard(
 
             Column {
                 OutlinedTextField(
-                    value = displayDateSdf.format(selectedDate.time),
+                    value = display.dateText,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(stringResource(R.string.date_label)) },
@@ -470,7 +517,7 @@ private fun DateTimeCard(
                 if (startInteractionSource.collectIsPressedAsState().value) onStartTimeClick()
                 
                 OutlinedTextField(
-                    value = startTime?.let { sdfTime.format(it.time) } ?: "",
+                    value = display.startTimeText ?: "",
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(stringResource(R.string.start_time_label)) },
@@ -488,7 +535,7 @@ private fun DateTimeCard(
 
                 Column(modifier = Modifier.weight(1f)) {
                     OutlinedTextField(
-                        value = endTime?.let { sdfTime.format(it.time) } ?: "",
+                        value = display.endTimeText ?: "",
                         onValueChange = {},
                         readOnly = true,
                         label = { Text(stringResource(R.string.end_time_label)) },
@@ -512,98 +559,109 @@ private fun DateTimeCard(
     }
 }
 
+@Composable
+private fun ViewModeToggle(viewMode: String, onViewModeChange: (String) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = { onViewModeChange(DROPDOWN_VIEW) }, modifier = Modifier.testTag(TestTags.NEW_RESERVATION_VIEW_DROPDOWN)) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.List,
+                contentDescription = stringResource(R.string.content_desc_view_list),
+                tint = if(viewMode == DROPDOWN_VIEW) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+            )
+        }
+        IconButton(onClick = { onViewModeChange(GRID_VIEW) }, modifier = Modifier.testTag(TestTags.NEW_RESERVATION_VIEW_GRID)) {
+            Icon(
+                imageVector = Icons.Default.ViewModule,
+                contentDescription = stringResource(R.string.content_desc_view_grid),
+                tint = if(viewMode == GRID_VIEW) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+            )
+        }
+    }
+}
+
+@Composable
+private fun SpotAvailabilityText(availableSpotsCount: Int) {
+    Text(
+        text = if (availableSpotsCount > 0) LocalContext.current.resources.getQuantityString(R.plurals.spots_available_count, availableSpotsCount, availableSpotsCount) else stringResource(R.string.no_spots_available),
+        fontSize = 12.sp,
+        color = MaterialTheme.colorScheme.secondary,
+        modifier = Modifier.padding(top = 8.dp)
+    )
+}
+
+@Composable
+private fun SpotViewContent(
+    state: SpotSelectionState,
+    onSpotSelected: (Int) -> Unit,
+    onSpotTypeFilterChange: (SpotType?) -> Unit
+) {
+    Column {
+        ResponsiveFilterChips(
+            selectedType = state.spotTypeFilter,
+            onTypeSelected = onSpotTypeFilterChange
+        )
+        if (state.viewMode == DROPDOWN_VIEW) {
+            SpotDropdown(
+                selectedSpot = state.selectedSpot,
+                onSpotSelected = onSpotSelected,
+                occupiedSpots = state.occupiedSpots,
+                spotTypeFilter = state.spotTypeFilter
+            )
+        } else {
+            SpotGrid(
+                selectedSpot = state.selectedSpot,
+                onSpotSelected = { spot ->
+                    if (!state.occupiedSpots.contains(spot)) {
+                        onSpotSelected(spot)
+                    }
+                },
+                occupiedSpots = state.occupiedSpots,
+                spotTypeFilter = state.spotTypeFilter
+            )
+        }
+        SpotAvailabilityText(state.availableSpotsCount)
+    }
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SpotSelectionCard(
-    selectedSpot: Int?,
-    startTime: Calendar?,
-    endTime: Calendar?,
-    spotsExpanded: Boolean,
-    viewMode: String,
-    spotTypeFilter: SpotType?,
-    occupiedSpots: List<Int>,
-    availableSpotsCount: Int,
-    validationErrorResId: Int?,
+    state: SpotSelectionState,
     onSpotSelected: (Int) -> Unit,
     onSpotTypeFilterChange: (SpotType?) -> Unit,
     onToggleExpanded: () -> Unit,
     onViewModeChange: (String) -> Unit
 ) {
-        Card(
-            modifier = Modifier.fillMaxWidth().animateContentSize(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            border = BorderStroke(1.dp, LightBorderGray)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().clickable { onToggleExpanded() },
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(stringResource(R.string.select_spot_title), fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(onClick = { onViewModeChange("dropdown") }, modifier = Modifier.testTag(TestTags.NEW_RESERVATION_VIEW_DROPDOWN)) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.List, 
-                                contentDescription = stringResource(R.string.content_desc_view_list), 
-                                tint = if(viewMode == "dropdown") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
-                            )
-                        }
-                        IconButton(onClick = { onViewModeChange("grid") }, modifier = Modifier.testTag(TestTags.NEW_RESERVATION_VIEW_GRID)) {
-                            Icon(
-                                imageVector = Icons.Default.ViewModule, 
-                                contentDescription = stringResource(R.string.content_desc_view_grid), 
-                                tint = if(viewMode == "grid") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            imageVector = if (spotsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-
-                AnimatedVisibility(visible = spotsExpanded) {
-                    Column {
-                        ResponsiveFilterChips(
-                            selectedType = spotTypeFilter,
-                            onTypeSelected = onSpotTypeFilterChange
-                        )
-
-                        if (viewMode == "dropdown") {
-                            SpotDropdown(
-                                selectedSpot = selectedSpot,
-                                onSpotSelected = onSpotSelected,
-                                occupiedSpots = occupiedSpots,
-                                spotTypeFilter = spotTypeFilter
-                            )
-                        } else {
-                            SpotGrid(
-                                selectedSpot = selectedSpot,
-                                onSpotSelected = { spot ->
-                                    if (!occupiedSpots.contains(spot)) {
-                                        onSpotSelected(spot)
-                                    }
-                                },
-                                occupiedSpots = occupiedSpots,
-                                spotTypeFilter = spotTypeFilter
-                            )
-                        }
-
-                        Text(
-                            text = if (availableSpotsCount > 0) stringResource(R.string.spots_available_count, availableSpotsCount) else stringResource(R.string.no_spots_available),
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
+    Card(
+        modifier = Modifier.fillMaxWidth().animateContentSize(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, LightBorderGray)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth().clickable { onToggleExpanded() },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(stringResource(R.string.select_spot_title), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ViewModeToggle(state.viewMode, onViewModeChange)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = if (state.spotsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
-        }
 
-    validationErrorResId?.let {
+            AnimatedVisibility(visible = state.spotsExpanded) {
+                SpotViewContent(state, onSpotSelected, onSpotTypeFilterChange)
+            }
+        }
+    }
+
+    state.validationErrorResId?.let {
         AlertError(
             message = stringResource(it),
             modifier = Modifier.testTag(TestTags.NEW_RESERVATION_ERROR_MESSAGE)
@@ -613,19 +671,18 @@ private fun SpotSelectionCard(
 
 @Composable
 private fun BoxScope.ConfirmButtonSection(
-    canConfirm: Boolean,
+    data: ReservationConfirmData,
     vehicles: List<Vehicle>?,
-    selectedSpot: Int?,
-    selectedDate: Calendar,
-    startTime: Calendar?,
-    endTime: Calendar?,
     viewModel: NewReservationViewModel,
     onNavigate: (String) -> Unit,
     onShowNoVehicleDialog: () -> Unit,
     onShowIncompatibleVehicleDialog: () -> Unit,
     onShowVehicleDialog: () -> Unit
 ) {
-    if (canConfirm) {
+    if (data.canConfirm) {
+        val spot = data.selectedSpot ?: return
+        val sTime = data.startTime ?: return
+        val eTime = data.endTime ?: return
         Surface(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -639,16 +696,16 @@ private fun BoxScope.ConfirmButtonSection(
                         if (vehicles?.isEmpty() == true) {
                             onShowNoVehicleDialog()
                         } else {
-                            val compatibleVehicles = (vehicles ?: emptyList()).filter { ParkingUtils.isVehicleAllowedInSpot(selectedSpot!!, it.type) }
+                            val compatibleVehicles = (vehicles ?: emptyList()).filter { ParkingUtils.isVehicleAllowedInSpot(spot, it.type) }
                             if (compatibleVehicles.isEmpty()) {
                                 onShowIncompatibleVehicleDialog()
                             } else if (compatibleVehicles.size == 1) {
                                 val v = compatibleVehicles.first()
                                 viewModel.addReservation(
-                                    selectedSpot!!,
-                                    selectedDate,
-                                    startTime!!,
-                                    endTime!!,
+                                    spot,
+                                    data.selectedDate,
+                                    sTime,
+                                    eTime,
                                     v.id,
                                     v.licensePlate
                                 )
@@ -664,7 +721,7 @@ private fun BoxScope.ConfirmButtonSection(
                 ) {
                     Icon(Icons.Default.Check, null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.confirm_reservation_btn, selectedSpot!!), fontSize = 16.sp)
+                    Text(stringResource(R.string.confirm_reservation_btn, spot), fontSize = 16.sp)
                 }
             }
         }
@@ -919,7 +976,7 @@ fun ParkingFilterChip(selected: Boolean, onClick: () -> Unit, label: String, ico
 @Composable
 fun SpotDropdown(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, occupiedSpots: List<Int>, spotTypeFilter: SpotType?) {
     var expanded by rememberSaveable { mutableStateOf(false) }
-    val availableSpots = (1..50).filter { !occupiedSpots.contains(it) && (spotTypeFilter == null || ParkingUtils.getSpotType(it) == spotTypeFilter) }
+    val availableSpots = getFilteredSpots(occupiedSpots, spotTypeFilter)
 
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }, modifier = Modifier.testTag(TestTags.NEW_RESERVATION_SPOT_DROPDOWN)) {
         OutlinedTextField(
@@ -970,7 +1027,7 @@ fun SpotGrid(selectedSpot: Int?, onSpotSelected: (Int) -> Unit, occupiedSpots: L
             LegendItem(stringResource(R.string.selection_legend), InfoBlue)
         }
 
-        val spots = (1..50).filter { spotTypeFilter == null || ParkingUtils.getSpotType(it) == spotTypeFilter }
+        val spots = getSpotsByType(spotTypeFilter)
         
         FlowRow(
             modifier = Modifier.fillMaxWidth(),

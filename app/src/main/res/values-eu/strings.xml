@@ -30,7 +30,7 @@
     <string name="email_sent_instructions">Egiaztatu zure sarrera-ontzia pasahitza berrezartzeko</string>
     <string name="reset_email_sent_success">Berreskuratze-esteka bidali da</string>
     <string name="check_inbox_hint">Minutu gutxiren buruan mezu elektronikoa jasotzen ez baduzu, egiaztatu spam karpeta.</string>
-    <string name="error_corporate_only">@lksnext.com posta korporatiboak bakarrik onartzen dira</string>
+    <string name="error_corporate_only">\@lksnext.com posta korporatiboak bakarrik onartzen dira</string>
     <string name="error_invalid_email_format">Email formatu baliogabea</string>
 
     <!-- Home Screen (Dashboard) -->
@@ -133,7 +133,7 @@
 
     <!-- About Screen -->
     <string name="about_title">Aplikazioari buruz</string>
-    <string name="about_version">Parking App > 1.0.0 bertsioa</string>
+    <string name="about_version">Parking App > %s bertsioa</string>
     <string name="about_description">LKS Next-ekin eta Euskal Herriko Unibertsitatearekin (UPV/EHU) lankidetzan, Produktu Digitalen Kontzeptualizazio eta Garapeneko Enpresa Gelarako garatutako proiektu akademikoa.</string>
     <string name="about_developed_by">Garatzailea: imayordomo</string>
     <string name="about_acknowledgments_title">Esker onak eta Aitortzak:</string>
@@ -191,7 +191,7 @@
     <string name="faq_q9">Erreserba bat bertan behera utzi dezaket?</string>
     <string name="faq_a9">Bai, zure erreserbak bertan behera utzi ditzakezu \"Erreserbak\" ataletik. Hedatu bertan behera utzi nahi duzun erreserba eta sakatu ezabatzeko botoia. Kontuan izan ekintza hau ezin dela desegin.</string>
     <string name="faq_q10">Zer egiten dut nire emaila @lksnext.com ez bada?</string>
-    <string name="faq_a10">@lksnext.com posta korporatiboa duten langileek bakarrik erregistratu daitezke sisteman. Sarbidea behar baduzu eta posta hori ez baduzu, jarri harremanetan facilities sailarekin.</string>
+    <string name="faq_a10">\@lksnext.com posta korporatiboa duten langileek bakarrik erregistratu daitezke sisteman. Sarbidea behar baduzu eta posta hori ez baduzu, jarri harremanetan facilities sailarekin.</string>
     <string name="faq_q11">Zer esan nahi dute koloreek Aparkalekua Kontsultatu atalean?</string>
     <string name="faq_a11">Aparkalekuaren ikuspegian, plazak hiru koloretan agertzen dira:\n\n• Berdea = Eskuragarri: inork ez du plaza erreserbatu ordu horretan.\n• Horia = Zure erreserba: erreserba aktibo bat duzu plaza horretan.\n• Grisa = Okupatua: beste erabiltzaile batek plaza hori erreserbatu du.</string>
     <string name="faq_q12">Zergatik aldatzen dira plaza okupatuak gaur eta beste egun batean ikustean?</string>
@@ -228,7 +228,10 @@
     <string name="spot_type_electric">Elektrikoa</string>
     <string name="spot_type_motorcycle">Motoa</string>
     <string name="spot_type_disabled">Desgaitua</string>
-    <string name="spots_available_count">%1$d plaza libre</string>
+    <plurals name="spots_available_count">
+        <item quantity="one">%1$d plaza libre</item>
+        <item quantity="other">%1$d plaza libre</item>
+    </plurals>
     <string name="no_spots_available">Ez dago plazarik libre</string>
     <string name="view_parking_title">Aparkalekua Kontsultatu</string>
     <string name="view_parking_subtitle">Ikusi aparkalekuaren egoera dataren arabera</string>

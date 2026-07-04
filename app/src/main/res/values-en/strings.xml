@@ -189,7 +189,7 @@
 
     <!-- About Screen -->
     <string name="about_title">About The App</string>
-    <string name="about_version">Parking App > Version 1.0.0</string>
+    <string name="about_version">Parking App > Version %s</string>
     <string name="about_description">Academic project developed for the Classroom Enterprise for Conceptualization and Development of Digital Products in collaboration with LKS Next and the University of the Basque Country (UPV/EHU).</string>
     <string name="about_developed_by">Developed by: imayordomo</string>
     <string name="about_acknowledgments_title">Acknowledgments and Attributions:</string>
@@ -228,7 +228,10 @@
     <string name="spot_type_electric">Electric</string>
     <string name="spot_type_motorcycle">Motorcycle</string>
     <string name="spot_type_disabled">Disabled</string>
-    <string name="spots_available_count">%1$d spots available</string>
+    <plurals name="spots_available_count">
+        <item quantity="one">%1$d spot available</item>
+        <item quantity="other">%1$d spots available</item>
+    </plurals>
     <string name="no_spots_available">No spots available</string>
     <string name="view_parking_title">Check Parking</string>
     <string name="view_parking_subtitle">Visualize parking status by date</string>

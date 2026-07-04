@@ -29,7 +29,7 @@ import com.lksnext.ParkingIMayordomo.data.AuthManager
 import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepositoryImpl
 import com.lksnext.ParkingIMayordomo.ui.pages.*
-import com.lksnext.ParkingIMayordomo.ui.theme.LKS_ParkingTheme
+import com.lksnext.ParkingIMayordomo.ui.theme.LksParkingTheme
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.*
 import com.lksnext.ParkingIMayordomo.utils.LocaleManager
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.PARAM_SHOW_VEHICLE_ALERT
@@ -88,7 +88,7 @@ class MainActivity : ComponentActivity() {
         askNotificationPermission()
 
         setContent {
-            LKS_ParkingTheme {
+            LksParkingTheme {
                 AppNavigation()
             }
         }

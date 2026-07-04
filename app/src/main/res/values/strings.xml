@@ -133,7 +133,7 @@
 
     <!-- About Screen -->
     <string name="about_title">Acerca de la App</string>
-    <string name="about_version">Parking App > Versión 1.0.0</string>
+    <string name="about_version">Parking App > Versión %s</string>
     <string name="about_description">Proyecto académico desarrollado para el Aula de Empresa de Conceptualización y Desarrollo de Productos Digitales en colaboración con LKS Next y la Universidad del País Vasco (UPV/EHU).</string>
     <string name="about_developed_by">Desarrollado por: imayordomo</string>
     <string name="about_acknowledgments_title">Agradecimientos y Atribuciones:</string>
@@ -228,7 +228,10 @@
     <string name="spot_type_electric">Eléctrico</string>
     <string name="spot_type_motorcycle">Moto</string>
     <string name="spot_type_disabled">Discapacitado</string>
-    <string name="spots_available_count">%1$d plazas disponibles</string>
+    <plurals name="spots_available_count">
+        <item quantity="one">%1$d plaza disponible</item>
+        <item quantity="other">%1$d plazas disponibles</item>
+    </plurals>
     <string name="no_spots_available">No hay plazas disponibles</string>
     <string name="view_parking_title">Consultar Parking</string>
     <string name="view_parking_subtitle">Visualiza el estado del parking por fecha</string>
