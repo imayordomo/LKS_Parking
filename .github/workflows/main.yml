@@ -8,6 +8,7 @@ on:
       - 'feature/**'
       - 'refactor/**'
       - 'hotfix/**'
+      - 'bugfix/**'
   pull_request:
     branches:
       - develop

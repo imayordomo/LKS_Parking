@@ -10,6 +10,7 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.toObject
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.perf.metrics.AddTrace
 import com.lksnext.ParkingIMayordomo.data.model.*
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
 import com.lksnext.ParkingIMayordomo.utils.ReservationReminderManager
@@ -145,6 +146,7 @@ object AuthManager {
         )
     }
 
+    @AddTrace(name = "login_trace")
     suspend fun login(email: String, password: String) {
         val normalizedEmail = email.trim().lowercase()
         if (!isEmailAuthorized(normalizedEmail)) throw Exception("error_corporate_only")
@@ -165,6 +167,7 @@ object AuthManager {
         } catch (e: Exception) { throw e }
     }
 
+    @AddTrace(name = "register_trace")
     suspend fun register(name: String, email: String, password: String) {
         val normalizedEmail = email.trim().lowercase()
         if (!isEmailAuthorized(normalizedEmail)) throw Exception("error_corporate_only")
@@ -284,6 +287,7 @@ object AuthManager {
         return sdf.parse("$date $time")?.time ?: 0L
     }
 
+    @AddTrace(name = "add_reservation_trace")
     suspend fun addReservation(spotNumber: Int, date: String, startTime: String, endTime: String, vehicleId: String, licensePlate: String? = null) {
         val userId = _user.value?.id ?: return
         val userName = _user.value?.name
@@ -310,6 +314,7 @@ object AuthManager {
         addInternalNotification(NotificationType.SUCCESS, "notif_confirm_title", "notif_confirm_msg", listOf(spotNumber, date, startTime))
     }
 
+    @AddTrace(name = "update_reservation_trace")
     suspend fun updateReservation(reservationId: String, spotNumber: Int? = null, date: String? = null, startTime: String? = null, endTime: String? = null, vehicleId: String? = null, licensePlate: String? = null) {
         val current = _reservations.value.find { it.id == reservationId } ?: return
         val finalDate = date ?: current.date
@@ -343,6 +348,7 @@ object AuthManager {
         addInternalNotification(NotificationType.INFO, "notif_modified_title", "notif_modified_msg", listOf(spotNumber ?: current.spotNumber, finalDate, finalStart))
     }
 
+    @AddTrace(name = "delete_reservation_trace")
     suspend fun deleteReservation(reservationId: String) {
         val current = _reservations.value.find { it.id == reservationId } ?: return
         if (current.groupId.isNotEmpty()) {
@@ -370,6 +376,7 @@ object AuthManager {
         db.collection(COLLECTION_VEHICLES).document(vehicleId).delete().await()
     }
 
+    @AddTrace(name = "update_profile_trace")
     suspend fun updateProfile(name: String, imageUri: String?) {
         val firebaseUser = auth.currentUser ?: return
         val profileUpdates = userProfileChangeRequest { displayName = name.trim() }
@@ -389,6 +396,7 @@ object AuthManager {
         addInternalNotification(NotificationType.SUCCESS, "notif_report_sent_title", "notif_report_sent_msg")
     }
 
+    @AddTrace(name = "delete_account_trace")
     suspend fun deleteAccount() {
         val userId = _user.value?.id ?: return
         clearListeners()
