@@ -73,7 +73,7 @@ object ParkingUtils {
             VehicleType.CAR -> R.string.spot_type_normal
             VehicleType.ELECTRIC -> R.string.spot_type_electric
             VehicleType.MOTORCYCLE -> R.string.spot_type_motorcycle
-            VehicleType.DISABLED -> R.string.spot_type_disabled
+            VehicleType.PMR -> R.string.spot_type_disabled
         }
     }
     
@@ -81,7 +81,7 @@ object ParkingUtils {
         return when (type) {
             VehicleType.CAR -> MainOrange
             VehicleType.ELECTRIC -> ElectricColor
-            VehicleType.DISABLED -> DisabledColor
+            VehicleType.PMR -> DisabledColor
             VehicleType.MOTORCYCLE -> MotorcycleColor
         }
     }
@@ -91,7 +91,7 @@ object ParkingUtils {
             VehicleType.CAR -> Icons.Default.DirectionsCar
             VehicleType.ELECTRIC -> Icons.Default.ElectricCar
             VehicleType.MOTORCYCLE -> Icons.Default.TwoWheeler
-            VehicleType.DISABLED -> Icons.AutoMirrored.Filled.Accessible
+            VehicleType.PMR -> Icons.AutoMirrored.Filled.Accessible
         }
     }
 
@@ -117,9 +117,9 @@ object ParkingUtils {
         val spotType = getSpotType(spotNumber)
         return when (spotType) {
             SpotType.MOTORCYCLE -> vehicleType == VehicleType.MOTORCYCLE
-            SpotType.DISABLED -> vehicleType == VehicleType.DISABLED
+            SpotType.DISABLED -> vehicleType == VehicleType.PMR
             SpotType.ELECTRIC -> vehicleType == VehicleType.ELECTRIC
-            SpotType.NORMAL -> vehicleType == VehicleType.CAR || vehicleType == VehicleType.ELECTRIC || vehicleType == VehicleType.DISABLED
+            SpotType.NORMAL -> vehicleType == VehicleType.CAR || vehicleType == VehicleType.ELECTRIC || vehicleType == VehicleType.PMR
         }
     }
 

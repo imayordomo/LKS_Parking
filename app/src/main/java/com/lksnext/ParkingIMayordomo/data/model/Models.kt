@@ -12,14 +12,14 @@ data class User(
 )
 
 enum class VehicleType {
-    CAR, ELECTRIC, MOTORCYCLE, DISABLED;
+    CAR, ELECTRIC, MOTORCYCLE, PMR;
 
     companion object {
         fun fromString(value: String): VehicleType = when(value.lowercase()) {
             "car" -> CAR
             "electric" -> ELECTRIC
             "motorcycle" -> MOTORCYCLE
-            "disabled" -> DISABLED
+            "pmr", "disabled" -> PMR
             else -> CAR
         }
     }

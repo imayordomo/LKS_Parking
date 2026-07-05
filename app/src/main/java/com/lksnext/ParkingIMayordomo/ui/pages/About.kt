@@ -22,6 +22,7 @@ import com.lksnext.ParkingIMayordomo.data.model.Notification
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
@@ -72,14 +73,15 @@ fun About(
                 )
             }
         ) { padding ->
-            Column(
-                modifier = modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
+            val scrollState = rememberScrollState()
+            Box(modifier = modifier.padding(padding).fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(16.dp)
+                        .verticalScroll(scrollState)
+                ) {
                 Text(
                     text = stringResource(R.string.about_title),
                     fontSize = 32.sp,
@@ -187,6 +189,8 @@ fun About(
                         color = MaterialTheme.colorScheme.outline
                     )
                 }
+                }
+                subtleScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
             }
         }
     }

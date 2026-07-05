@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
@@ -31,6 +32,7 @@ import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HELP
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_NOTIFICATIONS
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_PROFILE
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_VIEW_PARKING
 import com.lksnext.ParkingIMayordomo.utils.TestTags
 import kotlinx.coroutines.launch
@@ -95,14 +97,16 @@ fun Help(
                 )
             }
         ) { padding ->
-            LazyColumn(
-                modifier = modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            val listState = rememberLazyListState()
+            Box(modifier = modifier.padding(padding).fillMaxSize()) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    state = listState
+                ) {
                 item {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -160,8 +164,10 @@ fun Help(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
+            subtleScrollbar(listState, Modifier.align(Alignment.CenterEnd))
         }
     }
+}
 }
 
 @Composable

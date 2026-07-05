@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -41,6 +42,7 @@ import com.lksnext.ParkingIMayordomo.data.model.VehicleType
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.ProfileViewModel
 import com.lksnext.ParkingIMayordomo.utils.LocaleManager
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
@@ -137,15 +139,17 @@ fun Profile(
                 )
             }
         ) { padding ->
-            LazyColumn(
-                modifier = modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+            val listState = rememberLazyListState()
+            Box(modifier = modifier.padding(padding).fillMaxSize()) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    state = listState
+                ) {
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -299,9 +303,11 @@ fun Profile(
                 
                 item { Spacer(modifier = Modifier.height(80.dp)) }
             }
+            subtleScrollbar(listState, Modifier.align(Alignment.CenterEnd))
+        }
         }
     }
-
+    
     if (showVehicleAlert) {
         AlertDialog(
             onDismissRequest = { showVehicleAlert = false },

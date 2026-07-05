@@ -1,10 +1,12 @@
 package com.lksnext.ParkingIMayordomo.ui.pages
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -24,8 +26,10 @@ import com.lksnext.ParkingIMayordomo.data.model.Notification
 import com.lksnext.ParkingIMayordomo.data.model.NotificationType
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.theme.*
+import com.lksnext.ParkingIMayordomo.ui.viewmodel.DeleteConfirmState
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.NotificationsViewModel
 import com.lksnext.ParkingIMayordomo.utils.TestTags
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
@@ -47,9 +51,54 @@ fun Notifications(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val user by viewModel.user.collectAsState()
     val notifications by viewModel.notifications.collectAsState()
+    val deleteConfirmState by viewModel.deleteConfirmState.collectAsState()
     val unreadCount = notifications.count { !it.read }
+    var dontAskAgain by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) { viewModel.init(context) }
+
+    if (deleteConfirmState != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissDeleteConfirm() },
+            title = { Text(stringResource(R.string.delete_notification_confirm_title)) },
+            text = {
+                Column {
+                    Text(
+                        when (deleteConfirmState) {
+                            is DeleteConfirmState.All -> stringResource(R.string.delete_all_notifications_confirm_message)
+                            else -> stringResource(R.string.delete_notification_confirm_message)
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = dontAskAgain,
+                            onCheckedChange = { dontAskAgain = it }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.dont_ask_again), fontSize = 14.sp)
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { viewModel.confirmDelete(dontAskAgain) }
+                ) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { viewModel.dismissDeleteConfirm() }
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -88,7 +137,8 @@ fun Notifications(
                 unreadCount = unreadCount,
                 onMarkAllAsRead = { viewModel.markAllAsRead() },
                 onMarkAsRead = { id -> viewModel.markAsRead(id) },
-                onDelete = { id -> viewModel.deleteNotification(id) }
+                onDelete = { id -> viewModel.requestDeleteNotification(id) },
+                onDeleteAll = { viewModel.requestDeleteAll() }
             )
         }
     }
@@ -123,7 +173,6 @@ fun NotificationItem(
     val dateFormatStr = stringResource(R.string.notification_date_format)
     val sdf = remember(dateFormatStr) { SimpleDateFormat(dateFormatStr, Locale.getDefault()) }
 
-    // Safe title resolution
     val title = remember(notification) {
         notification.titleRes?.let { resName ->
             val id = context.resources.getIdentifier(resName, "string", context.packageName)
@@ -133,7 +182,6 @@ fun NotificationItem(
         } ?: notification.title ?: ""
     }
 
-    // Safe message resolution
     val message = remember(notification) {
         notification.messageRes?.let { resName ->
             val id = context.resources.getIdentifier(resName, "string", context.packageName)
@@ -266,7 +314,8 @@ private fun NotificationsContent(
     unreadCount: Int,
     onMarkAllAsRead: () -> Unit,
     onMarkAsRead: (String) -> Unit,
-    onDelete: (String) -> Unit
+    onDelete: (String) -> Unit,
+    onDeleteAll: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -290,16 +339,33 @@ private fun NotificationsContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (unreadCount > 0) {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-                TextButton(
-                    onClick = onMarkAllAsRead,
-                    modifier = Modifier.testTag(TestTags.NOTIFICATIONS_MARK_ALL_READ),
-                    contentPadding = PaddingValues(0.dp)
+        if (notifications.isNotEmpty()) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.DoneAll, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(stringResource(R.string.mark_all_read), fontSize = 14.sp)
+                    if (unreadCount > 0) {
+                        TextButton(
+                            onClick = onMarkAllAsRead,
+                            modifier = Modifier.testTag(TestTags.NOTIFICATIONS_MARK_ALL_READ),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Icon(Icons.Default.DoneAll, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(stringResource(R.string.mark_all_read), fontSize = 14.sp)
+                        }
+                    }
+                    TextButton(
+                        onClick = onDeleteAll,
+                        modifier = Modifier.testTag(TestTags.NOTIFICATIONS_DELETE_ALL),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(stringResource(R.string.delete_all_notifications), fontSize = 14.sp)
+                    }
                 }
             }
         }
@@ -309,14 +375,16 @@ private fun NotificationsContent(
         if (notifications.isEmpty()) {
             EmptyNotifications()
         } else {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                shape = RoundedCornerShape(8.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-            ) {
-                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            val listState = rememberLazyListState()
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                ) {
+                    LazyColumn(modifier = Modifier.fillMaxWidth(), state = listState) {
                     itemsIndexed(notifications, key = { _, it -> it.id }) { index, notification ->
                         NotificationItem(
                             notification = notification,
@@ -332,6 +400,8 @@ private fun NotificationsContent(
                         }
                     }
                 }
+            }
+            subtleScrollbar(listState, Modifier.align(Alignment.CenterEnd))
             }
         }
     }

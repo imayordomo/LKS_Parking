@@ -110,6 +110,12 @@
     <string name="notif_cancelled_msg">Se ha cancelado la reserva de la plaza #%1$d para el día %2$s.</string>
     <string name="notif_report_sent_title">Reporte enviado</string>
     <string name="notif_report_sent_msg">Hemos recibido tu reporte. Gracias por ayudarnos a mejorar.</string>
+    <string name="delete_all_notifications">Eliminar todas</string>
+    <string name="delete_notification_confirm_title">Eliminar notificación</string>
+    <string name="delete_notification_confirm_message">¿Estás seguro de que quieres eliminar esta notificación?</string>
+    <string name="delete_all_notifications_confirm_message">¿Estás seguro de que quieres eliminar todas las notificaciones?</string>
+    <string name="dont_ask_again">No volver a preguntar</string>
+    <string name="delete">Eliminar</string>
 
     <!-- Profile Screen -->
     <string name="edit_profile">Editar Perfil</string>
@@ -124,7 +130,7 @@
     <string name="go_to_profile">IR AL PERFIL</string>
     <string name="logout_confirmation">¿Estás seguro de que quieres cerrar sesión?</string>
     <string name="vehicle_not_compatible_short">No compatible</string>
-    <string name="license_plate_placeholder">ABC-1234</string>
+    <string name="license_plate_placeholder">1234 ABC</string>
     <string name="delete_vehicle_title">¿Eliminar vehículo?</string>
     <string name="delete_vehicle_msg">¿Estás seguro de que quieres eliminar el vehículo con matrícula %1$s?</string>
     <string name="delete_vehicle_error_title">No se puede eliminar</string>
@@ -224,10 +230,10 @@
     <string name="user_spot_legend">Tu plaza</string>
     <string name="confirm_reservation_btn">Confirmar Reserva - Plaza #%1$d</string>
     <string name="select_vehicle_dialog_title">Selecciona tu vehículo</string>
-    <string name="spot_type_normal">Normal</string>
+    <string name="spot_type_normal">Estándar</string>
     <string name="spot_type_electric">Eléctrico</string>
     <string name="spot_type_motorcycle">Moto</string>
-    <string name="spot_type_disabled">Discapacitado</string>
+    <string name="spot_type_disabled">PMR</string>
     <plurals name="spots_available_count">
         <item quantity="one">%1$d plaza disponible</item>
         <item quantity="other">%1$d plazas disponibles</item>
@@ -242,9 +248,10 @@
     <string name="status_occupied">OCUPADA</string>
     <string name="status_available">DISPONIBLE</string>
     <string name="status_partially_occupied">PARCIALMENTE OCUPADA</string>
+    <string name="status_free_now">AHORA LIBRE</string>
     <string name="reservations_count_label">Reservas para este día (%1$d): </string>
     <string name="no_license_plate">Sin matrícula</string>
-    <string name="mine_suffix"> (Tú)</string>
+    <string name="mine_suffix">(Tú)</string>
     <string name="schedule_format">Horario: %1$s - %2$s</string>
     <string name="reserve_spot_btn">Reservar esta plaza</string>
     <string name="consultation_mode_info">Modo consulta: Visualizando un día fuera del periodo de reserva (solo próximos 7 días).</string>
@@ -257,7 +264,7 @@
     <string name="day_month_format">d MMM</string>
     <string name="spot_display">%1$s %2$d</string>
     <string name="spot_number_with_prefix">%1$s #%2$d</string>
-    <string name="license_plate_with_mine">%1$s%2$s</string>
+    <string name="license_plate_with_mine">%1$s %2$s</string>
     <string name="spot_with_type_format">%1$s #%2$d (%3$s)</string>
     <string name="discard_changes_title">¿Descartar cambios?</string>
     <string name="discard_changes_msg">Has realizado cambios en el formulario. Si sales ahora, se perderán.</string>
@@ -291,9 +298,9 @@
 
     <!-- Language Selection -->
     <string name="select_language">Idioma</string>
-    <string name="language_english">Inglés</string>
+    <string name="language_english">English</string>
     <string name="language_spanish">Español</string>
-    <string name="language_basque">Vasco</string>
+    <string name="language_basque">Euskera</string>
 
     <!-- Delete Account -->
     <string name="delete_account">Eliminar Cuenta</string>

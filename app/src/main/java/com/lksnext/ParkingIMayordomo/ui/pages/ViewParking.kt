@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.SpotOccupancyState
@@ -168,14 +169,15 @@ fun ViewParking(
                 )
             }
         ) { padding ->
-            Column(
-                modifier = modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp)
-            ) {
+            val scrollState = rememberScrollState()
+            Box(modifier = modifier.padding(padding).fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .verticalScroll(scrollState)
+                        .padding(16.dp)
+                ) {
                 Text(text = stringResource(R.string.view_parking_title), fontSize = 32.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
                 Text(text = stringResource(R.string.view_parking_subtitle), fontSize = 16.sp, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(bottom = 24.dp))
 
@@ -205,6 +207,7 @@ fun ViewParking(
                         selectedSpot = spotNonNull,
                         spotReservations = spotReservations,
                         isUserSpot = isUserSpot,
+                        isCurrentDay = isCurrentDay,
                         spotType = spotType,
                         currentUser = currentUser,
                         isDateInReservationRange = isDateInReservationRange,
@@ -214,7 +217,9 @@ fun ViewParking(
                     )
                 }
             }
+            subtleScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
         }
+    }
     }
 
     ViewParkingDatePickerDialog(
@@ -346,6 +351,7 @@ private fun ViewParkingSpotDetail(
     selectedSpot: Int,
     spotReservations: List<Reservation>,
     isUserSpot: Boolean,
+    isCurrentDay: Boolean,
     spotType: SpotType,
     currentUser: com.lksnext.ParkingIMayordomo.data.model.User?,
     isDateInReservationRange: Boolean,
@@ -393,6 +399,8 @@ private fun ViewParkingSpotDetail(
                 ) {
                     Text(text = when {
                         isUserSpot -> stringResource(R.string.status_user_reserve)
+                        occupancyState == SpotOccupancyState.PARTIALLY_OCCUPIED -> stringResource(R.string.status_partially_occupied)
+                        isCurrentDay && occupancyState == SpotOccupancyState.FREE -> stringResource(R.string.status_free_now)
                         spotReservations.isNotEmpty() -> stringResource(R.string.status_occupied)
                         else -> stringResource(R.string.status_available)
                     }, modifier = Modifier.padding(4.dp), fontWeight = FontWeight.Bold)

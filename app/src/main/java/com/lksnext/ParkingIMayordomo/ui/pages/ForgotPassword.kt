@@ -25,6 +25,7 @@ import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.ForgotPasswordViewModel
 import com.lksnext.ParkingIMayordomo.utils.LocaleManager
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
 import com.lksnext.ParkingIMayordomo.utils.TestTags
 
 @Composable
@@ -42,16 +43,16 @@ fun ForgotPassword(
     val systemContext = remember(context) { LocaleManager.getSystemLocaleContext(context) }
     CompositionLocalProvider(LocalContext provides systemContext) {
     val scrollState = rememberScrollState()
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary)
-            .imePadding()
-            .verticalScroll(scrollState)
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+    Box(modifier = modifier.fillMaxSize().imePadding()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.primary)
+                .verticalScroll(scrollState)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -151,6 +152,8 @@ fun ForgotPassword(
                 )
             }
         }
+    }
+    subtleScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
     }
     }
 }

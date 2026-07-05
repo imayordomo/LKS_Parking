@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.utils.LocaleManager
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
 import com.lksnext.ParkingIMayordomo.utils.TestTags
 
 @Composable
@@ -32,15 +34,17 @@ fun Landing(
     val context = LocalContext.current
     val systemContext = remember(context) { LocaleManager.getSystemLocaleContext(context) }
     CompositionLocalProvider(LocalContext provides systemContext) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+    val scrollState = rememberScrollState()
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .verticalScroll(scrollState)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
         Icon(
             imageVector = Icons.Default.DirectionsCar,
             contentDescription = null,
@@ -93,6 +97,8 @@ fun Landing(
                 fontSize = 18.sp
             )
         }
+        }
+        subtleScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
     }
     }
 }

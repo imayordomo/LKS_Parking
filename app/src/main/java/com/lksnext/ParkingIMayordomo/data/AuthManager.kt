@@ -281,6 +281,14 @@ object AuthManager {
         db.collection(COLLECTION_USERS).document(userId).collection(COLLECTION_NOTIFICATIONS).document(id).delete().await()
     }
 
+    suspend fun deleteAllNotifications() {
+        val userId = _user.value?.id ?: return
+        val batch = db.batch()
+        val notifs = db.collection(COLLECTION_USERS).document(userId).collection(COLLECTION_NOTIFICATIONS).get().await()
+        for (doc in notifs) { batch.delete(doc.reference) }
+        batch.commit().await()
+    }
+
     private fun rescheduleAllReminders() {
         val now = System.currentTimeMillis()
         for (reservation in _reservations.value) {

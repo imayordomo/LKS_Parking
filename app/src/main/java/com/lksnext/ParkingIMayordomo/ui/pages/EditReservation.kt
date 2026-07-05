@@ -33,6 +33,7 @@ import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.EditReservationViewModel
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.ValidationParams
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
 import com.lksnext.ParkingIMayordomo.utils.TestTags
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
@@ -570,14 +571,15 @@ fun EditReservation(
                 )
             }
         ) { padding ->
-            Column(
-                modifier = modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp)
-            ) {
+            val scrollState = rememberScrollState()
+            Box(modifier = modifier.padding(padding).fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .verticalScroll(scrollState)
+                        .padding(16.dp)
+                ) {
                 Box(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         IconButton(
@@ -664,37 +666,39 @@ fun EditReservation(
                     }
                 }
             }
+            subtleScrollbar(scrollState, modifier = Modifier.align(Alignment.CenterEnd))
         }
     }
+}
 
     if (showDiscardDialog) {
-        AlertDialog(
-            onDismissRequest = { showDiscardDialog = false },
-            modifier = Modifier.testTag(TestTags.EDIT_RESERVATION_DISCARD_DIALOG),
-            title = { Text(stringResource(R.string.discard_changes_title)) },
-            text = { Text(stringResource(R.string.discard_changes_msg)) },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showDiscardDialog = false
-                        onNavigate(ROUTE_DASHBOARD)
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                    modifier = Modifier.testTag(TestTags.EDIT_RESERVATION_DISCARD_CONFIRM)
-                ) {
-                    Text(stringResource(R.string.discard_btn))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showDiscardDialog = false },
-                    modifier = Modifier.testTag(TestTags.EDIT_RESERVATION_DISCARD_CANCEL)
-                ) {
-                    Text(stringResource(R.string.keep_editing_btn))
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(8.dp)
-        )
+            AlertDialog(
+                onDismissRequest = { showDiscardDialog = false },
+                modifier = Modifier.testTag(TestTags.EDIT_RESERVATION_DISCARD_DIALOG),
+                title = { Text(stringResource(R.string.discard_changes_title)) },
+                text = { Text(stringResource(R.string.discard_changes_msg)) },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showDiscardDialog = false
+                            onNavigate(ROUTE_DASHBOARD)
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                        modifier = Modifier.testTag(TestTags.EDIT_RESERVATION_DISCARD_CONFIRM)
+                    ) {
+                        Text(stringResource(R.string.discard_btn))
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showDiscardDialog = false },
+                        modifier = Modifier.testTag(TestTags.EDIT_RESERVATION_DISCARD_CANCEL)
+                    ) {
+                        Text(stringResource(R.string.keep_editing_btn))
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(8.dp)
+            )
+        }
     }
-}
