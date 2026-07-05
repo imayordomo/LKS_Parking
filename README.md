@@ -1,65 +1,143 @@
+🇬🇧 **English** | 🇪🇸 [Español](README.es.md) | 🇪🇺 [Euskara](README.eu.md)
+
 # LKS Parking
 
 ![Android](https://img.shields.io/badge/Platform-Android-brightgreen.svg)
-![Kotlin](https://img.shields.io/badge/Kotlin-1.9+-blue.svg)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.2+-blue.svg)
 ![Compose](https://img.shields.io/badge/Jetpack-Compose-orange.svg)
 ![Architecture](https://img.shields.io/badge/Architecture-MVVM-red.svg)
 
-## Descripción
-Aplicación móvil para la gestión de reservas de plazas de parking en las oficinas de LKS Next.
-**Este proyecto forma parte del Aula de Empresa de Movilidad de LKS Next y la UPV/EHU 2026.**
+---
 
-## Características Principales
-- **Autenticación**: Registro e inicio de sesión con validación de correo corporativo (@lksnext.com).
-- **Reservas**: Sistema de reserva de plazas con selección de fecha y tramos horarios (máx. 7 días de antelación y 9 horas de duración). Posibilidad de cancelación.
-- **Visualización**: Mapa interactivo del estado del parking en tiempo real (Vista Cuadrícula y Lista).
-- **Gestión de Vehículos**: Registro de múltiples vehículos (Coche, Eléctrico, Moto, Discapacitado).
-- **Historial**: Consulta de reservas pasadas, activas y futuras con indicador de estado.
-- **Notificaciones**: Avisos sobre confirmaciones, cancelaciones y recordatorios automáticos.
-- **Reportes**: Sistema para informar de incidencias (daños, limpieza, ocupación indebida).
+## Description
+Mobile application for managing parking space reservations at LKS Next offices.
+This project was developed during the **LKS Next and UPV/EHU Mobility Business Classroom 2026.**
 
-**[Prototipo interactivo en Figma](https://ardent-harp-31107545.figma.site)**
+---
 
-## Roadmap y Planes Futuros
+## Key Features
+- **Authentication**: Registration and login with corporate email validation (@lksnext.com).
+- **Reservations**: Parking space reservation system with date and time slot selection (max. 7 days in advance and 9 hours duration). Cancellation possibility.
+- **Visualization**: Interactive map of parking status in real-time (Grid and List View).
+- **Vehicle Management**: Registration of multiple vehicles (Standard car, Electric, Motorcycle, PRM).
+- **History**: Consultation of past, active, and future reservations with status indicators.
+- **Notifications**: Notices about confirmations, cancellations, and automatic reminders (FCM and local).
+- **Reports**: System for reporting incidents (damage, cleaning, improper occupancy).
+- **Internationalization**: Support for Spanish, English, and Basque.
 
-- [x] **Firebase**: Integración de Firestore, Auth, Cloud Messaging.
-- [x] **Testing**: Tests unitarios de todos los ViewModels (cobertura 100%).
-- [ ] **Analíticas**: Implementación de Firebase Performance Monitoring y Crashlytics..
-- [x] **Automatización**: Pipeline de CI/CD (GitHub Actions) para tests y generación de `.apk`.
+**[Interactive Figma Prototype](https://ardent-harp-31107545.figma.site)**
 
-## Información para Desarrolladores
+---
 
-Toda la información técnica relativa a la arquitectura del sistema, la estructura de carpetas, la explicación de las clases clave y la guía de configuración del entorno de desarrollo se encuentra disponible en el siguiente archivo:
+# Screenshots
 
-**[CONSULTAR DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)**
+<p align="center">
+  <img src="docs/images/en/landing.jpg" width="220">
+  <img src="docs/images/en/login.jpg" width="220">
+  <img src="docs/images/en/home.jpg" width="220">
+</p>
 
-## Stack Tecnológico
-- **Lenguaje**: [Kotlin](https://kotlinlang.org/)
-- **UI**: [Jetpack Compose](https://developer.android.com/jetpack/compose)
-- **Arquitectura**: MVVM (Model-View-ViewModel)
-- **Navegación**: Compose Navigation
-- **Inyección de Dependencias**: Provisión manual vía `ViewModelFactory`
-- **Componentes**: Material Design 3
-- **Asincronía**: Kotlin Coroutines & StateFlow
-- **Backend**: Firebase (Auth, Firestore, Cloud Messaging, Crashlytics)
-- **Soporte Multiidioma**: Español, Inglés, Euskera
+<p align="center">
+  <img src="docs/images/en/parking.jpg" width="220">
+  <img src="docs/images/en/history.jpg" width="220">
+  <img src="docs/images/en/report.jpg" width="220">
+</p>
 
-```text
-app/src/main/java/com/lksnext/ParkingIMayordomo/
-├── data/          # Modelos, Repositorios y AuthManager (Firebase)
-├── ui/            # Pantallas (Pages), ViewModels y Componentes Reutilizables
-├── utils/         # Validación, constantes de rutas, LocaleManager
-└── MainActivity   # Punto de entrada, NavHost y Protección de Rutas
-```
+---
 
-## Instalación y Configuración
-1. Clonar el repositorio:
+# Roadmap and Future Plans
+
+## Completed
+
+- [x] Firebase Authentication
+- [x] Cloud Firestore (NoSQL)
+- [x] Firebase Cloud Messaging (FCM)
+- [x] Firebase Crashlytics + Performance Monitoring
+- [x] ViewModel Unit Tests (MockK)
+- [x] CI/CD Pipeline via GitHub Actions
+- [x] Static code analysis (Detekt & Lint)
+- [x] Coverage reports with JaCoCo
+- [x] SonarCloud integration
+
+## Coming Soon (Post-project final presentation)
+
+- [ ] AI-based Chatbot.
+- [ ] Parking occupancy prediction.
+- [ ] New features.
+
+---
+
+# Requirements
+
+- Android Studio Ladybug (2024.2.1) or higher.
+- Android SDK 24 (Min) / 36 (Target).
+- JDK 17.
+- Gradle Wrapper (included in the project).
+
+---
+
+## Download
+
+The easiest way to test the application is by downloading the latest APK from the **Releases** page.
+
+---
+
+# Installation and Configuration
+1. Clone the repository:
    ```bash
    git clone https://github.com/imayordomo/LKS_Parking.git
    ```
-2. Abrir el proyecto en **Android Studio (Ladybug o superior)**.
-3. Sincronizar Gradle.
-4. Ejecutar en un emulador o dispositivo físico con **Android 7.0 (API 24) o superior**.
+2. Open the project in **Android Studio**.
+3. Sync Gradle.
+4. Run on an emulator or physical device with **Android 7.0 (API 24) or higher**.
 
-## Contacto
-Para dudas o soporte técnico, contactar con **imayordomo** o abrir un Issue en este repositorio.
+---
+
+# Developer Information
+
+---
+
+Local technical resources:
+- **[DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md)**: Detailed guide on architecture, code standards, and workflow.
+- **[COMMANDS.md](docs/COMMANDS.md)**: List of useful commands for development and testing.
+
+---
+
+# Tech Stack
+
+| Technology | Implementation |
+|------------|----------------|
+| Language | Kotlin 2.2.10 |
+| UI | Jetpack Compose (BOM 2024.12.01) |
+| Architecture | MVVM |
+| Navigation | Compose Navigation |
+| State Management | StateFlow |
+| Dependency Injection | ViewModelFactory (manual) |
+| Backend | Firebase (Auth, Firestore, Messaging, Crashlytics, Perf) |
+| Quality | Detekt, JaCoCo, SonarCloud |
+| Languages | Spanish, Basque, English |
+
+---
+
+# Architecture
+
+The project follows an **MVVM (Model-View-ViewModel)** architecture.
+
+```text
+app/src/main/java/com/lksnext/ParkingIMayordomo/
+├── data/          # Models, repositories (Firebase) and AuthManager
+├── ui/            # Screens (Pages), ViewModels, components and theme
+├── utils/         # Helpers, constants and LocaleManager
+└── MainActivity   # Entry point and navigation
+```
+
+---
+
+# Contribution
+
+Currently, this project is part of the LKS Next and UPV/EHU Mobility Business Classroom, so external contributions are not accepted at the moment.
+
+---
+
+# Contact
+If you have any questions, suggestions, or detect any issues, you can open an **Issue** in this repository or contact **imayordomo**.
