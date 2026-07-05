@@ -1,0 +1,317 @@
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="UnusedResources,PluralsCandidate,Typos">
+    <string name="app_name">LKS Parking</string>
+    <string name="landing_title">LKS Parking</string>
+    <string name="landing_subtitle">Gestiona tus reservas de parking</string>
+    <string name="login_button">Iniciar Sesión</string>
+    <string name="register_button">Registrarse</string>
+    <string name="email_label">Email *</string>
+    <string name="password_label">Contraseña *</string>
+    <string name="forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="no_account">¿No tienes cuenta?</string>
+    <string name="register_link">Regístrate</string>
+    <string name="create_account">Crear Cuenta</string>
+    <string name="full_name_label">Nombre completo *</string>
+    <string name="confirm_password_label">Confirmar contraseña *</string>
+    <string name="corporate_email_hint">Usa tu correo corporativo (@lksnext.com)</string>
+    <string name="already_have_account">¿Ya tienes cuenta?</string>
+    <string name="login_link">Inicia sesión</string>
+
+    <!-- Login -->
+    <string name="error_required_fields">Todos los campos son obligatorios</string>
+    <string name="error_invalid_credentials">Email o contraseña incorrectos</string>
+    <string name="email_label_with_corporate">Email * (@lksnext.com)</string>
+
+    <!-- Forgot Password -->
+    <string name="recover_password_title">Recuperar Contraseña</string>
+    <string name="recover_password_subtitle">Ingresa tu email y te enviaremos un enlace de recuperación</string>
+    <string name="send_email_button">Enviar Enlace</string>
+    <string name="back_to_login">Volver al inicio de sesión</string>
+    <string name="email_sent_instructions">Revisa tu bandeja de entrada para restablecer tu contraseña</string>
+    <string name="reset_email_sent_success">Enlace de recuperación enviado</string>
+    <string name="check_inbox_hint">Si no recibes el correo en unos minutos, revisa tu carpeta de spam.</string>
+    <string name="error_corporate_only">Solo se aceptan correos corporativos @lksnext.com</string>
+    <string name="error_invalid_email_format">Formato de email no válido</string>
+
+    <!-- Home Screen (Dashboard) -->
+    <string name="my_reservations">Mis Reservas</string>
+    <string name="welcome_user">Bienvenido, %1$s</string>
+    <string name="register_vehicle_alert">Necesitas registrar un vehículo para reservar</string>
+    <string name="add_button">Añadir</string>
+    <string name="no_active_reservations">Sin reservas activas</string>
+    <string name="create_reservation">Crear reserva</string>
+    <string name="delete_reservation_title">¿Eliminar reserva?</string>
+    <string name="delete_reservation_msg">Esta acción no se puede deshacer.</string>
+    <string name="delete_btn">ELIMINAR</string>
+    <string name="today_tag">HOY</string>
+    <string name="tomorrow_tag">MAÑANA</string>
+    <string name="content_desc_add">Añadir reserva</string>
+    <string name="content_desc_edit">Editar reserva</string>
+    <string name="content_desc_warning">Advertencia</string>
+
+    <!-- Navigation & Labels -->
+    <string name="menu_dashboard">Reservas</string>
+    <string name="menu_history">Historial</string>
+    <string name="menu_profile">Perfil</string>
+    <string name="menu_parking">Parking</string>
+    <string name="menu_notifications">Notificaciones</string>
+    <string name="menu_report">Reportar</string>
+    <string name="menu_help">Ayuda</string>
+    <string name="menu_about">Acerca de</string>
+    <string name="drawer_history">Historial de Reservas</string>
+    <string name="drawer_profile">Perfil y Vehículos</string>
+    <string name="drawer_parking">Consultar Parking</string>
+    <string name="default_user_name">Usuario</string>
+    <string name="content_desc_menu">Menú</string>
+    <string name="content_desc_notifications">Notificaciones</string>
+    <string name="content_desc_back">Volver</string>
+    <string name="content_desc_delete">Eliminar reserva</string>
+    <string name="content_desc_view_list">Ver lista</string>
+    <string name="content_desc_view_grid">Ver cuadrícula</string>
+
+    <!-- Report Screen -->
+    <string name="report_title">Reportar un Problema</string>
+    <string name="report_subtitle">Ayúdanos a mantener el parking en buen estado</string>
+    <string name="report_type_label">Tipo de Problema *</string>
+    <string name="spot_number_optional_label">Número de Plaza (opcional)</string>
+    <string name="problem_description_label">Descripción del problema *</string>
+    <string name="problem_description_placeholder">Describe el problema con el mayor detalle posible…</string>
+    <string name="send_report_button">Enviar Reporte</string>
+    <string name="report_success_message">Reporte enviado correctamente. Gracias por tu colaboración.</string>
+    <string name="report_type_damage">Daño en la plaza</string>
+    <string name="report_type_unauthorized">Vehículo no autorizado</string>
+    <string name="report_type_lighting">Problema de iluminación</string>
+    <string name="report_type_cleaning">Necesita limpieza</string>
+    <string name="report_type_other">Otro</string>
+    <string name="error_invalid_spot_number">Número de plaza inválido (1–50)</string>
+    <string name="my_reports_title">Mis Reportes</string>
+    <string name="status_pending">PENDIENTE</string>
+    <string name="status_in_review">EN REVISIÓN</string>
+    <string name="status_resolved">RESUELTO</string>
+
+    <!-- Notifications Screen -->
+    <string name="notifications_title">Notificaciones</string>
+    <string name="notifications_subtitle">Mantente al día con tus reservas</string>
+    <string name="mark_all_read">Marcar todas como leídas</string>
+    <string name="no_notifications">No tienes notificaciones</string>
+    <string name="new_label">Nueva</string>
+    <string name="mark_read">Marcar como leída</string>
+    <string name="notification_date_format">d \'de\' MMMM \'a las\' HH:mm</string>
+
+    <string name="notif_welcome_title">Bienvenido a LKS Parking</string>
+    <string name="notif_welcome_msg">Ya puedes gestionar tus reservas de plaza de parking desde la app.</string>
+    <string name="notif_start_soon_title">Tu reserva comienza pronto</string>
+    <string name="notif_start_soon_msg">Tu reserva para la plaza #%1$d comienza en 30 minutos</string>
+    <string name="notif_confirm_title">Reserva confirmada</string>
+    <string name="notif_confirm_msg">Has reservado la plaza #%1$d para el día %2$s a las %3$s</string>
+    <string name="notif_modified_title">Reserva modificada</string>
+    <string name="notif_modified_msg">Plaza #%1$d actualizada para el %2$s a las %3$s</string>
+    <string name="notif_cancelled_title">Reserva cancelada</string>
+    <string name="notif_cancelled_msg">Se ha cancelado la reserva de la plaza #%1$d para el día %2$s.</string>
+    <string name="notif_report_sent_title">Reporte enviado</string>
+    <string name="notif_report_sent_msg">Hemos recibido tu reporte. Gracias por ayudarnos a mejorar.</string>
+    <string name="delete_all_notifications">Eliminar todas</string>
+    <string name="delete_notification_confirm_title">Eliminar notificación</string>
+    <string name="delete_notification_confirm_message">¿Estás seguro de que quieres eliminar esta notificación?</string>
+    <string name="delete_all_notifications_confirm_message">¿Estás seguro de que quieres eliminar todas las notificaciones?</string>
+    <string name="dont_ask_again">No volver a preguntar</string>
+    <string name="delete">Eliminar</string>
+
+    <!-- Profile Screen -->
+    <string name="edit_profile">Editar Perfil</string>
+    <string name="logout">Cerrar Sesión</string>
+    <string name="my_vehicles">Mis Vehículos</string>
+    <string name="add_vehicle">Añadir Vehículo</string>
+    <string name="no_vehicles">No tienes vehículos registrados</string>
+    <string name="vehicle_type">Tipo de Vehículo</string>
+    <string name="license_plate">Matrícula</string>
+    <string name="vehicle_required_alert">Debes añadir al menos un vehículo en tu perfil para poder realizar una reserva.</string>
+    <string name="vehicle_required_title">Vehículo requerido</string>
+    <string name="go_to_profile">IR AL PERFIL</string>
+    <string name="logout_confirmation">¿Estás seguro de que quieres cerrar sesión?</string>
+    <string name="vehicle_not_compatible_short">No compatible</string>
+    <string name="license_plate_placeholder">1234 ABC</string>
+    <string name="delete_vehicle_title">¿Eliminar vehículo?</string>
+    <string name="delete_vehicle_msg">¿Estás seguro de que quieres eliminar el vehículo con matrícula %1$s?</string>
+    <string name="delete_vehicle_error_title">No se puede eliminar</string>
+    <string name="delete_vehicle_error_msg">Este vehículo tiene una reserva activa o futura. Debes esperar a que termine la reserva o eliminarla antes de poder borrar el vehículo.</string>
+    <string name="error_license_plate_exists">Esta matrícula ya está registrada por otro usuario o en tu perfil.</string>
+
+    <!-- About Screen -->
+    <string name="about_title">Acerca de la App</string>
+    <string name="about_version">Parking App > Versión %s</string>
+    <string name="about_description">Proyecto académico desarrollado para el Aula de Empresa de Conceptualización y Desarrollo de Productos Digitales en colaboración con LKS Next y la Universidad del País Vasco (UPV/EHU).</string>
+    <string name="about_developed_by">Desarrollado por: imayordomo</string>
+    <string name="about_acknowledgments_title">Agradecimientos y Atribuciones:</string>
+    <string name="about_openmoji_desc">Esta aplicación utiliza recursos de código abierto de terceros bajo sus respectivas licencias:</string>
+    <string name="about_openmoji_item">OpenMoji assets used in this app: Basque flag emoji (🏴)</string>
+    <string name="about_author">Author: Sam Hocevar</string>
+    <string name="about_source">Source: https://openmoji.org/library/emoji-1F3F4-E0065-E0073-E0070-E0076-E007F/</string>
+    <string name="about_license">License: CC BY-SA 4.0</string>
+
+    <!-- History Screen -->
+    <string name="history_title">Historial</string>
+    <string name="history_subtitle">Todas tus reservas</string>
+    <string name="download_button">Descargar</string>
+    <string name="csv_header_spot">Plaza</string>
+    <string name="csv_header_date">Fecha</string>
+    <string name="csv_header_start">Inicio</string>
+    <string name="csv_header_end">Fin</string>
+    <string name="csv_header_license">Matrícula</string>
+    <string name="csv_filename">historial-reservas.csv</string>
+    <string name="filters">Filtros</string>
+    <string name="date_range">Rango de fechas</string>
+    <string name="from_date">Desde</string>
+    <string name="to_date">Hasta</string>
+    <string name="reservation_status">Estado de la reserva</string>
+    <string name="filter_all">TODAS</string>
+    <string name="filter_past">PASADAS</string>
+    <string name="filter_future">FUTURAS</string>
+    <string name="clear_filters">Limpiar todos los filtros</string>
+    <string name="no_history">No tienes reservas en tu historial</string>
+    <string name="status_active">ACTIVA</string>
+    <string name="status_past">Pasada</string>
+    <string name="status_next">Próxima</string>
+    <string name="spot_short_prefix">P</string>
+    <string name="spot_label_format">%1$s %2$d</string>
+
+    <!-- Help Screen -->
+    <string name="help_title">Ayuda</string>
+    <string name="help_subtitle">Preguntas frecuentes</string>
+    <string name="faq_q1">¿Cómo hago una reserva?</string>
+    <string name="faq_a1">Ve a \"Mis Reservas\" y pulsa el botón \"+\" flotante. Selecciona la fecha, hora de inicio y fin, elige una plaza disponible (verde) y confirma. Necesitas tener al menos un vehículo registrado para poder reservar.</string>
+    <string name="faq_q2">¿Con cuánta antelación puedo reservar?</string>
+    <string name="faq_a2">Puedes hacer reservas con un máximo de 7 días de antelación.</string>
+    <string name="faq_q3">¿Cuánto tiempo puedo reservar una plaza?</string>
+    <string name="faq_a3">El tiempo máximo de reserva por sesión es de 9 horas.</string>
+    <string name="faq_q4">¿Qué tipos de plaza existen?</string>
+    <string name="faq_a4">El parking tiene 50 plazas distribuidas en: plazas normales, plazas para vehículos eléctricos (con cargador), plazas para motos y plazas adaptadas para personas con movilidad reducida. Cada plaza está identificada con su icono correspondiente.</string>
+    <string name="faq_q5">¿Puedo ver quién ha reservado una plaza?</string>
+    <string name="faq_a5">Sí, en la sección \"Consultar Parking\" puedes seleccionar una fecha y ver las plazas ocupadas. Al hacer clic en una plaza ocupada verás quién la ha reservado y su matrícula.</string>
+    <string name="faq_q6">¿Cómo añado un vehículo?</string>
+    <string name="faq_a6">Ve a \"Perfil y Vehículos\" y pulsa el botón \"Añadir Vehículo\". Selecciona el tipo de vehículo (coche, eléctrico, moto o discapacitado) e introduce la matrícula. Debes tener al menos un vehículo registrado para poder hacer reservas.</string>
+    <string name="faq_q7">¿Cómo reporto un problema?</string>
+    <string name="faq_a7">Utiliza la sección \"Reportar\" del menú. Selecciona el tipo de problema (limpieza, daños, iluminación, seguridad u otro), indica el número de plaza si aplica, y describe el problema con el mayor detalle posible.</string>
+    <string name="faq_q8">¿Cómo funcionan las notificaciones?</string>
+    <string name="faq_a8">La aplicación te mantiene informado con notificaciones sobre tus reservas próximas, recordatorios y confirmaciones. Puedes ver todas tus notificaciones haciendo clic en el icono de campana en la barra superior.</string>
+    <string name="faq_q9">¿Puedo cancelar una reserva?</string>
+    <string name="faq_a9">Sí, puedes cancelar tus reservas desde \"Mis Reservas\". Simplemente expande la reserva que quieres cancelar y pulsa el botón de eliminar. Ten en cuenta que esta acción no se puede deshacer.</string>
+    <string name="faq_q10">¿Qué hago si mi correo no es @lksnext.com?</string>
+    <string name="faq_a10">Solo los empleados con correo corporativo @lksnext.com pueden registrarse en el sistema. Si necesitas acceso y no tienes este correo, contacta con el departamento de facilities.</string>
+    <string name="faq_q11">¿Qué significan los colores en Consultar Parking?</string>
+    <string name="faq_a11">En la vista de parking, las plazas se muestran en tres colores:\n\n• Verde = Disponible: nadie ha reservado la plaza en ese horario.\n• Amarillo = Tu reserva: tienes una reserva activa en esa plaza.\n• Gris = Ocupada: otro usuario ha reservado esa plaza.</string>
+    <string name="faq_q12">¿Por qué cambian las plazas ocupadas al consultar hoy y otro día?</string>
+    <string name="faq_a12">Cuando seleccionas el día de hoy, solo se muestran como ocupadas las plazas con una reserva activa en este momento. Si una reserva empieza más tarde, la plaza se verá libre hasta esa hora. Al seleccionar un día futuro, se muestran todas las reservas programadas para ese día, independientemente de la hora.</string>
+    <string name="more_help_title">¿Necesitas más ayuda?</string>
+    <string name="more_help_desc">Contacta con el departamento de facilities en example@lksnext.com o llama al ext. 1234</string>
+
+    <!-- Reservations & View Parking -->
+    <string name="new_reservation_title">Nueva Reserva</string>
+    <string name="edit_reservation_title">Editar Reserva - Plaza #%1$d</string>
+    <string name="reservation_not_found">Reserva no encontrada</string>
+    <string name="back_to_dashboard">Volver al Dashboard</string>
+    <string name="edit_instruction">Modifica los detalles de tu reserva</string>
+    <string name="max_advance_hint">Máximo 7 días de antelación</string>
+    <string name="max_duration_hint">Máximo 9 horas</string>
+    <string name="vehicle_label">Vehículo</string>
+    <string name="save_changes">Guardar Cambios</string>
+    <string name="date_time_section">Fecha y horario</string>
+    <string name="date_label">Fecha</string>
+    <string name="date_label_required">Fecha *</string>
+    <string name="start_time_label">Hora de inicio</string>
+    <string name="start_time_required">Hora de inicio *</string>
+    <string name="end_time_label">Hora de fin</string>
+    <string name="end_time_required">Hora de fin *</string>
+    <string name="select_spot_title">Selecciona una plaza</string>
+    <string name="available_legend">Libre</string>
+    <string name="occupied_legend">Ocupada</string>
+    <string name="partially_occupied_legend">Parcialmente ocupada</string>
+    <string name="selection_legend">Selección</string>
+    <string name="user_spot_legend">Tu plaza</string>
+    <string name="confirm_reservation_btn">Confirmar Reserva - Plaza #%1$d</string>
+    <string name="select_vehicle_dialog_title">Selecciona tu vehículo</string>
+    <string name="spot_type_normal">Estándar</string>
+    <string name="spot_type_electric">Eléctrico</string>
+    <string name="spot_type_motorcycle">Moto</string>
+    <string name="spot_type_disabled">PMR</string>
+    <plurals name="spots_available_count">
+        <item quantity="one">%1$d plaza disponible</item>
+        <item quantity="many">%1$d plazas disponibles</item>
+        <item quantity="other">%1$d plazas disponibles</item>
+    </plurals>
+    <string name="no_spots_available">No hay plazas disponibles</string>
+    <string name="view_parking_title">Consultar Parking</string>
+    <string name="view_parking_subtitle">Visualiza el estado del parking por fecha</string>
+    <string name="prefilled_info_msg">Fecha y plaza pre-seleccionadas desde Consultar Parking.</string>
+    <string name="prefilled_summary">Plaza #%1$d - %2$s</string>
+    <string name="spot_number_label">Plaza #%1$d</string>
+    <string name="status_user_reserve">TU RESERVA</string>
+    <string name="status_occupied">OCUPADA</string>
+    <string name="status_available">DISPONIBLE</string>
+    <string name="status_partially_occupied">PARCIALMENTE OCUPADA</string>
+    <string name="status_free_now">AHORA LIBRE</string>
+    <string name="reservations_count_label">Reservas para este día (%1$d): </string>
+    <string name="no_license_plate">Sin matrícula</string>
+    <string name="mine_suffix">(Tú)</string>
+    <string name="schedule_format">Horario: %1$s - %2$s</string>
+    <string name="reserve_spot_btn">Reservar esta plaza</string>
+    <string name="consultation_mode_info">Modo consulta: Visualizando un día fuera del periodo de reserva (solo próximos 7 días).</string>
+    <string name="select_spot_prompt">Seleccionar plaza</string>
+    <string name="badge_mine">Tuya</string>
+    <string name="vehicle_display_format">%1$s (%2$s)</string>
+    <string name="time_range_format">%1$s - %2$s</string>
+    <string name="date_display_format">d \'de\' MMMM \'de\' yyyy</string>
+    <string name="full_date_format">EEEE, d \'de\' MMMM</string>
+    <string name="day_month_format">d MMM</string>
+    <string name="spot_display">%1$s %2$d</string>
+    <string name="spot_number_with_prefix">%1$s #%2$d</string>
+    <string name="license_plate_with_mine">%1$s %2$s</string>
+    <string name="spot_with_type_format">%1$s #%2$d (%3$s)</string>
+    <string name="discard_changes_title">¿Descartar cambios?</string>
+    <string name="discard_changes_msg">Has realizado cambios en el formulario. Si sales ahora, se perderán.</string>
+    <string name="discard_btn">DESCARTAR</string>
+    <string name="keep_editing_btn">SEGUIR EDITANDO</string>
+
+    <!-- Validaciones -->
+    <string name="error_start_before_now">La hora de inicio no puede ser anterior a la actual</string>
+    <string name="error_end_after_start">La hora de fin debe ser posterior a la de inicio</string>
+    <string name="error_max_9_hours">La reserva no puede superar las 9 horas</string>
+    <string name="error_max_advance_exceeded">No se puede reservar más allá de 7 días desde hoy</string>
+    <string name="error_user_overlap">Ya tienes otra reserva realizada para este horario</string>
+    <string name="error_select_vehicle">Debes seleccionar un vehículo</string>
+    <string name="error_spot_occupied_simple">Plaza ocupada</string>
+    <string name="error_passwords_dont_match">Las contraseñas no coinciden</string>
+    <string name="error_password_too_short">La contraseña debe tener al menos 8 caracteres</string>
+    <string name="error_password_complexity">La contraseña debe incluir al menos una mayúscula y un número</string>
+    <string name="error_email_already_in_use">Este correo electrónico ya está en uso</string>
+    <string name="register_loading">Creando cuenta…</string>
+    <string name="error_network">Error de conexión. Comprueba tu conexión a internet</string>
+    <string name="error_user_disabled">Esta cuenta ha sido deshabilitada</string>
+    <string name="error_too_many_requests">Demasiados intentos. Inténtalo de nuevo más tarde</string>
+    <string name="error_unknown">Ha ocurrido un error inesperado</string>
+    <string name="incompatible_vehicle_title">Vehículo no compatible</string>
+    <string name="incompatible_vehicle_msg">Tu vehículo actual no es compatible con el tipo de plaza seleccionado (#%1$d). ¿Quieres añadir otro vehículo?</string>
+
+    <!-- Botones comunes -->
+    <string name="cancel">CANCELAR</string>
+    <string name="save">GUARDAR</string>
+    <string name="add">AÑADIR</string>
+
+    <!-- Language Selection -->
+    <string name="select_language">Idioma</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_basque">Euskera</string>
+
+
+    <!-- Delete Account -->
+    <string name="delete_account">Eliminar Cuenta</string>
+    <string name="delete_account_title">¿Eliminar cuenta?</string>
+    <string name="delete_account_confirmation">Esta acción eliminará permanentemente todos tus datos (vehículos, reservas, notificaciones e informes) y no se puede deshacer. ¿Estás seguro?</string>
+    <string name="delete_account_confirm_btn">ELIMINAR MI CUENTA</string>
+    <string name="error_delete_account">Error al eliminar la cuenta. Inténtalo de nuevo más tarde.</string>
+
+    <!-- Profile Image -->
+    <string name="change_image">Cambiar imagen</string>
+    <string name="delete_image">Eliminar imagen</string>
+</resources>

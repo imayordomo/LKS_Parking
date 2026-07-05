@@ -34,6 +34,8 @@ val DisabledColor = Color(0xFF2196F3)
 val UserSpotYellow = Color(0xFFFFC107)
 val UserSpotBackground = Color(0xFFFFF9C4)
 val UserSpotText = Color(0xFF856404)
+val OccupiedGray = Color(0xFF9E9E9E)
+val PartiallyOccupiedGreen = Color(0xFF9CCC65)
 val DividerGray = Color.LightGray.copy(alpha = 0.3f)
 val LightBorderGray = Color.LightGray.copy(alpha = 0.5f)
 

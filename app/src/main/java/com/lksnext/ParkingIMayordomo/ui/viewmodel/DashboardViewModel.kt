@@ -7,12 +7,14 @@ import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepository
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.util.*
 
 class DashboardViewModel(private val repository: ParkingRepository) : ViewModel() {
 
     val user = repository.user
     val vehicles = repository.vehicles
+    val notifications = repository.notifications
 
     val userReservations: StateFlow<List<Reservation>> = combine(
         repository.reservations,
@@ -37,6 +39,8 @@ class DashboardViewModel(private val repository: ParkingRepository) : ViewModel(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun deleteReservation(id: String) {
-        repository.deleteReservation(id)
+        viewModelScope.launch {
+            repository.deleteReservation(id)
+        }
     }
 }

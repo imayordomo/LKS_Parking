@@ -1,0 +1,467 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>ComplexCondition:Register.kt$trimmedName.isBlank() || trimmedEmail.isBlank() || password.isBlank() || confirmPassword.isBlank()</ID>
+    <ID>CyclomaticComplexMethod:AuthManager.kt$AuthManager$suspend fun updateReservation( reservationId: String, spotNumber: Int? = null, date: String? = null, startTime: String? = null, endTime: String? = null, vehicleId: String? = null, licensePlate: String? = null )</ID>
+    <ID>CyclomaticComplexMethod:Dashboard.kt$@Composable fun ReservationItem( reservation: Reservation, vehicle: Vehicle?, onEdit: () -&gt; Unit, onDelete: () -&gt; Unit, defaultExpanded: Boolean = false )</ID>
+    <ID>CyclomaticComplexMethod:EditReservation.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun EditReservation( viewModel: EditReservationViewModel, reservationId: String, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>CyclomaticComplexMethod:EditReservationViewModel.kt$EditReservationViewModel$fun getValidationErrorResId( selectedDate: Calendar, startTime: Calendar, endTime: Calendar, allReservations: List&lt;Reservation&gt;, currentReservationId: String, currentSpotNumber: Int, currentUserId: String?, selectedVehicleId: String ): Int?</ID>
+    <ID>CyclomaticComplexMethod:History.kt$@Composable fun ReservationHistoryItem( reservation: Reservation, vehicle: Vehicle?, todayStr: String, currentTimeStr: String )</ID>
+    <ID>CyclomaticComplexMethod:History.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun History( viewModel: HistoryViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>CyclomaticComplexMethod:NewReservation.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun NewReservation( viewModel: NewReservationViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier, prefilledDate: String? = null, prefilledSpot: Int? = null )</ID>
+    <ID>CyclomaticComplexMethod:NewReservationViewModel.kt$NewReservationViewModel$fun getValidationErrorResId( selectedDate: Calendar, startTime: Calendar?, endTime: Calendar?, selectedSpot: Int?, hasExistingUserReservation: Boolean, occupiedSpots: List&lt;Int&gt; ): Int?</ID>
+    <ID>CyclomaticComplexMethod:Notifications.kt$@Composable fun NotificationItem( notification: Notification, onRead: () -&gt; Unit, onDelete: () -&gt; Unit )</ID>
+    <ID>CyclomaticComplexMethod:Profile.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun Profile( viewModel: ProfileViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier, showVehicleAlertInit: Boolean = false )</ID>
+    <ID>CyclomaticComplexMethod:Register.kt$@Composable fun Register( viewModel: RegisterViewModel, onBackToLogin: () -&gt; Unit, onRegisterSuccess: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>CyclomaticComplexMethod:ViewModelFactory.kt$ViewModelFactory$@Suppress("UNCHECKED_CAST") override fun &lt;T : ViewModel&gt; create(modelClass: Class&lt;T&gt;, extras: CreationExtras): T</ID>
+    <ID>CyclomaticComplexMethod:ViewParking.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun ViewParking( viewModel: ViewParkingViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>ExplicitItLambdaParameter:Notifications.kt${ _, it -&gt; it.id }</ID>
+    <ID>FunctionNaming:About.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun About( onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>FunctionNaming:Dashboard.kt$@Composable fun ReservationItem( reservation: Reservation, vehicle: Vehicle?, onEdit: () -&gt; Unit, onDelete: () -&gt; Unit, defaultExpanded: Boolean = false )</ID>
+    <ID>FunctionNaming:Dashboard.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun Dashboard( viewModel: DashboardViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>FunctionNaming:EditReservation.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun EditReservation( viewModel: EditReservationViewModel, reservationId: String, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>FunctionNaming:ForgotPassword.kt$@Composable fun ForgotPassword( viewModel: ForgotPasswordViewModel, onBackToLogin: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>FunctionNaming:Help.kt$@Composable private fun FAQAccordion(faq: FAQ)</ID>
+    <ID>FunctionNaming:Help.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun Help( viewModel: HelpViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>FunctionNaming:History.kt$@Composable fun EmptyHistory()</ID>
+    <ID>FunctionNaming:History.kt$@Composable fun ReservationHistoryItem( reservation: Reservation, vehicle: Vehicle?, todayStr: String, currentTimeStr: String )</ID>
+    <ID>FunctionNaming:History.kt$@Composable fun StatusFilterButton( label: String, selected: Boolean, onClick: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>FunctionNaming:History.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun History( viewModel: HistoryViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>FunctionNaming:Landing.kt$@Composable fun Landing( viewModel: LandingViewModel, onLoginClick: () -&gt; Unit, onRegisterClick: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>FunctionNaming:Login.kt$@Composable fun Login( viewModel: LoginViewModel, onRegisterClick: () -&gt; Unit, onForgotPasswordClick: () -&gt; Unit, onLoginSuccess: () -&gt; Unit )</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable fun AppNavigation()</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable fun ProtectedRoute( user: User?, navController: NavHostController, content: @Composable () -&gt; Unit )</ID>
+    <ID>FunctionNaming:NewReservation.kt$@Composable fun AlertError(message: String)</ID>
+    <ID>FunctionNaming:NewReservation.kt$@Composable fun LegendItem(label: String, color: Color)</ID>
+    <ID>FunctionNaming:NewReservation.kt$@Composable fun ParkingFilterChip(selected: Boolean, onClick: () -&gt; Unit, label: String, icon: ImageVector)</ID>
+    <ID>FunctionNaming:NewReservation.kt$@Composable fun VehicleSelectionDialog(vehicles: List&lt;com.lksnext.ParkingIMayordomo.data.model.Vehicle&gt;, selectedSpot: Int, onDismiss: () -&gt; Unit, onConfirm: (com.lksnext.ParkingIMayordomo.data.model.Vehicle) -&gt; Unit)</ID>
+    <ID>FunctionNaming:NewReservation.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun ResponsiveFilterChips(selectedType: SpotType?, onTypeSelected: (SpotType?) -&gt; Unit)</ID>
+    <ID>FunctionNaming:NewReservation.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun SpotGrid(selectedSpot: Int?, onSpotSelected: (Int) -&gt; Unit, occupiedSpots: List&lt;Int&gt;, spotTypeFilter: SpotType?)</ID>
+    <ID>FunctionNaming:NewReservation.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun SpotDropdown(selectedSpot: Int?, onSpotSelected: (Int) -&gt; Unit, occupiedSpots: List&lt;Int&gt;, spotTypeFilter: SpotType?)</ID>
+    <ID>FunctionNaming:NewReservation.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun NewReservation( viewModel: NewReservationViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier, prefilledDate: String? = null, prefilledSpot: Int? = null )</ID>
+    <ID>FunctionNaming:Notifications.kt$@Composable fun EmptyNotifications()</ID>
+    <ID>FunctionNaming:Notifications.kt$@Composable fun NotificationItem( notification: Notification, onRead: () -&gt; Unit, onDelete: () -&gt; Unit )</ID>
+    <ID>FunctionNaming:Notifications.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun Notifications( viewModel: NotificationsViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>FunctionNaming:ParkingNavigation.kt$@Composable fun ParkingBottomBar( selectedItem: Int, onItemSelected: (Int) -&gt; Unit )</ID>
+    <ID>FunctionNaming:ParkingNavigation.kt$@Composable fun ParkingDrawerContent( currentRoute: String, onItemClick: (String) -&gt; Unit )</ID>
+    <ID>FunctionNaming:ParkingNavigation.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ParkingTopAppBar( onMenuClick: () -&gt; Unit, onNotificationsClick: () -&gt; Unit )</ID>
+    <ID>FunctionNaming:Profile.kt$@Composable fun LanguageFlag(option: LanguageOption)</ID>
+    <ID>FunctionNaming:Profile.kt$@Composable fun VehicleItem(vehicle: Vehicle, onDelete: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:Profile.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun AddVehicleDialog(onDismiss: () -&gt; Unit, onAdd: (VehicleType, String) -&gt; Unit)</ID>
+    <ID>FunctionNaming:Profile.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun EditProfileDialog(currentName: String, onDismiss: () -&gt; Unit, onSave: (String) -&gt; Unit)</ID>
+    <ID>FunctionNaming:Profile.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun LanguageSelector()</ID>
+    <ID>FunctionNaming:Profile.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun Profile( viewModel: ProfileViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier, showVehicleAlertInit: Boolean = false )</ID>
+    <ID>FunctionNaming:Register.kt$@Composable fun Register( viewModel: RegisterViewModel, onBackToLogin: () -&gt; Unit, onRegisterSuccess: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>FunctionNaming:Report.kt$@Composable private fun ReportHeader()</ID>
+    <ID>FunctionNaming:Report.kt$@Composable private fun ReportHistoryItemCompact(report: Report)</ID>
+    <ID>FunctionNaming:Report.kt$@Composable private fun ReportHistorySection(reports: List&lt;Report&gt;)</ID>
+    <ID>FunctionNaming:Report.kt$@Composable private fun ReportStatusMessage(text: String, isError: Boolean)</ID>
+    <ID>FunctionNaming:Report.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun Report( viewModel: ReportViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>FunctionNaming:Report.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable private fun ReportForm( viewModel: ReportViewModel, isSpotValid: Boolean )</ID>
+    <ID>FunctionNaming:Theme.kt$@Composable fun LKS_ParkingTheme( darkTheme: Boolean = isSystemInDarkTheme(), dynamicColor: Boolean = false, content: @Composable () -&gt; Unit )</ID>
+    <ID>FunctionNaming:ViewParking.kt$@Composable fun ViewLegendItem(label: String, color: Color)</ID>
+    <ID>FunctionNaming:ViewParking.kt$@Composable fun ViewParkingFilterChip(selected: Boolean, onClick: () -&gt; Unit, label: String, icon: ImageVector)</ID>
+    <ID>FunctionNaming:ViewParking.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun ViewParkingFilterChips(selectedType: SpotType?, onTypeSelected: (SpotType?) -&gt; Unit)</ID>
+    <ID>FunctionNaming:ViewParking.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun ViewSpotGrid(selectedSpot: Int?, onSpotSelected: (Int) -&gt; Unit, occupiedSpots: List&lt;Int&gt;, userSpots: List&lt;Int&gt;, spotTypeFilter: SpotType?)</ID>
+    <ID>FunctionNaming:ViewParking.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ViewSpotDropdown(selectedSpot: Int?, onSpotSelected: (Int) -&gt; Unit, occupiedSpots: List&lt;Int&gt;, userSpots: List&lt;Int&gt;, spotTypeFilter: SpotType?)</ID>
+    <ID>FunctionNaming:ViewParking.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun ViewParking( viewModel: ViewParkingViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:About.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun About( onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:Dashboard.kt$@Composable fun ReservationItem( reservation: Reservation, vehicle: Vehicle?, onEdit: () -&gt; Unit, onDelete: () -&gt; Unit, defaultExpanded: Boolean = false )</ID>
+    <ID>LongMethod:Dashboard.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun Dashboard( viewModel: DashboardViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:EditReservation.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun EditReservation( viewModel: EditReservationViewModel, reservationId: String, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:EditReservationViewModel.kt$EditReservationViewModel$fun getValidationErrorResId( selectedDate: Calendar, startTime: Calendar, endTime: Calendar, allReservations: List&lt;Reservation&gt;, currentReservationId: String, currentSpotNumber: Int, currentUserId: String?, selectedVehicleId: String ): Int?</ID>
+    <ID>LongMethod:ForgotPassword.kt$@Composable fun ForgotPassword( viewModel: ForgotPasswordViewModel, onBackToLogin: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:Help.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun Help( viewModel: HelpViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:History.kt$@Composable fun ReservationHistoryItem( reservation: Reservation, vehicle: Vehicle?, todayStr: String, currentTimeStr: String )</ID>
+    <ID>LongMethod:History.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun History( viewModel: HistoryViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:Login.kt$@Composable fun Login( viewModel: LoginViewModel, onRegisterClick: () -&gt; Unit, onForgotPasswordClick: () -&gt; Unit, onLoginSuccess: () -&gt; Unit )</ID>
+    <ID>LongMethod:MainActivity.kt$@Composable fun AppNavigation()</ID>
+    <ID>LongMethod:NewReservation.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun NewReservation( viewModel: NewReservationViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier, prefilledDate: String? = null, prefilledSpot: Int? = null )</ID>
+    <ID>LongMethod:Notifications.kt$@Composable fun NotificationItem( notification: Notification, onRead: () -&gt; Unit, onDelete: () -&gt; Unit )</ID>
+    <ID>LongMethod:Notifications.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun Notifications( viewModel: NotificationsViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:ParkingNavigation.kt$@Composable fun ParkingDrawerContent( currentRoute: String, onItemClick: (String) -&gt; Unit )</ID>
+    <ID>LongMethod:Profile.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun AddVehicleDialog(onDismiss: () -&gt; Unit, onAdd: (VehicleType, String) -&gt; Unit)</ID>
+    <ID>LongMethod:Profile.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun LanguageSelector()</ID>
+    <ID>LongMethod:Profile.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun Profile( viewModel: ProfileViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier, showVehicleAlertInit: Boolean = false )</ID>
+    <ID>LongMethod:Register.kt$@Composable fun Register( viewModel: RegisterViewModel, onBackToLogin: () -&gt; Unit, onRegisterSuccess: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:Report.kt$@Composable private fun ReportHistoryItemCompact(report: Report)</ID>
+    <ID>LongMethod:Report.kt$@Composable private fun ReportHistorySection(reports: List&lt;Report&gt;)</ID>
+    <ID>LongMethod:Report.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun Report( viewModel: ReportViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:Report.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable private fun ReportForm( viewModel: ReportViewModel, isSpotValid: Boolean )</ID>
+    <ID>LongMethod:ViewParking.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun ViewParking( viewModel: ViewParkingViewModel, onNavigate: (String) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongParameterList:AuthManager.kt$AuthManager$( reservationId: String, spotNumber: Int? = null, date: String? = null, startTime: String? = null, endTime: String? = null, vehicleId: String? = null, licensePlate: String? = null )</ID>
+    <ID>LongParameterList:AuthManager.kt$AuthManager$(spotNumber: Int, date: String, startTime: String, endTime: String, vehicleId: String, licensePlate: String? = null)</ID>
+    <ID>LongParameterList:EditReservationViewModel.kt$EditReservationViewModel$( id: String, date: Calendar, startTime: Calendar, endTime: Calendar, vehicleId: String, licensePlate: String? )</ID>
+    <ID>LongParameterList:EditReservationViewModel.kt$EditReservationViewModel$( selectedDate: Calendar, startTime: Calendar, endTime: Calendar, allReservations: List&lt;Reservation&gt;, currentReservationId: String, currentSpotNumber: Int, currentUserId: String?, selectedVehicleId: String )</ID>
+    <ID>LongParameterList:NewReservationViewModel.kt$NewReservationViewModel$( selectedDate: Calendar, startTime: Calendar?, endTime: Calendar?, selectedSpot: Int?, hasExistingUserReservation: Boolean, occupiedSpots: List&lt;Int&gt; )</ID>
+    <ID>LongParameterList:NewReservationViewModel.kt$NewReservationViewModel$( spotNumber: Int, date: Calendar, startTime: Calendar, endTime: Calendar, vehicleId: String, licensePlate: String )</ID>
+    <ID>LongParameterList:ParkingRepository.kt$ParkingRepository$(id: String, spotNumber: Int? = null, date: String? = null, startTime: String? = null, endTime: String? = null, vehicleId: String? = null, licensePlate: String? = null)</ID>
+    <ID>LongParameterList:ParkingRepository.kt$ParkingRepository$(spotNumber: Int, date: String, startTime: String, endTime: String, vehicleId: String, licensePlate: String? = null)</ID>
+    <ID>LongParameterList:ParkingUtils.kt$ParkingUtils$( date1: String, start1: String, end1: String, date2: String, start2: String, end2: String )</ID>
+    <ID>MagicNumber:AuthManager.kt$AuthManager$15</ID>
+    <ID>MagicNumber:AuthManager.kt$AuthManager$60</ID>
+    <ID>MagicNumber:AuthManager.kt$AuthManager$8</ID>
+    <ID>MagicNumber:AuthManager.kt$AuthManager$9</ID>
+    <ID>MagicNumber:Color.kt$0xFF121212</ID>
+    <ID>MagicNumber:Color.kt$0xFF1976D2</ID>
+    <ID>MagicNumber:Color.kt$0xFF1B5E20</ID>
+    <ID>MagicNumber:Color.kt$0xFF1C1B1F</ID>
+    <ID>MagicNumber:Color.kt$0xFF2196F3</ID>
+    <ID>MagicNumber:Color.kt$0xFF2E7D32</ID>
+    <ID>MagicNumber:Color.kt$0xFF4CAF50</ID>
+    <ID>MagicNumber:Color.kt$0xFF625b71</ID>
+    <ID>MagicNumber:Color.kt$0xFF6650a4</ID>
+    <ID>MagicNumber:Color.kt$0xFF757575</ID>
+    <ID>MagicNumber:Color.kt$0xFF7D5260</ID>
+    <ID>MagicNumber:Color.kt$0xFF856404</ID>
+    <ID>MagicNumber:Color.kt$0xFFBF360C</ID>
+    <ID>MagicNumber:Color.kt$0xFFCCC2DC</ID>
+    <ID>MagicNumber:Color.kt$0xFFD0BCFF</ID>
+    <ID>MagicNumber:Color.kt$0xFFE0E0E0</ID>
+    <ID>MagicNumber:Color.kt$0xFFE3F2FD</ID>
+    <ID>MagicNumber:Color.kt$0xFFE8F5E9</ID>
+    <ID>MagicNumber:Color.kt$0xFFEFB8C8</ID>
+    <ID>MagicNumber:Color.kt$0xFFF5F5F5</ID>
+    <ID>MagicNumber:Color.kt$0xFFFAFAFA</ID>
+    <ID>MagicNumber:Color.kt$0xFFFF7000</ID>
+    <ID>MagicNumber:Color.kt$0xFFFF9800</ID>
+    <ID>MagicNumber:Color.kt$0xFFFFC107</ID>
+    <ID>MagicNumber:Color.kt$0xFFFFEBEE</ID>
+    <ID>MagicNumber:Color.kt$0xFFFFF3E0</ID>
+    <ID>MagicNumber:Color.kt$0xFFFFF9C4</ID>
+    <ID>MagicNumber:DashboardViewModel.kt$DashboardViewModel$5000</ID>
+    <ID>MagicNumber:DashboardViewModel.kt$DashboardViewModel$60000</ID>
+    <ID>MagicNumber:EditReservation.kt$&lt;no name provided&gt;$7</ID>
+    <ID>MagicNumber:EditReservationViewModel.kt$EditReservationViewModel$1000</ID>
+    <ID>MagicNumber:EditReservationViewModel.kt$EditReservationViewModel$60</ID>
+    <ID>MagicNumber:EditReservationViewModel.kt$EditReservationViewModel$60.0</ID>
+    <ID>MagicNumber:EditReservationViewModel.kt$EditReservationViewModel$9</ID>
+    <ID>MagicNumber:History.kt$0.5f</ID>
+    <ID>MagicNumber:HistoryViewModel.kt$HistoryViewModel$5000</ID>
+    <ID>MagicNumber:NewReservation.kt$50</ID>
+    <ID>MagicNumber:NewReservation.kt$&lt;no name provided&gt;$7</ID>
+    <ID>MagicNumber:NewReservationViewModel.kt$NewReservationViewModel$1000</ID>
+    <ID>MagicNumber:NewReservationViewModel.kt$NewReservationViewModel$60</ID>
+    <ID>MagicNumber:NewReservationViewModel.kt$NewReservationViewModel$60.0</ID>
+    <ID>MagicNumber:NewReservationViewModel.kt$NewReservationViewModel$9</ID>
+    <ID>MagicNumber:ParkingNavigation.kt$3</ID>
+    <ID>MagicNumber:ParkingUtils.kt$ParkingUtils$24</ID>
+    <ID>MagicNumber:ParkingUtils.kt$ParkingUtils$5</ID>
+    <ID>MagicNumber:ParkingUtils.kt$ParkingUtils$6</ID>
+    <ID>MagicNumber:ParkingUtils.kt$ParkingUtils$60</ID>
+    <ID>MagicNumber:ParkingUtils.kt$ParkingUtils$7</ID>
+    <ID>MagicNumber:ParkingUtils.kt$ParkingUtils$8</ID>
+    <ID>MagicNumber:ParkingUtils.kt$ParkingUtils$9</ID>
+    <ID>MagicNumber:Profile.kt$0xFF757575</ID>
+    <ID>MagicNumber:Profile.kt$0xFFFF6D00</ID>
+    <ID>MagicNumber:ReportViewModel.kt$ReportViewModel$3000</ID>
+    <ID>MagicNumber:ReportViewModel.kt$ReportViewModel$50</ID>
+    <ID>MagicNumber:Theme.kt$0xFF1D192B</ID>
+    <ID>MagicNumber:Theme.kt$0xFF31111D</ID>
+    <ID>MagicNumber:Theme.kt$0xFF410002</ID>
+    <ID>MagicNumber:Theme.kt$0xFF49454F</ID>
+    <ID>MagicNumber:Theme.kt$0xFF4A4458</ID>
+    <ID>MagicNumber:Theme.kt$0xFF601410</ID>
+    <ID>MagicNumber:Theme.kt$0xFF633B48</ID>
+    <ID>MagicNumber:Theme.kt$0xFF8C1D18</ID>
+    <ID>MagicNumber:Theme.kt$0xFF938F99</ID>
+    <ID>MagicNumber:Theme.kt$0xFFCAC4D0</ID>
+    <ID>MagicNumber:Theme.kt$0xFFE8DEF8</ID>
+    <ID>MagicNumber:Theme.kt$0xFFF2B8B5</ID>
+    <ID>MagicNumber:Theme.kt$0xFFF9DEDC</ID>
+    <ID>MagicNumber:Theme.kt$0xFFFFD8E4</ID>
+    <ID>MagicNumber:ViewParking.kt$23</ID>
+    <ID>MagicNumber:ViewParking.kt$50</ID>
+    <ID>MagicNumber:ViewParking.kt$59</ID>
+    <ID>MagicNumber:ViewParking.kt$7</ID>
+    <ID>MaxLineLength:About.kt$colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))</ID>
+    <ID>MaxLineLength:About.kt$val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING, ROUTE_ABOUT)</ID>
+    <ID>MaxLineLength:AuthManager.kt$AuthManager$_allReservations.value = snapshot?.documents?.mapNotNull { it.toObject&lt;Reservation&gt;() } ?: emptyList()</ID>
+    <ID>MaxLineLength:AuthManager.kt$AuthManager$_notifications.value = snapshot?.documents?.mapNotNull { it.toObject&lt;Notification&gt;() } ?: emptyList()</ID>
+    <ID>MaxLineLength:AuthManager.kt$AuthManager$suspend</ID>
+    <ID>MaxLineLength:Dashboard.kt$Icon(Icons.Default.AccessTime, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))</ID>
+    <ID>MaxLineLength:Dashboard.kt$Icon(Icons.Default.CalendarToday, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))</ID>
+    <ID>MaxLineLength:Dashboard.kt$border = BorderStroke(1.dp, if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)</ID>
+    <ID>MaxLineLength:Dashboard.kt$com.lksnext.ParkingIMayordomo.utils.SpotType.DISABLED -&gt; com.lksnext.ParkingIMayordomo.data.model.VehicleType.DISABLED</ID>
+    <ID>MaxLineLength:Dashboard.kt$com.lksnext.ParkingIMayordomo.utils.SpotType.ELECTRIC -&gt; com.lksnext.ParkingIMayordomo.data.model.VehicleType.ELECTRIC</ID>
+    <ID>MaxLineLength:Dashboard.kt$com.lksnext.ParkingIMayordomo.utils.SpotType.MOTORCYCLE -&gt; com.lksnext.ParkingIMayordomo.data.model.VehicleType.MOTORCYCLE</ID>
+    <ID>MaxLineLength:Dashboard.kt$defaultExpanded = reservation.date == todayStr || reservation.id == closestFutureReservationId</ID>
+    <ID>MaxLineLength:Dashboard.kt$text = stringResource(R.string.time_range_format, reservation.startTime, reservation.endTime)</ID>
+    <ID>MaxLineLength:Dashboard.kt$val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING, ROUTE_ABOUT)</ID>
+    <ID>MaxLineLength:Dashboard.kt$val tagSdf = remember(dayMonthFormatStr) { SimpleDateFormat(dayMonthFormatStr, Locale.getDefault()) }</ID>
+    <ID>MaxLineLength:EditReservation.kt$&lt;no name provided&gt;$set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)</ID>
+    <ID>MaxLineLength:EditReservation.kt$Box</ID>
+    <ID>MaxLineLength:EditReservation.kt$CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)</ID>
+    <ID>MaxLineLength:EditReservation.kt$Row</ID>
+    <ID>MaxLineLength:EditReservation.kt$colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)</ID>
+    <ID>MaxLineLength:EditReservation.kt$if (!isInProgress &amp;&amp; dateInteractionSource.collectIsPressedAsState().value) showDatePicker = true</ID>
+    <ID>MaxLineLength:EditReservation.kt$if (!isInProgress &amp;&amp; startInteractionSource.collectIsPressedAsState().value) showStartTimePicker = true</ID>
+    <ID>MaxLineLength:EditReservation.kt$stringResource(ParkingUtils.getVehicleTypeLabelRes(vehicle.type))</ID>
+    <ID>MaxLineLength:EditReservation.kt$trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = vehicleExpanded) }</ID>
+    <ID>MaxLineLength:EditReservation.kt$val</ID>
+    <ID>MaxLineLength:EditReservation.kt$val icon = if (selectedVehicle != null) ParkingUtils.getVehicleIcon(selectedVehicle.type) else Icons.Default.DirectionsCar</ID>
+    <ID>MaxLineLength:EditReservation.kt$val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING, ROUTE_ABOUT)</ID>
+    <ID>MaxLineLength:ForgotPassword.kt$CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))</ID>
+    <ID>MaxLineLength:Help.kt$val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING, ROUTE_ABOUT)</ID>
+    <ID>MaxLineLength:History.kt$Icon(Icons.Default.AccessTime, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.secondary)</ID>
+    <ID>MaxLineLength:History.kt$Icon(Icons.Default.Close, null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)</ID>
+    <ID>MaxLineLength:History.kt$border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline)</ID>
+    <ID>MaxLineLength:History.kt$containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface</ID>
+    <ID>MaxLineLength:History.kt$contentColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface</ID>
+    <ID>MaxLineLength:History.kt$if (endInteractionSource.collectIsPressedAsState().value) showEndDatePicker = true</ID>
+    <ID>MaxLineLength:History.kt$if (startInteractionSource.collectIsPressedAsState().value) showStartDatePicker = true</ID>
+    <ID>MaxLineLength:History.kt$imageVector = if (filtersExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore</ID>
+    <ID>MaxLineLength:History.kt$text = stringResource(R.string.spot_label_format, stringResource(R.string.spot_short_prefix), reservation.spotNumber)</ID>
+    <ID>MaxLineLength:History.kt$val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING, ROUTE_ABOUT)</ID>
+    <ID>MaxLineLength:Login.kt$visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()</ID>
+    <ID>MaxLineLength:MainActivity.kt$onLoginSuccess = { navController.navigate(ROUTE_DASHBOARD) { popUpTo(ROUTE_LANDING) { inclusive = true } } }</ID>
+    <ID>MaxLineLength:MainActivity.kt$onRegisterSuccess = { navController.navigate(ROUTE_DASHBOARD) { popUpTo(ROUTE_LANDING) { inclusive = true } } }</ID>
+    <ID>MaxLineLength:NewReservation.kt$&lt;no name provided&gt;$set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)</ID>
+    <ID>MaxLineLength:NewReservation.kt$Icon(ParkingUtils.getSpotIcon(spotType), null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(16.dp))</ID>
+    <ID>MaxLineLength:NewReservation.kt$Icon(ParkingUtils.getSpotIcon(spotType), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))</ID>
+    <ID>MaxLineLength:NewReservation.kt$Icon(icon, null, tint = if (isCompatible) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)</ID>
+    <ID>MaxLineLength:NewReservation.kt$Row</ID>
+    <ID>MaxLineLength:NewReservation.kt$Text(spot.toString(), color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)</ID>
+    <ID>MaxLineLength:NewReservation.kt$Text(stringResource(R.string.date_time_section), fontWeight = FontWeight.Bold, fontSize = 18.sp)</ID>
+    <ID>MaxLineLength:NewReservation.kt$Text(stringResource(R.string.new_reservation_title), fontSize = 28.sp, fontWeight = FontWeight.Normal)</ID>
+    <ID>MaxLineLength:NewReservation.kt$Text(stringResource(R.string.select_spot_title), fontWeight = FontWeight.Bold, fontSize = 18.sp)</ID>
+    <ID>MaxLineLength:NewReservation.kt$Text(stringResource(R.string.spot_with_type_format, stringResource(R.string.available_legend), spot, stringResource(ParkingUtils.getSpotLabelRes(spotType))))</ID>
+    <ID>MaxLineLength:NewReservation.kt$colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)</ID>
+    <ID>MaxLineLength:NewReservation.kt$fun</ID>
+    <ID>MaxLineLength:NewReservation.kt$imageVector = if (spotsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore</ID>
+    <ID>MaxLineLength:NewReservation.kt$text = if (availableSpotsCount &gt; 0) stringResource(R.string.spots_available_count, availableSpotsCount) else stringResource(R.string.no_spots_available)</ID>
+    <ID>MaxLineLength:NewReservation.kt$tint = if(viewMode == "dropdown") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary</ID>
+    <ID>MaxLineLength:NewReservation.kt$tint = if(viewMode == "grid") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary</ID>
+    <ID>MaxLineLength:NewReservation.kt$trailingContent = { if (!isCompatible) Text(stringResource(R.string.vehicle_not_compatible_short), color = MaterialTheme.colorScheme.error, fontSize = 10.sp) }</ID>
+    <ID>MaxLineLength:NewReservation.kt$val</ID>
+    <ID>MaxLineLength:NewReservation.kt$val availableSpots = (1..50).filter { !occupiedSpots.contains(it) &amp;&amp; (spotTypeFilter == null || ParkingUtils.getSpotType(it) == spotTypeFilter) }</ID>
+    <ID>MaxLineLength:NewReservation.kt$val canConfirm = selectedSpot != null &amp;&amp; startTime != null &amp;&amp; endTime != null &amp;&amp; validationErrorResId == null</ID>
+    <ID>MaxLineLength:NewReservation.kt$val compatibleVehicles = vehicles.filter { ParkingUtils.isVehicleAllowedInSpot(selectedSpot!!, it.type) }</ID>
+    <ID>MaxLineLength:NewReservation.kt$value = selectedSpot?.let { stringResource(R.string.spot_number_with_prefix, stringResource(R.string.available_legend), it) } ?: ""</ID>
+    <ID>MaxLineLength:Notifications.kt$Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.content_desc_delete), tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))</ID>
+    <ID>MaxLineLength:Notifications.kt$Text(stringResource(R.string.mark_read), fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)</ID>
+    <ID>MaxLineLength:Notifications.kt$border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)</ID>
+    <ID>MaxLineLength:Notifications.kt$val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING, ROUTE_ABOUT)</ID>
+    <ID>MaxLineLength:ParkingRepository.kt$ParkingRepository$suspend fun addReservation(spotNumber: Int, date: String, startTime: String, endTime: String, vehicleId: String, licensePlate: String? = null)</ID>
+    <ID>MaxLineLength:ParkingRepository.kt$ParkingRepository$suspend fun updateReservation(id: String, spotNumber: Int? = null, date: String? = null, startTime: String? = null, endTime: String? = null, vehicleId: String? = null, licensePlate: String? = null)</ID>
+    <ID>MaxLineLength:ParkingRepositoryImpl.kt$ParkingRepositoryImpl$override suspend</ID>
+    <ID>MaxLineLength:ParkingUtils.kt$ParkingUtils$SpotType.NORMAL -&gt; vehicleType == VehicleType.CAR || vehicleType == VehicleType.ELECTRIC || vehicleType == VehicleType.DISABLED</ID>
+    <ID>MaxLineLength:ParkingUtils.kt$ParkingUtils$val cal = Calendar.getInstance().apply { time = sdf.parse(date) ?: return date; add(Calendar.DAY_OF_YEAR, days) }</ID>
+    <ID>MaxLineLength:Profile.kt$Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, modifier = Modifier.size(18.dp))</ID>
+    <ID>MaxLineLength:Profile.kt$Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.content_desc_delete), tint = MaterialTheme.colorScheme.error)</ID>
+    <ID>MaxLineLength:Profile.kt$Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(20.dp))</ID>
+    <ID>MaxLineLength:Profile.kt$Text(langName, fontWeight = if (lang.code == currentLanguageCode) FontWeight.Bold else FontWeight.Normal)</ID>
+    <ID>MaxLineLength:Profile.kt$Text(text = vehicle.licensePlate, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)</ID>
+    <ID>MaxLineLength:Profile.kt$val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING, ROUTE_ABOUT)</ID>
+    <ID>MaxLineLength:Register.kt$CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)</ID>
+    <ID>MaxLineLength:Register.kt$if</ID>
+    <ID>MaxLineLength:Register.kt$visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()</ID>
+    <ID>MaxLineLength:Report.kt$CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)</ID>
+    <ID>MaxLineLength:Report.kt$ReportStatus.PENDING -&gt; stringResource(R.string.status_pending) to MaterialTheme.colorScheme.secondary</ID>
+    <ID>MaxLineLength:Report.kt$Text(stringResource(R.string.error_invalid_spot_number), color = MaterialTheme.colorScheme.error)</ID>
+    <ID>MaxLineLength:Report.kt$val bgColor = if (isError) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)</ID>
+    <ID>MaxLineLength:Report.kt$val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING, ROUTE_ABOUT)</ID>
+    <ID>MaxLineLength:ViewModelFactory.kt$ViewModelFactory$modelClass.isAssignableFrom(EditReservationViewModel::class.java) -&gt; EditReservationViewModel(repository) as T</ID>
+    <ID>MaxLineLength:ViewParking.kt$.</ID>
+    <ID>MaxLineLength:ViewParking.kt$ExposedDropdownMenu</ID>
+    <ID>MaxLineLength:ViewParking.kt$ExposedDropdownMenuBox</ID>
+    <ID>MaxLineLength:ViewParking.kt$FlowRow</ID>
+    <ID>MaxLineLength:ViewParking.kt$Icon(Icons.Default.DirectionsCar, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.secondary)</ID>
+    <ID>MaxLineLength:ViewParking.kt$Icon(ParkingUtils.getSpotIcon(spotType), null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)</ID>
+    <ID>MaxLineLength:ViewParking.kt$Icon(icon, null, modifier = Modifier.size(18.dp), tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)</ID>
+    <ID>MaxLineLength:ViewParking.kt$Row</ID>
+    <ID>MaxLineLength:ViewParking.kt$Spacer(Modifier.width(8.dp))</ID>
+    <ID>MaxLineLength:ViewParking.kt$Text(label, fontSize = 11.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)</ID>
+    <ID>MaxLineLength:ViewParking.kt$Text(stringResource(ParkingUtils.getSpotLabelRes(spotType)), color = MaterialTheme.colorScheme.secondary, fontSize = 14.sp)</ID>
+    <ID>MaxLineLength:ViewParking.kt$Text(stringResource(R.string.reservations_count_label, spotReservations.size), fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 16.dp), color = MaterialTheme.colorScheme.onSurface)</ID>
+    <ID>MaxLineLength:ViewParking.kt$Text(stringResource(R.string.schedule_format, reservation.startTime, reservation.endTime), fontSize = 13.sp, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(top = 4.dp))</ID>
+    <ID>MaxLineLength:ViewParking.kt$Text(stringResource(R.string.spot_number_label, selectedSpot!!), fontWeight = FontWeight.Bold, fontSize = 20.sp, color = MaterialTheme.colorScheme.onSurface)</ID>
+    <ID>MaxLineLength:ViewParking.kt$Text(text = stringResource(R.string.date_label), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(bottom = 16.dp))</ID>
+    <ID>MaxLineLength:ViewParking.kt$Text(text = stringResource(R.string.select_spot_title), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurface)</ID>
+    <ID>MaxLineLength:ViewParking.kt$Text(text = stringResource(R.string.view_parking_subtitle), fontSize = 16.sp, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(bottom = 24.dp))</ID>
+    <ID>MaxLineLength:ViewParking.kt$Text(text = stringResource(R.string.view_parking_title), fontSize = 32.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)</ID>
+    <ID>MaxLineLength:ViewParking.kt$ViewLegendItem(stringResource(R.string.occupied_legend), MaterialTheme.colorScheme.outlineVariant)</ID>
+    <ID>MaxLineLength:ViewParking.kt$ViewParkingFilterChip(selected = selectedType == SpotType.DISABLED, onClick = { onTypeSelected(SpotType.DISABLED) }, label = stringResource(R.string.spot_type_disabled), icon = Icons.AutoMirrored.Filled.Accessible)</ID>
+    <ID>MaxLineLength:ViewParking.kt$ViewParkingFilterChip(selected = selectedType == SpotType.ELECTRIC, onClick = { onTypeSelected(SpotType.ELECTRIC) }, label = stringResource(R.string.spot_type_electric), icon = Icons.Default.ElectricCar)</ID>
+    <ID>MaxLineLength:ViewParking.kt$ViewParkingFilterChip(selected = selectedType == SpotType.MOTORCYCLE, onClick = { onTypeSelected(SpotType.MOTORCYCLE) }, label = stringResource(R.string.spot_type_motorcycle), icon = Icons.Default.TwoWheeler)</ID>
+    <ID>MaxLineLength:ViewParking.kt$ViewParkingFilterChip(selected = selectedType == SpotType.NORMAL, onClick = { onTypeSelected(SpotType.NORMAL) }, label = stringResource(R.string.spot_type_normal), icon = Icons.Default.DirectionsCar)</ID>
+    <ID>MaxLineLength:ViewParking.kt$ViewParkingFilterChip(selected = selectedType == null, onClick = { onTypeSelected(null) }, label = stringResource(R.string.filter_all), icon = Icons.Default.LocalParking)</ID>
+    <ID>MaxLineLength:ViewParking.kt$ViewParkingFilterChips(selectedType = spotTypeFilter, onTypeSelected = { spotTypeFilter = it; selectedSpot = null })</ID>
+    <ID>MaxLineLength:ViewParking.kt$ViewSpotDropdown(selectedSpot = selectedSpot, onSpotSelected = { selectedSpot = it }, occupiedSpots = occupiedSpots, userSpots = userSpots, spotTypeFilter = spotTypeFilter)</ID>
+    <ID>MaxLineLength:ViewParking.kt$ViewSpotGrid(selectedSpot = selectedSpot, onSpotSelected = { selectedSpot = it }, occupiedSpots = occupiedSpots, userSpots = userSpots, spotTypeFilter = spotTypeFilter)</ID>
+    <ID>MaxLineLength:ViewParking.kt$border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))</ID>
+    <ID>MaxLineLength:ViewParking.kt$border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)</ID>
+    <ID>MaxLineLength:ViewParking.kt$border = if (isMine) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null</ID>
+    <ID>MaxLineLength:ViewParking.kt$color = if (isMine) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)</ID>
+    <ID>MaxLineLength:ViewParking.kt$colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)</ID>
+    <ID>MaxLineLength:ViewParking.kt$else</ID>
+    <ID>MaxLineLength:ViewParking.kt$fun</ID>
+    <ID>MaxLineLength:ViewParking.kt$if</ID>
+    <ID>MaxLineLength:ViewParking.kt$imageVector = if (spotsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore</ID>
+    <ID>MaxLineLength:ViewParking.kt$onClick = { onNavigate("${ROUTE_NEW_RESERVATION}?spot=$selectedSpot&amp;date=$dateStr") }</ID>
+    <ID>MaxLineLength:ViewParking.kt$reservation.licensePlate ?: stringResource(R.string.no_license_plate)</ID>
+    <ID>MaxLineLength:ViewParking.kt$spotReservations.isNotEmpty() -&gt; MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)</ID>
+    <ID>MaxLineLength:ViewParking.kt$tint = if(viewMode == "dropdown") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary</ID>
+    <ID>MaxLineLength:ViewParking.kt$tint = if(viewMode == "grid") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary</ID>
+    <ID>MaxLineLength:ViewParking.kt$val isOccupied = occupiedSpots.contains(spot)</ID>
+    <ID>MaxLineLength:ViewParking.kt$val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING, ROUTE_ABOUT)</ID>
+    <ID>MaxLineLength:ViewParking.kt$value = selectedSpot?.let { stringResource(R.string.spot_number_with_prefix, stringResource(R.string.available_legend), it) } ?: stringResource(R.string.select_spot_prompt)</ID>
+    <ID>MaxLineLength:ViewParkingViewModel.kt$ViewParkingViewModel$fun</ID>
+    <ID>NewLineAtEndOfFile:Type.kt$com.lksnext.ParkingIMayordomo.ui.theme.Type.kt</ID>
+    <ID>PackageNaming:About.kt$package com.lksnext.ParkingIMayordomo.ui.pages</ID>
+    <ID>PackageNaming:AuthManager.kt$package com.lksnext.ParkingIMayordomo.data</ID>
+    <ID>PackageNaming:Color.kt$package com.lksnext.ParkingIMayordomo.ui.theme</ID>
+    <ID>PackageNaming:Dashboard.kt$package com.lksnext.ParkingIMayordomo.ui.pages</ID>
+    <ID>PackageNaming:DashboardViewModel.kt$package com.lksnext.ParkingIMayordomo.ui.viewmodel</ID>
+    <ID>PackageNaming:EditReservation.kt$package com.lksnext.ParkingIMayordomo.ui.pages</ID>
+    <ID>PackageNaming:EditReservationViewModel.kt$package com.lksnext.ParkingIMayordomo.ui.viewmodel</ID>
+    <ID>PackageNaming:ForgotPassword.kt$package com.lksnext.ParkingIMayordomo.ui.pages</ID>
+    <ID>PackageNaming:ForgotPasswordViewModel.kt$package com.lksnext.ParkingIMayordomo.ui.viewmodel</ID>
+    <ID>PackageNaming:Help.kt$package com.lksnext.ParkingIMayordomo.ui.pages</ID>
+    <ID>PackageNaming:HelpViewModel.kt$package com.lksnext.ParkingIMayordomo.ui.viewmodel</ID>
+    <ID>PackageNaming:History.kt$package com.lksnext.ParkingIMayordomo.ui.pages</ID>
+    <ID>PackageNaming:HistoryViewModel.kt$package com.lksnext.ParkingIMayordomo.ui.viewmodel</ID>
+    <ID>PackageNaming:Landing.kt$package com.lksnext.ParkingIMayordomo.ui.pages</ID>
+    <ID>PackageNaming:LandingViewModel.kt$package com.lksnext.ParkingIMayordomo.ui.viewmodel</ID>
+    <ID>PackageNaming:LocaleManager.kt$package com.lksnext.ParkingIMayordomo.utils</ID>
+    <ID>PackageNaming:Login.kt$package com.lksnext.ParkingIMayordomo.ui.pages</ID>
+    <ID>PackageNaming:LoginViewModel.kt$package com.lksnext.ParkingIMayordomo.ui.viewmodel</ID>
+    <ID>PackageNaming:MainActivity.kt$package com.lksnext.ParkingIMayordomo</ID>
+    <ID>PackageNaming:Models.kt$package com.lksnext.ParkingIMayordomo.data.model</ID>
+    <ID>PackageNaming:MyFirebaseMessagingService.kt$package com.lksnext.ParkingIMayordomo</ID>
+    <ID>PackageNaming:NewReservation.kt$package com.lksnext.ParkingIMayordomo.ui.pages</ID>
+    <ID>PackageNaming:NewReservationViewModel.kt$package com.lksnext.ParkingIMayordomo.ui.viewmodel</ID>
+    <ID>PackageNaming:Notifications.kt$package com.lksnext.ParkingIMayordomo.ui.pages</ID>
+    <ID>PackageNaming:NotificationsViewModel.kt$package com.lksnext.ParkingIMayordomo.ui.viewmodel</ID>
+    <ID>PackageNaming:ParkingNavigation.kt$package com.lksnext.ParkingIMayordomo.ui.components</ID>
+    <ID>PackageNaming:ParkingRepository.kt$package com.lksnext.ParkingIMayordomo.data.repository</ID>
+    <ID>PackageNaming:ParkingRepositoryImpl.kt$package com.lksnext.ParkingIMayordomo.data.repository</ID>
+    <ID>PackageNaming:ParkingUtils.kt$package com.lksnext.ParkingIMayordomo.utils</ID>
+    <ID>PackageNaming:Profile.kt$package com.lksnext.ParkingIMayordomo.ui.pages</ID>
+    <ID>PackageNaming:ProfileViewModel.kt$package com.lksnext.ParkingIMayordomo.ui.viewmodel</ID>
+    <ID>PackageNaming:Register.kt$package com.lksnext.ParkingIMayordomo.ui.pages</ID>
+    <ID>PackageNaming:RegisterViewModel.kt$package com.lksnext.ParkingIMayordomo.ui.viewmodel</ID>
+    <ID>PackageNaming:Report.kt$package com.lksnext.ParkingIMayordomo.ui.pages</ID>
+    <ID>PackageNaming:ReportViewModel.kt$package com.lksnext.ParkingIMayordomo.ui.viewmodel</ID>
+    <ID>PackageNaming:Theme.kt$package com.lksnext.ParkingIMayordomo.ui.theme</ID>
+    <ID>PackageNaming:Type.kt$package com.lksnext.ParkingIMayordomo.ui.theme</ID>
+    <ID>PackageNaming:ViewModelFactory.kt$package com.lksnext.ParkingIMayordomo.ui.viewmodel</ID>
+    <ID>PackageNaming:ViewParking.kt$package com.lksnext.ParkingIMayordomo.ui.pages</ID>
+    <ID>PackageNaming:ViewParkingViewModel.kt$package com.lksnext.ParkingIMayordomo.ui.viewmodel</ID>
+    <ID>ReturnCount:EditReservationViewModel.kt$EditReservationViewModel$fun getValidationErrorResId( selectedDate: Calendar, startTime: Calendar, endTime: Calendar, allReservations: List&lt;Reservation&gt;, currentReservationId: String, currentSpotNumber: Int, currentUserId: String?, selectedVehicleId: String ): Int?</ID>
+    <ID>ReturnCount:NewReservationViewModel.kt$NewReservationViewModel$fun getValidationErrorResId( selectedDate: Calendar, startTime: Calendar?, endTime: Calendar?, selectedSpot: Int?, hasExistingUserReservation: Boolean, occupiedSpots: List&lt;Int&gt; ): Int?</ID>
+    <ID>SpreadOperator:Notifications.kt$(id, *notification.messageArgs.toTypedArray())</ID>
+    <ID>SpreadOperator:Notifications.kt$(resId, *notification.messageArgs.toTypedArray())</ID>
+    <ID>SwallowedException:AuthManager.kt$AuthManager$e: Exception</ID>
+    <ID>SwallowedException:AuthManager.kt$AuthManager$e: FirebaseAuthUserCollisionException</ID>
+    <ID>SwallowedException:Notifications.kt$e: Exception</ID>
+    <ID>SwallowedException:ParkingUtils.kt$ParkingUtils$e: Exception</ID>
+    <ID>SwallowedException:ReportViewModel.kt$ReportViewModel$e: Exception</ID>
+    <ID>ThrowsCount:AuthManager.kt$AuthManager$suspend fun login(email: String, password: String)</ID>
+    <ID>ThrowsCount:AuthManager.kt$AuthManager$suspend fun register(name: String, email: String, password: String)</ID>
+    <ID>TooGenericExceptionCaught:AuthManager.kt$AuthManager$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ForgotPasswordViewModel.kt$ForgotPasswordViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:LoginViewModel.kt$LoginViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MyFirebaseMessagingService.kt$MyFirebaseMessagingService$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:Notifications.kt$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ParkingUtils.kt$ParkingUtils$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ProfileViewModel.kt$ProfileViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RegisterViewModel.kt$RegisterViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ReportViewModel.kt$ReportViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionThrown:AuthManager.kt$AuthManager$throw Exception("Registration failed")</ID>
+    <ID>TooGenericExceptionThrown:AuthManager.kt$AuthManager$throw Exception("error_corporate_only")</ID>
+    <ID>TooGenericExceptionThrown:AuthManager.kt$AuthManager$throw Exception("error_email_already_in_use")</ID>
+    <ID>TooGenericExceptionThrown:AuthManager.kt$AuthManager$throw Exception("error_invalid_credentials")</ID>
+    <ID>TooGenericExceptionThrown:AuthManager.kt$AuthManager$throw Exception("error_invalid_email_format")</ID>
+    <ID>TooGenericExceptionThrown:AuthManager.kt$AuthManager$throw Exception("error_license_plate_exists")</ID>
+    <ID>TooGenericExceptionThrown:AuthManager.kt$AuthManager$throw Exception("error_max_9_hours")</ID>
+    <ID>TooGenericExceptionThrown:AuthManager.kt$AuthManager$throw Exception("error_password_complexity")</ID>
+    <ID>TooGenericExceptionThrown:AuthManager.kt$AuthManager$throw Exception("error_password_too_short")</ID>
+    <ID>TooGenericExceptionThrown:AuthManager.kt$AuthManager$throw Exception(e.message ?: "Registration failed")</ID>
+    <ID>TooGenericExceptionThrown:AuthManager.kt$AuthManager$throw Exception(e.message ?: "error_unknown")</ID>
+    <ID>TooManyFunctions:AuthManager.kt$AuthManager</ID>
+    <ID>TooManyFunctions:ParkingRepository.kt$ParkingRepository</ID>
+    <ID>TooManyFunctions:ParkingRepositoryImpl.kt$ParkingRepositoryImpl : ParkingRepository</ID>
+    <ID>TooManyFunctions:ParkingUtils.kt$ParkingUtils</ID>
+    <ID>UnusedParameter:Help.kt$viewModel: HelpViewModel</ID>
+    <ID>UnusedParameter:Landing.kt$viewModel: LandingViewModel</ID>
+    <ID>UnusedPrivateProperty:EditReservation.kt$val context = LocalContext.current</ID>
+    <ID>UnusedPrivateProperty:HelpViewModel.kt$HelpViewModel$private val repository: ParkingRepository</ID>
+    <ID>UnusedPrivateProperty:LandingViewModel.kt$LandingViewModel$private val repository: ParkingRepository</ID>
+    <ID>UnusedPrivateProperty:ViewParking.kt$val context = LocalContext.current</ID>
+    <ID>WildcardImport:About.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:About.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:AuthManager.kt$import com.lksnext.ParkingIMayordomo.data.model.*</ID>
+    <ID>WildcardImport:Dashboard.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:Dashboard.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:Dashboard.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:Dashboard.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:Dashboard.kt$import com.lksnext.ParkingIMayordomo.ui.theme.*</ID>
+    <ID>WildcardImport:DashboardViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:EditReservation.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:EditReservation.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:EditReservation.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:EditReservation.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:EditReservation.kt$import com.lksnext.ParkingIMayordomo.ui.theme.*</ID>
+    <ID>WildcardImport:EditReservationViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:ForgotPassword.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:ForgotPassword.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:ForgotPassword.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:ForgotPassword.kt$import com.lksnext.ParkingIMayordomo.ui.theme.*</ID>
+    <ID>WildcardImport:Help.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:Help.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:Help.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:Help.kt$import com.lksnext.ParkingIMayordomo.ui.theme.*</ID>
+    <ID>WildcardImport:History.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:History.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:History.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:History.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:HistoryViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:Landing.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:Landing.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:Login.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:Login.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:Login.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:Login.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:Login.kt$import com.lksnext.ParkingIMayordomo.ui.theme.*</ID>
+    <ID>WildcardImport:MainActivity.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:MainActivity.kt$import com.lksnext.ParkingIMayordomo.ui.pages.*</ID>
+    <ID>WildcardImport:MainActivity.kt$import com.lksnext.ParkingIMayordomo.ui.viewmodel.*</ID>
+    <ID>WildcardImport:NewReservation.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:NewReservation.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:NewReservation.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:NewReservation.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:NewReservation.kt$import com.lksnext.ParkingIMayordomo.ui.theme.*</ID>
+    <ID>WildcardImport:NewReservationViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:Notifications.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:Notifications.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:Notifications.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:Notifications.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:Notifications.kt$import com.lksnext.ParkingIMayordomo.ui.theme.*</ID>
+    <ID>WildcardImport:ParkingNavigation.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:ParkingNavigation.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:ParkingNavigation.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:ParkingNavigation.kt$import com.lksnext.ParkingIMayordomo.ui.theme.*</ID>
+    <ID>WildcardImport:ParkingRepository.kt$import com.lksnext.ParkingIMayordomo.data.model.*</ID>
+    <ID>WildcardImport:ParkingRepositoryImpl.kt$import com.lksnext.ParkingIMayordomo.data.model.*</ID>
+    <ID>WildcardImport:ParkingUtils.kt$import com.lksnext.ParkingIMayordomo.ui.theme.*</ID>
+    <ID>WildcardImport:Profile.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:Profile.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:Profile.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:Profile.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:Register.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:Register.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:Register.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:Register.kt$import com.lksnext.ParkingIMayordomo.ui.theme.*</ID>
+    <ID>WildcardImport:Report.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:Report.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:Report.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:Report.kt$import com.lksnext.ParkingIMayordomo.ui.theme.*</ID>
+    <ID>WildcardImport:ViewParking.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:ViewParking.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:ViewParking.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:ViewParking.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:ViewParking.kt$import com.lksnext.ParkingIMayordomo.ui.theme.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

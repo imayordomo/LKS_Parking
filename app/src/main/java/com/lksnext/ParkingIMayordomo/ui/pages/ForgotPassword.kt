@@ -2,17 +2,20 @@ package com.lksnext.ParkingIMayordomo.ui.pages
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -21,6 +24,9 @@ import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.ForgotPasswordViewModel
+import com.lksnext.ParkingIMayordomo.utils.LocaleManager
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
+import com.lksnext.ParkingIMayordomo.utils.TestTags
 
 @Composable
 fun ForgotPassword(
@@ -29,19 +35,24 @@ fun ForgotPassword(
     modifier: Modifier = Modifier
 ) {
     val email by viewModel.email.collectAsState()
-    val code by viewModel.code.collectAsState()
-    val isCodeSent by viewModel.isCodeSent.collectAsState()
+    val isEmailSent by viewModel.isEmailSent.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorResId by viewModel.errorResId.collectAsState()
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary)
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+    val context = LocalContext.current
+    val systemContext = remember(context) { LocaleManager.getSystemLocaleContext(context) }
+    CompositionLocalProvider(LocalContext provides systemContext) {
+    val scrollState = rememberScrollState()
+    Box(modifier = modifier.fillMaxSize().imePadding()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.primary)
+                .verticalScroll(scrollState)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -75,8 +86,8 @@ fun ForgotPassword(
             )
 
             Text(
-                text = if (!isCodeSent) stringResource(R.string.recover_password_subtitle) 
-                       else stringResource(R.string.verify_code_subtitle),
+                text = if (!isEmailSent) stringResource(R.string.recover_password_subtitle) 
+                       else stringResource(R.string.email_sent_instructions),
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.padding(top = 8.dp)
@@ -84,23 +95,9 @@ fun ForgotPassword(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            if (errorResId != null) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                    color = MaterialTheme.colorScheme.errorContainer,
-                    shape = RoundedCornerShape(8.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error)
-                ) {
-                    Text(
-                        text = stringResource(errorResId!!),
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        modifier = Modifier.padding(12.dp),
-                        fontSize = 14.sp
-                    )
-                }
-            }
+            ForgotPasswordError(errorResId = errorResId)
 
-            if (!isCodeSent) {
+            if (!isEmailSent) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Email,
@@ -113,7 +110,7 @@ fun ForgotPassword(
                         value = email,
                         onValueChange = { viewModel.onEmailChange(it) },
                         label = { Text(stringResource(R.string.email_label)) },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().testTag(TestTags.FORGOT_PASSWORD_EMAIL_FIELD),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -129,8 +126,8 @@ fun ForgotPassword(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
-                    onClick = { viewModel.sendCode() },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    onClick = { viewModel.sendResetEmail() },
+                    modifier = Modifier.fillMaxWidth().height(56.dp).testTag(TestTags.FORGOT_PASSWORD_SEND_BUTTON),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     shape = RoundedCornerShape(12.dp),
                     enabled = !isLoading
@@ -138,84 +135,16 @@ fun ForgotPassword(
                     if (isLoading) {
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
                     } else {
-                        Text(stringResource(R.string.send_code_button), fontSize = 16.sp)
+                        Text(stringResource(R.string.send_email_button), fontSize = 16.sp)
                     }
                 }
             } else {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(SuccessGreen.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
-                        .padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.CheckCircleOutline,
-                        contentDescription = null,
-                        tint = SuccessGreen
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.code_sent_success), color = SuccessGreen, fontSize = 14.sp)
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.VpnKey,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        OutlinedTextField(
-                            value = code,
-                            onValueChange = { viewModel.onCodeChange(it) },
-                            label = { Text(stringResource(R.string.recovery_code_label)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                focusedLabelColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                            ),
-                            singleLine = true,
-                            enabled = !isLoading
-                        )
-                        Text(
-                            stringResource(R.string.demo_code_hint),
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.padding(start = 8.dp, top = 4.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Button(
-                    onClick = { viewModel.verifyCode(onSuccess = onBackToLogin) },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    shape = RoundedCornerShape(12.dp),
-                    enabled = !isLoading
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
-                    } else {
-                        Text(stringResource(R.string.verify_code_button), fontSize = 16.sp)
-                    }
-                }
-
-                TextButton(onClick = { viewModel.resetState() }, enabled = !isLoading) {
-                    Text(stringResource(R.string.resend_code), color = MaterialTheme.colorScheme.primary)
-                }
+                ForgotPasswordSuccess()
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextButton(onClick = onBackToLogin, enabled = !isLoading) {
+            TextButton(onClick = onBackToLogin, modifier = Modifier.testTag(TestTags.FORGOT_PASSWORD_BACK_BUTTON), enabled = !isLoading) {
                 Text(
                     text = stringResource(R.string.back_to_login),
                     color = MaterialTheme.colorScheme.primary,
@@ -224,4 +153,54 @@ fun ForgotPassword(
             }
         }
     }
+    subtleScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
+    }
+    }
+}
+
+@Composable
+private fun ForgotPasswordError(errorResId: Int?) {
+    errorResId?.let { resId ->
+        Surface(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).testTag(TestTags.FORGOT_PASSWORD_ERROR_MESSAGE),
+            color = MaterialTheme.colorScheme.errorContainer,
+            shape = RoundedCornerShape(8.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error)
+        ) {
+            Text(
+                text = stringResource(resId),
+                color = MaterialTheme.colorScheme.onErrorContainer,
+                modifier = Modifier.padding(12.dp),
+                fontSize = 14.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun ForgotPasswordSuccess() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(SuccessGreen.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            Icons.Default.CheckCircleOutline,
+            contentDescription = null,
+            tint = SuccessGreen
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(stringResource(R.string.reset_email_sent_success), color = SuccessGreen, fontSize = 14.sp)
+    }
+
+    Spacer(modifier = Modifier.height(32.dp))
+
+    Text(
+        text = stringResource(R.string.check_inbox_hint),
+        fontSize = 14.sp,
+        color = MaterialTheme.colorScheme.secondary,
+        modifier = Modifier.padding(bottom = 16.dp)
+    )
 }

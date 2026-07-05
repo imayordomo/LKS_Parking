@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.*
 import java.util.*
 
 class HistoryViewModel(private val repository: ParkingRepository) : ViewModel() {
+    val notifications = repository.notifications
+    val user = repository.user
 
     private val _statusFilter = MutableStateFlow("all")
     val statusFilter: StateFlow<String> = _statusFilter.asStateFlow()
@@ -35,7 +37,7 @@ class HistoryViewModel(private val repository: ParkingRepository) : ViewModel() 
         reservations
             .filter { it.userId == currentUser?.id }
             .filter { res ->
-                val isPast = res.date < todayStr || (res.date == todayStr && res.endTime <= currentTimeStr)
+                val isPast = res.date < todayStr || (res.date == todayStr && res.endTime < currentTimeStr)
                 
                 val matchesStatus = when (status) {
                     "past" -> isPast
@@ -48,7 +50,7 @@ class HistoryViewModel(private val repository: ParkingRepository) : ViewModel() 
 
                 matchesStatus && matchesDate
             }
-            .sortedByDescending { it.date }
+            .sortedWith(compareByDescending<Reservation> { it.date }.thenByDescending { it.startTime })
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun setStatusFilter(status: String) { _statusFilter.value = status }
@@ -59,5 +61,21 @@ class HistoryViewModel(private val repository: ParkingRepository) : ViewModel() 
         _statusFilter.value = "all"
         _startDateText.value = ""
         _endDateText.value = ""
+    }
+
+    fun generateCsvContent(headers: List<String>): String {
+        val csvContent = StringBuilder()
+        csvContent.append(headers.joinToString(",")).append("\n")
+        filteredReservations.value.forEach { r ->
+            val row = listOf(
+                "#${r.spotNumber}",
+                r.date,
+                r.startTime,
+                r.endTime,
+                r.licensePlate.orEmpty()
+            )
+            csvContent.append(row.joinToString(",")).append("\n")
+        }
+        return csvContent.toString()
     }
 }

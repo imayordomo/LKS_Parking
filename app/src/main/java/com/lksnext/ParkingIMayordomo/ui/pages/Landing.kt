@@ -2,35 +2,49 @@ package com.lksnext.ParkingIMayordomo.ui.pages
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
-import com.lksnext.ParkingIMayordomo.ui.viewmodel.LandingViewModel
+import com.lksnext.ParkingIMayordomo.utils.LocaleManager
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
+import com.lksnext.ParkingIMayordomo.utils.TestTags
 
 @Composable
 fun Landing(
-    viewModel: LandingViewModel,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+    val context = LocalContext.current
+    val systemContext = remember(context) { LocaleManager.getSystemLocaleContext(context) }
+    CompositionLocalProvider(LocalContext provides systemContext) {
+    val scrollState = rememberScrollState()
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .verticalScroll(scrollState)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
         Icon(
             imageVector = Icons.Default.DirectionsCar,
             contentDescription = null,
@@ -60,7 +74,8 @@ fun Landing(
             onClick = onLoginClick,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
+                .height(56.dp)
+                .testTag(TestTags.LANDING_LOGIN_BUTTON),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             shape = RoundedCornerShape(8.dp)
         ) {
@@ -72,12 +87,18 @@ fun Landing(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextButton(onClick = onRegisterClick) {
+        TextButton(
+            onClick = onRegisterClick,
+            modifier = Modifier.testTag(TestTags.LANDING_REGISTER_BUTTON)
+        ) {
             Text(
                 text = stringResource(R.string.register_button),
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 18.sp
             )
         }
+        }
+        subtleScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
+    }
     }
 }

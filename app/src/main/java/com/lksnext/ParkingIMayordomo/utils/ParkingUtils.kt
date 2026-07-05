@@ -34,7 +34,9 @@ object ParkingUtils {
     const val ROUTE_EDIT_RESERVATION = "edit-reservation"
     const val ROUTE_NOTIFICATIONS = "notifications"
     const val ROUTE_REPORT = "report"
+    const val ROUTE_MY_REPORTS = "my-reports"
     const val ROUTE_HELP = "help"
+    const val ROUTE_ABOUT = "about"
     
     // Params
     const val PARAM_SHOW_VEHICLE_ALERT = "showVehicleAlert"
@@ -71,7 +73,7 @@ object ParkingUtils {
             VehicleType.CAR -> R.string.spot_type_normal
             VehicleType.ELECTRIC -> R.string.spot_type_electric
             VehicleType.MOTORCYCLE -> R.string.spot_type_motorcycle
-            VehicleType.DISABLED -> R.string.spot_type_disabled
+            VehicleType.PMR -> R.string.spot_type_disabled
         }
     }
     
@@ -79,7 +81,7 @@ object ParkingUtils {
         return when (type) {
             VehicleType.CAR -> MainOrange
             VehicleType.ELECTRIC -> ElectricColor
-            VehicleType.DISABLED -> DisabledColor
+            VehicleType.PMR -> DisabledColor
             VehicleType.MOTORCYCLE -> MotorcycleColor
         }
     }
@@ -89,7 +91,7 @@ object ParkingUtils {
             VehicleType.CAR -> Icons.Default.DirectionsCar
             VehicleType.ELECTRIC -> Icons.Default.ElectricCar
             VehicleType.MOTORCYCLE -> Icons.Default.TwoWheeler
-            VehicleType.DISABLED -> Icons.AutoMirrored.Filled.Accessible
+            VehicleType.PMR -> Icons.AutoMirrored.Filled.Accessible
         }
     }
 
@@ -115,13 +117,40 @@ object ParkingUtils {
         val spotType = getSpotType(spotNumber)
         return when (spotType) {
             SpotType.MOTORCYCLE -> vehicleType == VehicleType.MOTORCYCLE
-            SpotType.DISABLED -> vehicleType == VehicleType.DISABLED
+            SpotType.DISABLED -> vehicleType == VehicleType.PMR
             SpotType.ELECTRIC -> vehicleType == VehicleType.ELECTRIC
-            SpotType.NORMAL -> vehicleType == VehicleType.CAR || vehicleType == VehicleType.ELECTRIC || vehicleType == VehicleType.DISABLED
+            SpotType.NORMAL -> vehicleType == VehicleType.CAR || vehicleType == VehicleType.ELECTRIC || vehicleType == VehicleType.PMR
         }
     }
 
-     //Los tiempos deben venir en formato "HH:mm"
+    fun timeToMinutes(time: String): Int {
+        val parts = time.split(":")
+        return parts[0].toInt() * 60 + parts[1].toInt()
+    }
+
+    fun minutesToTime(minutes: Int): String {
+        val h = minutes / 60
+        val m = minutes % 60
+        return "${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}"
+    }
+
+    fun addDays(date: String, days: Int): String {
+        val sdf = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
+        val cal = Calendar.getInstance().apply { time = sdf.parse(date) ?: return date; add(Calendar.DAY_OF_YEAR, days) }
+        return sdf.format(cal.time)
+    }
+
+    fun isMidnightCrossing(startTime: String, endTime: String): Boolean {
+        return timeToMinutes(endTime) < timeToMinutes(startTime)
+    }
+
+    fun calculateDurationMinutes(startTime: String, endTime: String): Int {
+        val start = timeToMinutes(startTime)
+        val end = timeToMinutes(endTime)
+        return if (end > start) end - start else (24 * 60 - start) + end
+    }
+
+     //time format must come as "HH:mm"
     fun isTimeOverlapping(
         date1: String, start1: String, end1: String,
         date2: String, start2: String, end2: String
@@ -130,5 +159,14 @@ object ParkingUtils {
         return (start1 >= start2 && start1 < end2) ||
                (end1 > start2 && end1 <= end2) ||
                (start1 <= start2 && end1 >= end2)
+    }
+
+    fun isReservationActiveOrFuture(date: String, endTime: String): Boolean {
+        val today = formatDate(Date())
+        if (date > today) return true
+        if (date < today) return false
+        
+        val nowTime = formatTime(Date())
+        return endTime >= nowTime
     }
 }

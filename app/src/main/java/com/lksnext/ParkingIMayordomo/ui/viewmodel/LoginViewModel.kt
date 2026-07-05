@@ -34,6 +34,9 @@ class LoginViewModel(private val repository: ParkingRepository) : ViewModel() {
                     "error_corporate_only" -> R.string.error_corporate_only
                     "error_invalid_credentials" -> R.string.error_invalid_credentials
                     "error_invalid_email_format" -> R.string.error_invalid_email_format
+                    "error_network" -> R.string.error_network
+                    "error_user_disabled" -> R.string.error_user_disabled
+                    "error_too_many_requests" -> R.string.error_too_many_requests
                     else -> R.string.error_unknown
                 }
             } finally {

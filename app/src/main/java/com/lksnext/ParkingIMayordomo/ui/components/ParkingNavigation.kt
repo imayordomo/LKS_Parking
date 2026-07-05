@@ -1,5 +1,8 @@
 package com.lksnext.ParkingIMayordomo.ui.components
 
+import android.graphics.BitmapFactory
+import android.util.Base64
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -9,16 +12,25 @@ import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
-import com.lksnext.ParkingIMayordomo.data.AuthManager
+import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.ui.theme.*
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
+import com.lksnext.ParkingIMayordomo.utils.TestTags
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HELP
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
@@ -31,10 +43,9 @@ import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_VIEW_PARKING
 @Composable
 fun ParkingTopAppBar(
     onMenuClick: () -> Unit,
-    onNotificationsClick: () -> Unit
+    onNotificationsClick: () -> Unit,
+    unreadNotificationsCount: Int = 0
 ) {
-    val unreadCount = AuthManager.notifications.count { !it.read }
-
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -54,7 +65,7 @@ fun ParkingTopAppBar(
             }
         },
         navigationIcon = {
-            IconButton(onClick = onMenuClick) {
+            IconButton(onClick = onMenuClick, modifier = Modifier.testTag(TestTags.NAV_MENU_BUTTON)) {
                 Icon(
                     imageVector = Icons.Default.Menu,
                     contentDescription = stringResource(R.string.content_desc_menu),
@@ -63,15 +74,15 @@ fun ParkingTopAppBar(
             }
         },
         actions = {
-            IconButton(onClick = onNotificationsClick) {
+            IconButton(onClick = onNotificationsClick, modifier = Modifier.testTag(TestTags.NAV_NOTIFICATIONS_BUTTON)) {
                 BadgedBox(
                     badge = {
-                        if (unreadCount > 0) {
+                        if (unreadNotificationsCount > 0) {
                             Badge(
                                 containerColor = MaterialTheme.colorScheme.error,
                                 contentColor = MaterialTheme.colorScheme.onError
                             ) {
-                                Text(unreadCount.toString())
+                                Text(unreadNotificationsCount.toString())
                             }
                         }
                     }
@@ -107,9 +118,17 @@ fun ParkingBottomBar(
         )
 
         items.forEach { (icon, label, index) ->
+            val tag = when (index) {
+                0 -> TestTags.NAV_BOTTOM_DASHBOARD
+                1 -> TestTags.NAV_BOTTOM_HISTORY
+                2 -> TestTags.NAV_BOTTOM_PROFILE
+                3 -> TestTags.NAV_BOTTOM_PARKING
+                else -> ""
+            }
             NavigationBarItem(
                 selected = selectedItem == index,
                 onClick = { onItemSelected(index) },
+                modifier = Modifier.testTag(tag),
                 icon = { Icon(icon, contentDescription = null) },
                 label = { Text(text = label, fontSize = 11.sp) },
                 colors = NavigationBarItemDefaults.colors(
@@ -124,12 +143,21 @@ fun ParkingBottomBar(
 @Composable
 fun ParkingDrawerContent(
     currentRoute: String,
-    onItemClick: (String) -> Unit
+    onItemClick: (String) -> Unit,
+    user: User? = null
 ) {
-    val user = AuthManager.user
-
+    val userName = user?.name.orEmpty()
+    val userEmail = user?.email.orEmpty()
+    val profileBitmap = remember(user?.profileImage) {
+        user?.profileImage?.let { base64 ->
+            try {
+                val bytes = Base64.decode(base64, Base64.NO_WRAP)
+                BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            } catch (_: Exception) { null }
+        }
+    }
     ModalDrawerSheet(
-        modifier = Modifier.width(300.dp),
+        modifier = Modifier.widthIn(max = 300.dp).fillMaxWidth(),
         drawerContainerColor = MaterialTheme.colorScheme.surface,
         drawerShape = RoundedCornerShape(0.dp)
     ) {
@@ -140,30 +168,41 @@ fun ParkingDrawerContent(
                 .padding(top = 48.dp, bottom = 24.dp, start = 24.dp, end = 24.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Surface(
-                    modifier = Modifier.size(64.dp),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.secondaryContainer
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = user?.name?.firstOrNull()?.toString()?.uppercase() ?: "",
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                if (profileBitmap != null) {
+                    Image(
+                        bitmap = profileBitmap.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Surface(
+                        modifier = Modifier.size(64.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.secondaryContainer
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = userName.firstOrNull()?.toString()?.uppercase().orEmpty(),
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
                     Text(
-                        text = user?.name ?: stringResource(R.string.default_user_name),
+                        text = userName.ifBlank { stringResource(R.string.default_user_name) },
                         color = MaterialTheme.colorScheme.onPrimary,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = user?.email ?: "",
+                        text = userEmail,
                         color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
                         fontSize = 14.sp
                     )
@@ -172,40 +211,60 @@ fun ParkingDrawerContent(
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-        
-        val menuItems = listOf(
-            Triple(Icons.Default.EventAvailable, stringResource(R.string.my_reservations), ROUTE_DASHBOARD),
-            Triple(Icons.Default.History, stringResource(R.string.drawer_history), ROUTE_HISTORY),
-            Triple(Icons.Default.Person, stringResource(R.string.drawer_profile), ROUTE_PROFILE),
-            Triple(Icons.Default.Search, stringResource(R.string.drawer_parking), ROUTE_VIEW_PARKING),
-            Triple(Icons.Default.Notifications, stringResource(R.string.menu_notifications), ROUTE_NOTIFICATIONS),
-            Triple(Icons.Default.ReportProblem, stringResource(R.string.menu_report), ROUTE_REPORT),
-            Triple(Icons.AutoMirrored.Filled.HelpOutline, stringResource(R.string.menu_help), ROUTE_HELP)
-        )
 
-        menuItems.forEach { (icon, label, route) ->
-            NavigationDrawerItem(
-                label = { Text(text = label, fontSize = 16.sp) },
-                selected = currentRoute == route,
-                onClick = { onItemClick(route) },
-                icon = {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                colors = NavigationDrawerItemDefaults.colors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    unselectedContainerColor = Color.Transparent,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurface,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurface
-                ),
-                shape = RoundedCornerShape(0.dp),
-                modifier = Modifier.padding(horizontal = 0.dp)
-            )
+        DrawerMenuItems(currentRoute = currentRoute, onItemClick = onItemClick)
+    }
+}
+
+@Composable
+private fun DrawerMenuItems(
+    currentRoute: String,
+    onItemClick: (String) -> Unit
+) {
+    val menuItems = listOf(
+        Triple(Icons.Default.EventAvailable, stringResource(R.string.my_reservations), ROUTE_DASHBOARD),
+        Triple(Icons.Default.History, stringResource(R.string.drawer_history), ROUTE_HISTORY),
+        Triple(Icons.Default.Person, stringResource(R.string.drawer_profile), ROUTE_PROFILE),
+        Triple(Icons.Default.Search, stringResource(R.string.drawer_parking), ROUTE_VIEW_PARKING),
+        Triple(Icons.Default.Notifications, stringResource(R.string.menu_notifications), ROUTE_NOTIFICATIONS),
+        Triple(Icons.Default.ReportProblem, stringResource(R.string.menu_report), ROUTE_REPORT),
+        Triple(Icons.AutoMirrored.Filled.HelpOutline, stringResource(R.string.menu_help), ROUTE_HELP),
+        Triple(Icons.Default.Info, stringResource(R.string.menu_about), ROUTE_ABOUT)
+    )
+
+    menuItems.forEach { (icon, label, route) ->
+        val tag = when (route) {
+            ROUTE_DASHBOARD -> TestTags.NAV_DRAWER_DASHBOARD
+            ROUTE_HISTORY -> TestTags.NAV_DRAWER_HISTORY
+            ROUTE_PROFILE -> TestTags.NAV_DRAWER_PROFILE
+            ROUTE_VIEW_PARKING -> TestTags.NAV_DRAWER_PARKING
+            ROUTE_NOTIFICATIONS -> TestTags.NAV_DRAWER_NOTIFICATIONS
+            ROUTE_REPORT -> TestTags.NAV_DRAWER_REPORT
+            ROUTE_HELP -> TestTags.NAV_DRAWER_HELP
+            ROUTE_ABOUT -> TestTags.NAV_DRAWER_ABOUT
+            else -> ""
         }
+        NavigationDrawerItem(
+            label = { Text(text = label, fontSize = 16.sp) },
+            selected = currentRoute == route,
+            onClick = { onItemClick(route) },
+            icon = {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            },
+            colors = NavigationDrawerItemDefaults.colors(
+                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                unselectedContainerColor = Color.Transparent,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurface,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurface
+            ),
+            shape = RoundedCornerShape(0.dp),
+            modifier = Modifier.padding(horizontal = 0.dp).testTag(tag)
+        )
     }
 }

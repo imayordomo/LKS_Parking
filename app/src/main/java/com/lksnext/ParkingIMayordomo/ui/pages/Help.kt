@@ -6,31 +6,35 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
+import com.lksnext.ParkingIMayordomo.data.model.Notification
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
-import com.lksnext.ParkingIMayordomo.ui.theme.*
-import com.lksnext.ParkingIMayordomo.ui.viewmodel.HelpViewModel
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HELP
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_HISTORY
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_NOTIFICATIONS
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_PROFILE
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_VIEW_PARKING
+import com.lksnext.ParkingIMayordomo.utils.TestTags
 import kotlinx.coroutines.launch
 
 private data class FAQ(val question: String, val answer: String)
@@ -38,9 +42,10 @@ private data class FAQ(val question: String, val answer: String)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Help(
-    viewModel: HelpViewModel,
+    modifier: Modifier = Modifier,
     onNavigate: (String) -> Unit,
-    modifier: Modifier = Modifier
+    user: com.lksnext.ParkingIMayordomo.data.model.User? = null,
+    notifications: List<Notification> = emptyList(),
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -55,7 +60,9 @@ fun Help(
         FAQ(stringResource(R.string.faq_q7), stringResource(R.string.faq_a7)),
         FAQ(stringResource(R.string.faq_q8), stringResource(R.string.faq_a8)),
         FAQ(stringResource(R.string.faq_q9), stringResource(R.string.faq_a9)),
-        FAQ(stringResource(R.string.faq_q10), stringResource(R.string.faq_a10))
+        FAQ(stringResource(R.string.faq_q10), stringResource(R.string.faq_a10)),
+        FAQ(stringResource(R.string.faq_q11), stringResource(R.string.faq_a11)),
+        FAQ(stringResource(R.string.faq_q12), stringResource(R.string.faq_a12))
     )
 
     ModalNavigationDrawer(
@@ -66,35 +73,40 @@ fun Help(
                 onItemClick = { route ->
                     scope.launch { drawerState.close() }
                     onNavigate(route)
-                }
+                },
+                user = user
             )
         }
     ) {
+        val unreadCount = notifications.count { !it.read }
         Scaffold(
             topBar = {
                 ParkingTopAppBar(
                     onMenuClick = { scope.launch { drawerState.open() } },
-                    onNotificationsClick = { onNavigate(ROUTE_NOTIFICATIONS) }
+                    onNotificationsClick = { onNavigate(ROUTE_NOTIFICATIONS) },
+                    unreadNotificationsCount = unreadCount
                 )
             },
             bottomBar = {
                 ParkingBottomBar(
                     selectedItem = -1,
                     onItemSelected = { index ->
-                        val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING)
+                        val routes = listOf(ROUTE_DASHBOARD, ROUTE_HISTORY, ROUTE_PROFILE, ROUTE_VIEW_PARKING, ROUTE_ABOUT)
                         onNavigate(routes[index])
                     }
                 )
             }
         ) { padding ->
-            LazyColumn(
-                modifier = modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            val listState = rememberLazyListState()
+            Box(modifier = modifier.padding(padding).fillMaxSize()) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    state = listState
+                ) {
                 item {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -152,13 +164,15 @@ fun Help(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
+            subtleScrollbar(listState, Modifier.align(Alignment.CenterEnd))
         }
     }
+}
 }
 
 @Composable
 private fun FAQAccordion(faq: FAQ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -171,6 +185,7 @@ private fun FAQAccordion(faq: FAQ) {
         Column(
             modifier = Modifier
                 .clickable { expanded = !expanded }
+                .testTag(TestTags.HELP_FAQ_ACCORDION)
                 .padding(16.dp)
         ) {
             Row(
