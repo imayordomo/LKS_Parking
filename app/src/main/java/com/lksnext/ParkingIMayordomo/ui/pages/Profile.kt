@@ -92,7 +92,7 @@ fun Profile(
                 val bytes = java.io.ByteArrayOutputStream()
                 bmp.compress(Bitmap.CompressFormat.JPEG, 80, bytes)
                 val base64Image = Base64.encodeToString(bytes.toByteArray(), Base64.NO_WRAP)
-                viewModel.updateProfile(user?.name ?: "", base64Image)
+                viewModel.updateProfile(user?.name ?: "", base64Image, updateImage = true)
             }
         }
     }
@@ -340,12 +340,17 @@ fun Profile(
     if (showEditProfileDialog) {
         EditProfileDialog(
             currentName = user?.name ?: "",
+            hasImage = user?.profileImage != null,
             onDismiss = { showEditProfileDialog = false },
             onSave = { newName ->
                 viewModel.updateProfile(newName)
                 showEditProfileDialog = false
             },
-            onChangeImage = { imagePickerLauncher.launch("image/*") }
+            onChangeImage = { imagePickerLauncher.launch("image/*") },
+            onDeleteImage = {
+                viewModel.updateProfile(user?.name ?: "", null, updateImage = true)
+                showEditProfileDialog = false
+            }
         )
     }
 
@@ -617,7 +622,14 @@ fun VehicleItem(vehicle: Vehicle, onDelete: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfileDialog(currentName: String, onDismiss: () -> Unit, onSave: (String) -> Unit, onChangeImage: () -> Unit) {
+fun EditProfileDialog(
+    currentName: String, 
+    hasImage: Boolean,
+    onDismiss: () -> Unit, 
+    onSave: (String) -> Unit, 
+    onChangeImage: () -> Unit,
+    onDeleteImage: () -> Unit
+) {
     var name by rememberSaveable { mutableStateOf(currentName) }
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -634,13 +646,26 @@ fun EditProfileDialog(currentName: String, onDismiss: () -> Unit, onSave: (Strin
                         focusedLabelColor = MaterialTheme.colorScheme.primary
                     )
                 )
-                TextButton(
-                    onClick = { onChangeImage(); onDismiss() },
-                    modifier = Modifier.testTag(TestTags.PROFILE_EDIT_DIALOG_CHANGE_IMAGE)
-                ) {
-                    Icon(Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.change_image))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    TextButton(
+                        onClick = { onChangeImage(); onDismiss() },
+                        modifier = Modifier.testTag(TestTags.PROFILE_EDIT_DIALOG_CHANGE_IMAGE)
+                    ) {
+                        Icon(Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.change_image))
+                    }
+                    if (hasImage) {
+                        TextButton(
+                            onClick = onDeleteImage,
+                            modifier = Modifier.testTag(TestTags.PROFILE_EDIT_DIALOG_DELETE_IMAGE),
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                        ) {
+                            Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.delete_image))
+                        }
+                    }
                 }
             }
         },

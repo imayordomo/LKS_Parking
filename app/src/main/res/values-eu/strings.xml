@@ -311,4 +311,5 @@
 
     <!-- Profile Image -->
     <string name="change_image">Irudia aldatu</string>
+    <string name="delete_image">Irudia ezabatu</string>
 </resources>

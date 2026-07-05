@@ -73,8 +73,8 @@ class ParkingRepositoryImpl : ParkingRepository {
         AuthManager.removeVehicle(id)
     }
 
-    override suspend fun updateProfile(name: String, profileImage: String?) {
-        AuthManager.updateProfile(name, profileImage)
+    override suspend fun updateProfile(name: String, profileImage: String?, updateImage: Boolean) {
+        AuthManager.updateProfile(name, profileImage, updateImage)
     }
 
     override suspend fun updateFcmToken(token: String) {

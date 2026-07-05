@@ -413,15 +413,24 @@ object AuthManager {
     }
 
     @AddTrace(name = "update_profile_trace")
-    suspend fun updateProfile(name: String, imageUri: String?) {
+    suspend fun updateProfile(name: String, profileImage: String?, updateImage: Boolean = false) {
         val firebaseUser = auth.currentUser ?: return
         val profileUpdates = userProfileChangeRequest { displayName = name.trim() }
         firebaseUser.updateProfile(profileUpdates).await()
         val userId = firebaseUser.uid
         val updates = mutableMapOf<String, Any>("name" to name.trim())
-        imageUri?.let { updates["profileImage"] = it }
+        if (updateImage) {
+            if (profileImage == null) {
+                updates["profileImage"] = com.google.firebase.firestore.FieldValue.delete()
+            } else {
+                updates["profileImage"] = profileImage
+            }
+        }
         db.collection(COLLECTION_USERS).document(userId).update(updates).await()
-        _user.value = _user.value?.copy(name = name.trim(), profileImage = imageUri ?: _user.value?.profileImage)
+        _user.value = _user.value?.copy(
+            name = name.trim(),
+            profileImage = if (updateImage) profileImage else _user.value?.profileImage
+        )
     }
 
     suspend fun addReport(spotNumber: Int?, title: String, description: String) {

@@ -63,6 +63,7 @@ object TestTags {
     const val PROFILE_EDIT_DIALOG_SAVE = "profile_edit_dialog_save"
     const val PROFILE_EDIT_DIALOG_CANCEL = "profile_edit_dialog_cancel"
     const val PROFILE_EDIT_DIALOG_CHANGE_IMAGE = "profile_edit_dialog_change_image"
+    const val PROFILE_EDIT_DIALOG_DELETE_IMAGE = "profile_edit_dialog_delete_image"
     const val PROFILE_ADD_VEHICLE_TYPE_FIELD = "profile_add_vehicle_type_field"
     const val PROFILE_ADD_VEHICLE_TYPE_MENU = "profile_add_vehicle_type_menu"
     const val PROFILE_ADD_VEHICLE_PLATE_FIELD = "profile_add_vehicle_plate_field"
