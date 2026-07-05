@@ -20,10 +20,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.*
+
 @Suppress("StaticFieldLeak")
 object AuthManager {
-    private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
+    private val auth by lazy { FirebaseAuth.getInstance() }
+    private val db by lazy { FirebaseFirestore.getInstance() }
     private var reminderManager: ReservationReminderManager? = null
     
     private const val CORPORATE_DOMAIN = "@lksnext.com"
@@ -61,23 +62,32 @@ object AuthManager {
 
     private val activeListeners = mutableListOf<ListenerRegistration>()
 
-    init {
-        auth.currentUser?.let { firebaseUser ->
-            val userId = firebaseUser.uid
-            val email = firebaseUser.email.orEmpty()
-            _user.value = User(
-                id = userId,
-                email = email,
-                name = firebaseUser.displayName ?: email.substringBefore("@"),
-                profileImage = firebaseUser.photoUrl?.toString()
-            )
-            refreshAllData()
-            syncFcmToken()
+    /**
+     * Replaces the init block to avoid automatic Firebase initialization during unit tests.
+     * In the app, this should be called after Firebase is initialized.
+     */
+    fun checkCurrentUser() {
+        try {
+            auth.currentUser?.let { firebaseUser ->
+                val userId = firebaseUser.uid
+                val email = firebaseUser.email.orEmpty()
+                _user.value = User(
+                    id = userId,
+                    email = email,
+                    name = firebaseUser.displayName ?: email.substringBefore("@"),
+                    profileImage = firebaseUser.photoUrl?.toString()
+                )
+                refreshAllData()
+                syncFcmToken()
+            }
+        } catch (e: Exception) {
+            Log.e("AuthManager", "Error checking current user", e)
         }
     }
 
     fun init(context: Context) {
         reminderManager = ReservationReminderManager(context.applicationContext)
+        checkCurrentUser()
     }
 
     private fun refreshAllData() {
@@ -201,12 +211,16 @@ object AuthManager {
 
     @Suppress("DEPRECATION")
     fun syncFcmToken() {
-        FirebaseMessaging.getInstance().getToken().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val token = task.result
-                val userId = _user.value?.id ?: return@addOnCompleteListener
-                db.collection(COLLECTION_USERS).document(userId).update(FIELD_FCM_TOKEN, token)
+        try {
+            FirebaseMessaging.getInstance().getToken().addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val token = task.result
+                    val userId = _user.value?.id ?: return@addOnCompleteListener
+                    db.collection(COLLECTION_USERS).document(userId).update(FIELD_FCM_TOKEN, token)
+                }
             }
+        } catch (e: Exception) {
+            Log.w("AuthManager", "Firebase Messaging not available", e)
         }
     }
 
@@ -305,7 +319,7 @@ object AuthManager {
 
     private fun getMillis(date: String, time: String): Long {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-        return sdf.parse("$date $time")?.time ?: 0L
+        return try { sdf.parse("$date $time")?.time ?: 0L } catch (e: Exception) { 0L }
     }
 
     @AddTrace(name = "add_reservation_trace")

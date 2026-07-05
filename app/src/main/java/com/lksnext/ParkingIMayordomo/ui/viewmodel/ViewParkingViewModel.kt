@@ -35,12 +35,11 @@ class ViewParkingViewModel(private val repository: ParkingRepository) : ViewMode
             val spotStates = mutableMapOf<Int, SpotOccupancyState>()
 
             for (spot in 1..50) {
-                val todayActiveReservations = reservations.filter { r ->
-                    r.spotNumber == spot && r.date == dateStr &&
-                    (isToday && isCurrentlyActive(r.startTime, r.endTime))
-                }
-
                 if (isToday) {
+                    val todayActiveReservations = reservations.filter { r ->
+                        r.spotNumber == spot && r.date == dateStr &&
+                        isCurrentlyActive(r.startTime, r.endTime)
+                    }
                     if (todayActiveReservations.isNotEmpty()) {
                         spotStates[spot] = SpotOccupancyState.FULLY_OCCUPIED
                     }
@@ -75,7 +74,10 @@ class ViewParkingViewModel(private val repository: ParkingRepository) : ViewMode
 
         for (r in dayReservations) {
             val start = ParkingUtils.timeToMinutes(r.startTime)
-            val end = ParkingUtils.timeToMinutes(r.endTime)
+            var end = ParkingUtils.timeToMinutes(r.endTime)
+            // Treat 23:59 as end of day for coverage calculation
+            if (r.endTime == "23:59") end = fullDay
+            
             if (end > start) {
                 intervals.add(Pair(start, end))
             } else {
@@ -84,7 +86,8 @@ class ViewParkingViewModel(private val repository: ParkingRepository) : ViewMode
         }
 
         for (r in prevMidnightCrossing) {
-            val end = ParkingUtils.timeToMinutes(r.endTime)
+            var end = ParkingUtils.timeToMinutes(r.endTime)
+            if (r.endTime == "23:59") end = fullDay
             intervals.add(Pair(0, end))
         }
 

@@ -2,7 +2,7 @@
 
 This document contains the most useful commands for development, testing, and maintenance of the project.
 
-## 🚀 Build & Installation
+## Build & Installation
 
 | Command | Description |
 |---------|-------------|
@@ -11,7 +11,7 @@ This document contains the most useful commands for development, testing, and ma
 | `.\gradlew.bat installDebug` | Compiles and installs the app on the connected device. |
 | `.\gradlew.bat bundleRelease` | Generates the Android App Bundle (.aab) for production. |
 
-## 🧪 Testing & Coverage
+## Testing & Coverage
 
 ### Unit Tests (Local)
 | Command | Description |
@@ -30,7 +30,7 @@ This document contains the most useful commands for development, testing, and ma
 |---------|-------------|
 | `.\gradlew.bat jacocoTestReport` | Generates the JaCoCo coverage report (HTML/XML) in `app/build/reports/jacoco/`. |
 
-## 💎 Quality & Static Analysis
+## Quality & Static Analysis
 
 | Command | Description |
 |---------|-------------|
@@ -38,7 +38,7 @@ This document contains the most useful commands for development, testing, and ma
 | `.\gradlew.bat lintDebug` | Runs the official Android Lint analysis. |
 | `.\gradlew.bat sonar` | Uploads analysis and coverage results to **SonarCloud**. |
 
-## 🛠️ Development Utilities
+## 🛠Development Utilities
 
 ### Database Seeding (Firestore)
 To populate the database with test data (users, vehicles, and reservations):
@@ -51,13 +51,13 @@ node seed.js --clear            # Delete everything and repopulate
 *Requires `serviceAccountKey.json` in the `scripts/` folder.*
 
 ### Gradle & Dependency Management
-| Command | Description |
-|---------|-------------|
-| `.\gradlew.bat :app:dependencies` | Shows the full dependency tree. |
-| `.\gradlew.bat --stop` | Stops the Gradle daemon (useful if it hangs). |
-| `.\gradlew.bat cleanBuildCache` | Clears the Gradle build cache. |
+| Command                                   | Description                                   |
+|-------------------------------------------|-----------------------------------------------|
+| `.\gradlew.bat :app:dependencies`         | Shows the full dependency tree.               |
+| `.\gradlew.bat --stop`                    | Stops the Gradle daemon (useful if it hangs). |
+| `.\gradlew.bat cleanBuildCache`           | Clears the Gradle build cache.                |
 
-## 📱 Useful ADB Commands
+## Useful ADB Commands
 
 | Command | Description |
 |---------|-------------|

@@ -4,11 +4,15 @@ import com.lksnext.ParkingIMayordomo.data.model.Notification
 import com.lksnext.ParkingIMayordomo.data.model.Reservation
 import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepository
+import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -36,6 +40,11 @@ class ViewParkingViewModelTest {
         viewModel = ViewParkingViewModel(repository)
     }
 
+    @After
+    fun tearDown() {
+        unmockkAll()
+    }
+
     @Test
     fun `getOccupiedSpots should return distinct spot numbers for selected date`() = runTest {
         val date = Calendar.getInstance()
@@ -50,9 +59,47 @@ class ViewParkingViewModelTest {
 
         val occupied = viewModel.getOccupiedSpots(date).first()
         
-        // occupied is Map<Int, SpotOccupancyState>
+        // Non-today date uses partially/fully occupied logic
+        // Since intervals [8-10] and [12-14] don't cover 00:00-23:59, they are PARTIALLY_OCCUPIED
         assertEquals(2, occupied.size)
-        assertEquals(listOf(5, 10), occupied.keys.sorted())
+        assertEquals(SpotOccupancyState.PARTIALLY_OCCUPIED, occupied[5])
+        assertEquals(SpotOccupancyState.PARTIALLY_OCCUPIED, occupied[10])
+    }
+
+    @Test
+    fun `getOccupiedSpots - Fully occupied branch`() = runTest {
+        val date = Calendar.getInstance()
+        date.set(2023, 4, 10)
+        
+        // Cover entire day for spot 7
+        allReservationsFlow.value = listOf(
+            Reservation(id = "1", spotNumber = 7, date = "2023-05-10", startTime = "00:00", endTime = "23:59")
+        )
+
+        val occupied = viewModel.getOccupiedSpots(date).first()
+        assertEquals(SpotOccupancyState.FULLY_OCCUPIED, occupied[7])
+    }
+    
+    @Test
+    fun `getOccupiedSpots - Midnight crossing from previous day`() = runTest {
+        val date = Calendar.getInstance()
+        date.set(2023, 4, 10) // 2023-05-10
+        
+        mockkObject(ParkingUtils)
+        every { ParkingUtils.addDays("2023-05-10", -1) } returns "2023-05-09"
+        every { ParkingUtils.isMidnightCrossing("22:00", "08:00") } returns true
+        every { ParkingUtils.timeToMinutes("22:00") } returns 22 * 60
+        every { ParkingUtils.timeToMinutes("08:00") } returns 8 * 60
+        every { ParkingUtils.timeToMinutes("23:59") } returns 24 * 60 - 1
+        
+        // Spot 8: 00:00-08:00 from prev day, then 08:00-23:59 from current day
+        allReservationsFlow.value = listOf(
+            Reservation(id = "prev", spotNumber = 8, date = "2023-05-09", startTime = "22:00", endTime = "08:00"),
+            Reservation(id = "curr", spotNumber = 8, date = "2023-05-10", startTime = "08:00", endTime = "23:59")
+        )
+
+        val occupied = viewModel.getOccupiedSpots(date).first()
+        assertEquals(SpotOccupancyState.FULLY_OCCUPIED, occupied[8])
     }
 
     @Test
