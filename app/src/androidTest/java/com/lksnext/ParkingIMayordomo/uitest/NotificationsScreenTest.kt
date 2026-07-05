@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.lksnext.ParkingIMayordomo.data.model.Notification
 import com.lksnext.ParkingIMayordomo.data.model.NotificationType
+import com.lksnext.ParkingIMayordomo.data.model.User
 import com.lksnext.ParkingIMayordomo.data.repository.ParkingRepository
 import com.lksnext.ParkingIMayordomo.ui.pages.Notifications
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.NotificationsViewModel
@@ -28,6 +29,7 @@ class NotificationsScreenTest {
     ): ParkingRepository {
         val repo = mockk<ParkingRepository>(relaxed = true)
         every { repo.notifications } returns MutableStateFlow(notifications)
+        every { repo.user } returns MutableStateFlow<User?>(null)
         return repo
     }
 
