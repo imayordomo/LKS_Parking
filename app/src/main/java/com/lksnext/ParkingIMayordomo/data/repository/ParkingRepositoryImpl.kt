@@ -5,8 +5,8 @@ import com.lksnext.ParkingIMayordomo.data.model.*
 import kotlinx.coroutines.flow.StateFlow
 
 class ParkingRepositoryImpl : ParkingRepository {
-    override val user: StateFlow<User?> = AuthManager.user
-    override val reservations: StateFlow<List<Reservation>> = AuthManager.reservations
+    override val user: StateFlow<User?> get() = AuthManager.user
+    override val reservations: StateFlow<List<Reservation>> get() = AuthManager.reservations
     override val allReservations: StateFlow<List<Reservation>>
         get() {
             AuthManager.startAllReservationsListener()
@@ -17,9 +17,9 @@ class ParkingRepositoryImpl : ParkingRepository {
             AuthManager.startAllReservationsListener()
             return AuthManager.allReservationsReady
         }
-    override val vehicles: StateFlow<List<Vehicle>?> = AuthManager.vehicles
-    override val notifications: StateFlow<List<Notification>> = AuthManager.notifications
-    override val reports: StateFlow<List<Report>> = AuthManager.reports
+    override val vehicles: StateFlow<List<Vehicle>?> get() = AuthManager.vehicles
+    override val notifications: StateFlow<List<Notification>> get() = AuthManager.notifications
+    override val reports: StateFlow<List<Report>> get() = AuthManager.reports
 
     override suspend fun login(email: String, password: String) {
         AuthManager.login(email, password)
