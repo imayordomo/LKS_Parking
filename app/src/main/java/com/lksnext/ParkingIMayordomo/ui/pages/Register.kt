@@ -57,6 +57,7 @@ fun Register(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .imePadding()
             .verticalScroll(scrollState),
         contentAlignment = Alignment.Center
     ) {

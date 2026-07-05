@@ -2,7 +2,9 @@ package com.lksnext.ParkingIMayordomo.ui.pages
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircleOutline
@@ -39,10 +41,13 @@ fun ForgotPassword(
     val context = LocalContext.current
     val systemContext = remember(context) { LocaleManager.getSystemLocaleContext(context) }
     CompositionLocalProvider(LocalContext provides systemContext) {
+    val scrollState = rememberScrollState()
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.primary)
+            .imePadding()
+            .verticalScroll(scrollState)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

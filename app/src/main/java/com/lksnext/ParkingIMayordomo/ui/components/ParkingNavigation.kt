@@ -157,7 +157,7 @@ fun ParkingDrawerContent(
         }
     }
     ModalDrawerSheet(
-        modifier = Modifier.width(300.dp),
+        modifier = Modifier.widthIn(max = 300.dp).fillMaxWidth(),
         drawerContainerColor = MaterialTheme.colorScheme.surface,
         drawerShape = RoundedCornerShape(0.dp)
     ) {

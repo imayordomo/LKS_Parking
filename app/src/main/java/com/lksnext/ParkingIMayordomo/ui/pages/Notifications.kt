@@ -2,6 +2,7 @@ package com.lksnext.ParkingIMayordomo.ui.pages
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,6 +47,7 @@ fun Notifications(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val user by viewModel.user.collectAsState()
     val notifications by viewModel.notifications.collectAsState()
     val unreadCount = notifications.count { !it.read }
 
@@ -57,7 +59,8 @@ fun Notifications(
                 onItemClick = { route ->
                     scope.launch { drawerState.close() }
                     onNavigate(route)
-                }
+                },
+                user = user
             )
         }
     ) {
@@ -173,7 +176,9 @@ fun NotificationItem(
                         fontWeight = if (notification.read) FontWeight.Normal else FontWeight.Bold,
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f, fill = false)
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     if (!notification.read) {
                         Spacer(modifier = Modifier.width(8.dp))
@@ -194,7 +199,9 @@ fun NotificationItem(
                 Text(
                     text = message,
                     fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {

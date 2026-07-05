@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Accessible
 import androidx.compose.material.icons.automirrored.filled.List
@@ -259,6 +260,7 @@ private fun ViewParkingDateCard(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ViewParkingSpotSection(
     spotsExpanded: Boolean,
@@ -321,7 +323,7 @@ private fun ViewParkingSpotSection(
                         ViewSpotDropdown(selectedSpot = selectedSpot, onSpotSelected = onSpotSelected, spotOccupancy = spotOccupancy, userSpots = userSpots, spotTypeFilter = spotTypeFilter)
                     } else {
                         Column {
-                            Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FlowRow(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                 ViewLegendItem(stringResource(R.string.available_legend), SuccessGreen)
                                 ViewLegendItem(
                                     stringResource(R.string.partially_occupied_legend),
@@ -417,7 +419,9 @@ private fun ViewParkingSpotDetail(
                                         if (isMine) stringResource(R.string.mine_suffix) else ""
                                     ),
                                     fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                             Text(stringResource(R.string.schedule_format, reservation.startTime, reservation.endTime), fontSize = 13.sp, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(top = 4.dp))
