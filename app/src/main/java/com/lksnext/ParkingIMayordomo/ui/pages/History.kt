@@ -11,6 +11,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,6 +33,7 @@ import com.lksnext.ParkingIMayordomo.data.model.Reservation
 import com.lksnext.ParkingIMayordomo.data.model.Vehicle
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.HistoryViewModel
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
@@ -130,13 +132,15 @@ fun History(
                 )
             }
         ) { padding ->
-            LazyColumn(
-                modifier = modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp)
-            ) {
+            val listState = rememberLazyListState()
+            Box(modifier = modifier.padding(padding).fillMaxSize()) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(16.dp),
+                    state = listState
+                ) {
                 item {
                     Row(
                         modifier = Modifier
@@ -339,7 +343,9 @@ fun History(
                 
                 item { Spacer(modifier = Modifier.height(80.dp)) }
             }
+            subtleScrollbar(listState, Modifier.align(Alignment.CenterEnd))
         }
+    }
     }
 
     if (showStartDatePicker) {

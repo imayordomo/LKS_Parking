@@ -10,7 +10,8 @@ class ModelsTest {
         assertEquals(VehicleType.CAR, VehicleType.fromString("car"))
         assertEquals(VehicleType.ELECTRIC, VehicleType.fromString("electric"))
         assertEquals(VehicleType.MOTORCYCLE, VehicleType.fromString("motorcycle"))
-        assertEquals(VehicleType.DISABLED, VehicleType.fromString("disabled"))
+        assertEquals(VehicleType.PMR, VehicleType.fromString("disabled"))
+        assertEquals(VehicleType.PMR, VehicleType.fromString("pmr"))
     }
 
     @Test

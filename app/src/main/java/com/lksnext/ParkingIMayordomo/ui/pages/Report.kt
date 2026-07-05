@@ -36,6 +36,7 @@ import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.ReportViewModel
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
 import com.lksnext.ParkingIMayordomo.utils.TestTags
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_ABOUT
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.ROUTE_DASHBOARD
@@ -99,14 +100,15 @@ fun Report(
                 )
             }
         ) { padding ->
-            Column(
-                modifier = modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp)
-            ) {
+            val scrollState = rememberScrollState()
+            Box(modifier = modifier.padding(padding).fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .verticalScroll(scrollState)
+                        .padding(16.dp)
+                ) {
                 ReportHeader()
 
                 if (success) {
@@ -134,8 +136,10 @@ fun Report(
                 
                 Spacer(modifier = Modifier.height(24.dp))
             }
+            subtleScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
         }
     }
+}
 }
 
 @Composable

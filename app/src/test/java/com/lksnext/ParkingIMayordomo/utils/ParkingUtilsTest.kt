@@ -96,7 +96,7 @@ class ParkingUtilsTest {
         assertEquals(R.string.spot_type_normal, ParkingUtils.getVehicleTypeLabelRes(VehicleType.CAR))
         assertEquals(R.string.spot_type_electric, ParkingUtils.getVehicleTypeLabelRes(VehicleType.ELECTRIC))
         assertEquals(R.string.spot_type_motorcycle, ParkingUtils.getVehicleTypeLabelRes(VehicleType.MOTORCYCLE))
-        assertEquals(R.string.spot_type_disabled, ParkingUtils.getVehicleTypeLabelRes(VehicleType.DISABLED))
+        assertEquals(R.string.spot_type_disabled, ParkingUtils.getVehicleTypeLabelRes(VehicleType.PMR))
     }
 
     @Test
@@ -212,11 +212,11 @@ class ParkingUtilsTest {
     }
 
     @Test
-    fun `isVehicleAllowedInSpot disabled only in disabled spot`() {
-        assertFalse(ParkingUtils.isVehicleAllowedInSpot(1, VehicleType.DISABLED))
-        assertTrue(ParkingUtils.isVehicleAllowedInSpot(6, VehicleType.DISABLED))
-        assertFalse(ParkingUtils.isVehicleAllowedInSpot(8, VehicleType.DISABLED))
-        assertTrue(ParkingUtils.isVehicleAllowedInSpot(10, VehicleType.DISABLED))
+    fun `isVehicleAllowedInSpot pmr only in disabled spot`() {
+        assertFalse(ParkingUtils.isVehicleAllowedInSpot(1, VehicleType.PMR))
+        assertTrue(ParkingUtils.isVehicleAllowedInSpot(6, VehicleType.PMR))
+        assertFalse(ParkingUtils.isVehicleAllowedInSpot(8, VehicleType.PMR))
+        assertTrue(ParkingUtils.isVehicleAllowedInSpot(10, VehicleType.PMR))
     }
 
     @Test

@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.RegisterViewModel
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
 import com.lksnext.ParkingIMayordomo.utils.LocaleManager
 import com.lksnext.ParkingIMayordomo.utils.TestTags
 
@@ -53,15 +54,15 @@ fun Register(
     val context = LocalContext.current
     val systemContext = remember(context) { LocaleManager.getSystemLocaleContext(context) }
     CompositionLocalProvider(LocalContext provides systemContext) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .imePadding()
-            .verticalScroll(scrollState),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
+    Box(modifier = modifier.fillMaxSize().imePadding()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .verticalScroll(scrollState),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
@@ -162,8 +163,10 @@ fun Register(
                 }
             }
         }
+        subtleScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
     }
     }
+}
 }
 
 @Composable

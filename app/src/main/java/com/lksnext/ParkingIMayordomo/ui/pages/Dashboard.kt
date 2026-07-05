@@ -6,6 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -31,6 +32,7 @@ import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.utils.TestTags
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.DashboardViewModel
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils.PARAM_SHOW_VEHICLE_ALERT
@@ -118,25 +120,27 @@ fun Dashboard(
                 }
             }
         ) { padding ->
-            LazyColumn(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item {
-                    Text(
-                        text = stringResource(R.string.my_reservations),
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                    Text(
-                        text = stringResource(R.string.welcome_user, user?.name ?: ""),
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+            val listState = rememberLazyListState()
+            Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    state = listState
+                ) {
+                    item {
+                        Text(
+                            text = stringResource(R.string.my_reservations),
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Normal
+                        )
+                        Text(
+                            text = stringResource(R.string.welcome_user, user?.name ?: ""),
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
                 }
 
                 if (vehicles != null && vehicles?.isEmpty() == true) {
@@ -170,6 +174,8 @@ fun Dashboard(
                 
                 item { Spacer(modifier = Modifier.height(80.dp)) }
             }
+            subtleScrollbar(listState, Modifier.align(Alignment.CenterEnd))
+        }
         }
     }
 
@@ -363,7 +369,7 @@ private fun DashboardReservationCard(
                 val spotType = ParkingUtils.getSpotType(reservation.spotNumber)
                 when (spotType) {
                     com.lksnext.ParkingIMayordomo.utils.SpotType.MOTORCYCLE -> com.lksnext.ParkingIMayordomo.data.model.VehicleType.MOTORCYCLE
-                    com.lksnext.ParkingIMayordomo.utils.SpotType.DISABLED -> com.lksnext.ParkingIMayordomo.data.model.VehicleType.DISABLED
+                    com.lksnext.ParkingIMayordomo.utils.SpotType.DISABLED -> com.lksnext.ParkingIMayordomo.data.model.VehicleType.PMR
                     com.lksnext.ParkingIMayordomo.utils.SpotType.ELECTRIC -> com.lksnext.ParkingIMayordomo.data.model.VehicleType.ELECTRIC
                     else -> com.lksnext.ParkingIMayordomo.data.model.VehicleType.CAR
                 }

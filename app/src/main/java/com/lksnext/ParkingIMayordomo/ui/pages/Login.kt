@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingIMayordomo.R
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.LoginViewModel
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
 import com.lksnext.ParkingIMayordomo.utils.LocaleManager
 import com.lksnext.ParkingIMayordomo.utils.TestTags
 
@@ -47,16 +48,16 @@ fun Login(
     val context = LocalContext.current
     val systemContext = remember(context) { LocaleManager.getSystemLocaleContext(context) }
     CompositionLocalProvider(LocalContext provides systemContext) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .imePadding()
-            .verticalScroll(scrollState)
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
+    Box(modifier = Modifier.fillMaxSize().imePadding()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .verticalScroll(scrollState)
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
@@ -233,6 +234,8 @@ fun Login(
                 }
             }
         }
+        subtleScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
     }
     }
+}
 }

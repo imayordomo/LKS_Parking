@@ -49,6 +49,10 @@ class ParkingRepositoryImpl : ParkingRepository {
         AuthManager.deleteNotification(id)
     }
 
+    override suspend fun deleteAllNotifications() {
+        AuthManager.deleteAllNotifications()
+    }
+
     override suspend fun addReservation(spotNumber: Int, date: String, startTime: String, endTime: String, vehicleId: String, licensePlate: String?) {
         AuthManager.addReservation(spotNumber, date, startTime, endTime, vehicleId, licensePlate)
     }

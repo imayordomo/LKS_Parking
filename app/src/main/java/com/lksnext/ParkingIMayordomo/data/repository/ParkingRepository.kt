@@ -20,6 +20,7 @@ interface ParkingRepository {
     suspend fun markAsRead(id: String)
     suspend fun markAllAsRead()
     suspend fun deleteNotification(id: String)
+    suspend fun deleteAllNotifications()
     
     suspend fun addReservation(spotNumber: Int, date: String, startTime: String, endTime: String, vehicleId: String, licensePlate: String? = null)
     suspend fun updateReservation(id: String, spotNumber: Int? = null, date: String? = null, startTime: String? = null, endTime: String? = null, vehicleId: String? = null, licensePlate: String? = null)

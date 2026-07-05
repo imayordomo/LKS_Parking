@@ -110,6 +110,12 @@
     <string name="notif_cancelled_msg">#%1$d plazako erreserba bertan behera utzi da %2$s egunerako.</string>
     <string name="notif_report_sent_title">Jakinarazpena bidalita</string>
     <string name="notif_report_sent_msg">Zure jakinarazpena jaso dugu. Eskerrik asko hobetzen laguntzeagatik.</string>
+    <string name="delete_all_notifications">Ezabatu guztiak</string>
+    <string name="delete_notification_confirm_title">Jakinarazpena ezabatu</string>
+    <string name="delete_notification_confirm_message">Ziur zaude jakinarazpen hau ezabatu nahi duzula?</string>
+    <string name="delete_all_notifications_confirm_message">Ziur zaude jakinarazpen guztiak ezabatu nahi dituzula?</string>
+    <string name="dont_ask_again">Ez berriro galdetu</string>
+    <string name="delete">Ezabatu</string>
 
     <!-- Profile Screen -->
     <string name="edit_profile">Editatu Profila</string>
@@ -124,7 +130,7 @@
     <string name="go_to_profile">JOAN PROFILERA</string>
     <string name="logout_confirmation">Ziur zaude saioa itxi nahi duzula?</string>
     <string name="vehicle_not_compatible_short">Ez da bateragarria</string>
-    <string name="license_plate_placeholder">ABC-1234</string>
+    <string name="license_plate_placeholder">1234 ABC</string>
     <string name="delete_vehicle_title">Ibilgailua ezabatu?</string>
     <string name="delete_vehicle_msg">Ziur zaude %1$s matrikuladun ibilgailua ezabatu nahi duzula?</string>
     <string name="delete_vehicle_error_title">Ezin da ezabatu</string>
@@ -224,10 +230,10 @@
     <string name="user_spot_legend">Zure plaza</string>
     <string name="confirm_reservation_btn">Baieztatu Erreserba - #%1$d Plaza</string>
     <string name="select_vehicle_dialog_title">Hautatu zure ibilgailua</string>
-    <string name="spot_type_normal">Arrunta</string>
+    <string name="spot_type_normal">Estandarra</string>
     <string name="spot_type_electric">Elektrikoa</string>
     <string name="spot_type_motorcycle">Motoa</string>
-    <string name="spot_type_disabled">Desgaitua</string>
+    <string name="spot_type_disabled">MUP</string>
     <plurals name="spots_available_count">
         <item quantity="one">%1$d plaza libre</item>
         <item quantity="other">%1$d plaza libre</item>
@@ -242,6 +248,7 @@
     <string name="status_occupied">BETETA</string>
     <string name="status_available">LIBRE</string>
     <string name="status_partially_occupied">PARTZIALKI BETETA</string>
+    <string name="status_free_now">ORAIN LIBRE</string>
     <string name="reservations_count_label">Egun honetarako erreserbak (%1$d): </string>
     <string name="no_license_plate">Matrikularik gabe</string>
     <string name="mine_suffix"> (Zu)</string>
@@ -257,7 +264,7 @@
     <string name="day_month_format">MMM d</string>
     <string name="spot_display">%1$s %2$d</string>
     <string name="spot_number_with_prefix">%1$s #%2$d</string>
-    <string name="license_plate_with_mine">%1$s%2$s</string>
+    <string name="license_plate_with_mine">%1$s %2$s</string>
     <string name="spot_with_type_format">%1$s #%2$d (%3$s)</string>
     <string name="discard_changes_title">Aldaketak baztertu?</string>
     <string name="discard_changes_msg">Aldaketak egin dituzu inprimakian. Orain irteten bazara, galdu egingo dira.</string>
@@ -291,9 +298,9 @@
 
     <!-- Language Selection -->
     <string name="select_language">Hizkuntza</string>
-    <string name="language_english">Ingelesa</string>
-    <string name="language_spanish">Gaztelera</string>
-    <string name="language_basque">Euskara</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_basque">Euskera</string>
 
     <!-- Delete Account -->
     <string name="delete_account">Kontua Ezabatu</string>

@@ -37,6 +37,7 @@ import com.lksnext.ParkingIMayordomo.data.model.Vehicle
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingBottomBar
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingDrawerContent
 import com.lksnext.ParkingIMayordomo.ui.components.ParkingTopAppBar
+import com.lksnext.ParkingIMayordomo.ui.components.subtleScrollbar
 import com.lksnext.ParkingIMayordomo.ui.theme.*
 import com.lksnext.ParkingIMayordomo.ui.viewmodel.NewReservationViewModel
 import com.lksnext.ParkingIMayordomo.utils.ParkingUtils
@@ -281,12 +282,13 @@ fun NewReservation(
                 )
             }
         ) { padding ->
+            val scrollState = rememberScrollState()
             Box(modifier = Modifier.fillMaxSize().padding(padding)) {
                 Column(
                     modifier = modifier
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background)
-                        .verticalScroll(rememberScrollState())
+                        .verticalScroll(scrollState)
                         .padding(16.dp)
                 ) {
                     NewReservationHeader(
@@ -359,6 +361,7 @@ fun NewReservation(
                     onShowIncompatibleVehicleDialog = { showIncompatibleVehicleDialog = true },
                     onShowVehicleDialog = { showVehicleDialog = true }
                 )
+                subtleScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
             }
         }
     }
