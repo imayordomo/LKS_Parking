@@ -28,7 +28,7 @@ interface ParkingRepository {
     
     suspend fun addVehicle(type: VehicleType, licensePlate: String)
     suspend fun removeVehicle(id: String)
-    suspend fun updateProfile(name: String, profileImage: String? = null)
+    suspend fun updateProfile(name: String, profileImage: String? = null, updateImage: Boolean = false)
     suspend fun updateFcmToken(token: String)
 
     suspend fun addReport(spotNumber: Int?, title: String, description: String)

@@ -160,4 +160,13 @@ object ParkingUtils {
                (end1 > start2 && end1 <= end2) ||
                (start1 <= start2 && end1 >= end2)
     }
+
+    fun isReservationActiveOrFuture(date: String, endTime: String): Boolean {
+        val today = formatDate(Date())
+        if (date > today) return true
+        if (date < today) return false
+        
+        val nowTime = formatTime(Date())
+        return endTime >= nowTime
+    }
 }

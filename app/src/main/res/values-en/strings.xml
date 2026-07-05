@@ -311,4 +311,5 @@
 
     <!-- Profile Image -->
     <string name="change_image">Change image</string>
+    <string name="delete_image">Delete image</string>
 </resources>

@@ -26,9 +26,9 @@ class ProfileViewModel(private val repository: ParkingRepository) : ViewModel() 
         _errorResId.value = null
     }
 
-    fun updateProfile(name: String, profileImage: String? = null) {
+    fun updateProfile(name: String, profileImage: String? = null, updateImage: Boolean = false) {
         viewModelScope.launch {
-            repository.updateProfile(name, profileImage)
+            repository.updateProfile(name, profileImage, updateImage)
         }
     }
 
