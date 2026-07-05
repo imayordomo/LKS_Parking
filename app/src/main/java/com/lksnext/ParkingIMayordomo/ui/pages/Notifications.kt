@@ -359,7 +359,7 @@ private fun NotificationsContent(
                     }
                     TextButton(
                         onClick = onDeleteAll,
-                        modifier = Modifier.testTag(TestTags.NOTIFICATIONS_MARK_ALL_READ),
+                        modifier = Modifier.testTag(TestTags.NOTIFICATIONS_DELETE_ALL),
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))

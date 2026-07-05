@@ -153,6 +153,7 @@ object TestTags {
     const val NOTIFICATIONS_MARK_ALL_READ = "notifications_mark_all_read"
     const val NOTIFICATIONS_ITEM_MARK_READ = "notifications_item_mark_read"
     const val NOTIFICATIONS_ITEM_DELETE = "notifications_item_delete"
+    const val NOTIFICATIONS_DELETE_ALL = "notifications_delete_all"
 
     // Report
     const val REPORT_TYPE_FIELD = "report_type_field"
