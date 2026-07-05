@@ -51,6 +51,7 @@ fun Login(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .imePadding()
             .verticalScroll(scrollState)
             .padding(16.dp),
         contentAlignment = Alignment.Center

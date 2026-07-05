@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 
 class NotificationsViewModel(private val repository: ParkingRepository) : ViewModel() {
     val notifications = repository.notifications
+    val user = repository.user
 
     fun markAsRead(id: String) {
         viewModelScope.launch {

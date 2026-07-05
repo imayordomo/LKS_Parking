@@ -86,6 +86,19 @@ object AuthManager {
         clearListeners()
 
         activeListeners.add(
+            db.collection(COLLECTION_USERS).document(userId)
+                .addSnapshotListener { snapshot, _ ->
+                    val firestoreUser = snapshot?.toObject<User>()
+                    if (firestoreUser != null) {
+                        _user.value = _user.value?.copy(
+                            name = firestoreUser.name,
+                            profileImage = firestoreUser.profileImage
+                        )
+                    }
+                }
+        )
+
+        activeListeners.add(
             db.collection(COLLECTION_RESERVATIONS)
                 .whereEqualTo(FIELD_USER_ID, userId)
                 .addSnapshotListener { snapshot, _ ->
@@ -320,32 +333,45 @@ object AuthManager {
         val finalDate = date ?: current.date
         val finalStart = startTime ?: current.startTime
         val finalEnd = endTime ?: current.endTime
+        val finalSpot = spotNumber ?: current.spotNumber
+        val finalVehicle = vehicleId ?: current.vehicleId
+        val finalPlate = licensePlate ?: current.licensePlate
+        val userName = _user.value?.name
 
-        val updates = mutableMapOf<String, Any?>()
-        spotNumber?.let { updates["spotNumber"] = it }
-        date?.let { updates["date"] = it }
-        startTime?.let { updates["startTime"] = it }
-        endTime?.let { updates["endTime"] = it }
-        vehicleId?.let { updates["vehicleId"] = it }
-        licensePlate?.let { updates["licensePlate"] = it }
-
-        db.collection(COLLECTION_RESERVATIONS).document(reservationId).update(updates.filterValues { it != null }).await()
-        reminderManager?.updateReminders(reservationId, getMillis(finalDate, finalStart), getMillis(finalDate, finalEnd))
-
+        // Delete existing reservation(s)
         if (current.groupId.isNotEmpty()) {
-            val siblings = _reservations.value.filter { it.groupId == current.groupId && it.id != reservationId }
-            for (sibling in siblings) {
-                val siblingUpdates = mutableMapOf<String, Any?>()
-                spotNumber?.let { siblingUpdates["spotNumber"] = it }
-                vehicleId?.let { siblingUpdates["vehicleId"] = it }
-                licensePlate?.let { siblingUpdates["licensePlate"] = it }
-                if (siblingUpdates.isNotEmpty()) {
-                    db.collection(COLLECTION_RESERVATIONS).document(sibling.id).update(siblingUpdates.filterValues { it != null }).await()
-                }
+            val allInGroup = _reservations.value.filter { it.groupId == current.groupId }
+            for (r in allInGroup) {
+                db.collection(COLLECTION_RESERVATIONS).document(r.id).delete().await()
+                reminderManager?.cancelReminders(r.id)
             }
+        } else {
+            db.collection(COLLECTION_RESERVATIONS).document(reservationId).delete().await()
+            reminderManager?.cancelReminders(reservationId)
         }
 
-        addInternalNotification(NotificationType.INFO, "notif_modified_title", "notif_modified_msg", listOf(spotNumber ?: current.spotNumber, finalDate, finalStart))
+        // Create new reservation(s) based on whether it crosses midnight
+        if (ParkingUtils.isMidnightCrossing(finalStart, finalEnd)) {
+            val groupId = UUID.randomUUID().toString()
+            val nextDate = ParkingUtils.addDays(finalDate, 1)
+
+            val ref1 = db.collection(COLLECTION_RESERVATIONS).document()
+            val res1 = Reservation(id = ref1.id, spotNumber = finalSpot, date = finalDate, startTime = finalStart, endTime = "23:59", userId = current.userId, vehicleId = finalVehicle, userName = userName, licensePlate = finalPlate, groupId = groupId)
+            ref1.set(res1).await()
+            reminderManager?.scheduleReminders(ref1.id, getMillis(finalDate, finalStart), getMillis(finalDate, "23:59"))
+
+            val ref2 = db.collection(COLLECTION_RESERVATIONS).document()
+            val res2 = Reservation(id = ref2.id, spotNumber = finalSpot, date = nextDate, startTime = "00:00", endTime = finalEnd, userId = current.userId, vehicleId = finalVehicle, userName = userName, licensePlate = finalPlate, groupId = groupId)
+            ref2.set(res2).await()
+            reminderManager?.scheduleReminders(ref2.id, getMillis(nextDate, "00:00"), getMillis(nextDate, finalEnd))
+        } else {
+            val ref = db.collection(COLLECTION_RESERVATIONS).document()
+            val res = Reservation(id = ref.id, spotNumber = finalSpot, date = finalDate, startTime = finalStart, endTime = finalEnd, userId = current.userId, vehicleId = finalVehicle, userName = userName, licensePlate = finalPlate)
+            ref.set(res).await()
+            reminderManager?.scheduleReminders(ref.id, getMillis(finalDate, finalStart), getMillis(finalDate, finalEnd))
+        }
+
+        addInternalNotification(NotificationType.INFO, "notif_modified_title", "notif_modified_msg", listOf(finalSpot, finalDate, finalStart))
     }
 
     @AddTrace(name = "delete_reservation_trace")
@@ -367,6 +393,8 @@ object AuthManager {
     suspend fun addVehicle(type: VehicleType, licensePlate: String) {
         val userId = _user.value?.id ?: return
         val normalizedPlate = licensePlate.trim().uppercase()
+        val existing = _vehicles.value?.any { it.licensePlate.equals(normalizedPlate, ignoreCase = true) }
+        if (existing == true) throw Exception("error_license_plate_exists")
         val id = UUID.randomUUID().toString()
         val newVehicle = Vehicle(id = id, userId = userId, type = type, licensePlate = normalizedPlate)
         db.collection(COLLECTION_VEHICLES).document(id).set(newVehicle).await()

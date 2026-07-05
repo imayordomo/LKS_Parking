@@ -11,6 +11,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -472,14 +473,18 @@ fun ReservationHistoryItem(
                     text = stringResource(R.string.spot_label_format, stringResource(R.string.spot_short_prefix), reservation.spotNumber),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = itemAlpha)
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = itemAlpha),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = displaySdf.format(resDate),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Surface(
                     color = badgeColor,

@@ -19,6 +19,9 @@ class ProfileViewModel(private val repository: ParkingRepository) : ViewModel() 
     private val _errorResId = MutableStateFlow<Int?>(null)
     val errorResId: StateFlow<Int?> = _errorResId.asStateFlow()
 
+    private val _isSavingVehicle = MutableStateFlow(false)
+    val isSavingVehicle: StateFlow<Boolean> = _isSavingVehicle.asStateFlow()
+
     fun clearError() {
         _errorResId.value = null
     }
@@ -30,7 +33,9 @@ class ProfileViewModel(private val repository: ParkingRepository) : ViewModel() 
     }
 
     fun addVehicle(type: VehicleType, licensePlate: String, onSuccess: () -> Unit) {
+        if (_isSavingVehicle.value) return
         viewModelScope.launch {
+            _isSavingVehicle.value = true
             _errorResId.value = null
             try {
                 repository.addVehicle(type, licensePlate)
@@ -40,6 +45,8 @@ class ProfileViewModel(private val repository: ParkingRepository) : ViewModel() 
                     "error_license_plate_exists" -> R.string.error_license_plate_exists
                     else -> R.string.error_unknown
                 }
+            } finally {
+                _isSavingVehicle.value = false
             }
         }
     }

@@ -70,6 +70,7 @@ fun Profile(
     val vehicles by viewModel.vehicles.collectAsState()
     val reservations by viewModel.reservations.collectAsState()
     val errorResId by viewModel.errorResId.collectAsState()
+    val isSavingVehicle by viewModel.isSavingVehicle.collectAsState()
     val notifications by viewModel.notifications.collectAsState()
 
     var showEditProfileDialog by rememberSaveable { mutableStateOf(false) }
@@ -344,6 +345,7 @@ fun Profile(
 
     if (showAddVehicleDialog) {
         AddVehicleDialog(
+            saving = isSavingVehicle,
             onDismiss = { showAddVehicleDialog = false },
             onAdd = { type, plate ->
                 viewModel.addVehicle(type, plate) {
@@ -493,7 +495,7 @@ fun LanguageSelector(modifier: Modifier = Modifier) {
     val currentLang = languages.find { it.code == currentLanguageCode } ?: languages[0]
     val localizedName = stringResource(currentLang.nameRes)
 
-    Box(modifier = modifier.width(220.dp), contentAlignment = Alignment.Center) {
+    Box(modifier = modifier.fillMaxWidth().widthIn(max = 220.dp), contentAlignment = Alignment.Center) {
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded }
@@ -661,7 +663,7 @@ fun EditProfileDialog(currentName: String, onDismiss: () -> Unit, onSave: (Strin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddVehicleDialog(onDismiss: () -> Unit, onAdd: (VehicleType, String) -> Unit) {
+fun AddVehicleDialog(saving: Boolean = false, onDismiss: () -> Unit, onAdd: (VehicleType, String) -> Unit) {
     var type by rememberSaveable { mutableStateOf(VehicleType.CAR) }
     var plate by rememberSaveable { mutableStateOf("") }
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -732,18 +734,23 @@ fun AddVehicleDialog(onDismiss: () -> Unit, onAdd: (VehicleType, String) -> Unit
         confirmButton = {
             Button(
                 onClick = { onAdd(type, plate) },
-                enabled = plate.isNotBlank(),
+                enabled = plate.isNotBlank() && !saving,
                 modifier = Modifier.testTag(TestTags.PROFILE_ADD_VEHICLE_ADD_BUTTON),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
+                if (saving) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
                 Text(stringResource(R.string.add))
             }
         },
         dismissButton = {
             TextButton(
                 onClick = { 
-                    onDismiss()
+                    if (!saving) onDismiss()
                 },
+                enabled = !saving,
                 modifier = Modifier.testTag(TestTags.PROFILE_ADD_VEHICLE_CANCEL)
             ) {
                 Text(stringResource(R.string.cancel))

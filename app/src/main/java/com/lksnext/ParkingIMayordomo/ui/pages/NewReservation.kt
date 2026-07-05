@@ -1091,7 +1091,9 @@ fun VehicleSelectionDialog(vehicles: List<Vehicle>, selectedSpot: Int, onDismiss
             modifier = Modifier.testTag(TestTags.NEW_RESERVATION_VEHICLE_SELECT_DIALOG),
             title = { Text(stringResource(R.string.select_vehicle_dialog_title)) },
             text = {
-                Column {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                ) {
                     vehicles.forEach { vehicle ->
                         val isCompatible = ParkingUtils.isVehicleAllowedInSpot(selectedSpot, vehicle.type)
                         ListItem(
