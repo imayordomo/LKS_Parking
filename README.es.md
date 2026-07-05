@@ -101,6 +101,10 @@ Recursos técnicos locales:
 - **[DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md)**: Guía detallada sobre arquitectura, estándares de código y flujo de trabajo.
 - **[COMMANDS.md](docs/COMMANDS.md)**: Listado de comandos útiles para el desarrollo y testing.
 
+Recursos técnicos externos:
+- **[GitHub Wiki](https://github.com/imayordomo/LKS_Parking/wiki)**: Información más detallada en la página Wiki del repositorio de GitHub.
+- **[DeepWiki](https://deepwiki.com/imayordomo/LKS_Parking)**: Documentación detallada disponible en DeepWiki.
+
 ---
 
 # Stack tecnológico
