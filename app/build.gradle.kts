@@ -122,7 +122,9 @@ val jacocoTestReport by tasks.registering(JacocoReport::class) {
         "**/ui/components/**",
         "**/ui/theme/**",
         "**/MainActivity.*",
-        "**/MyFirebaseMessagingService.*"
+        "**/MyFirebaseMessagingService.*",
+        "**/NotificationReceiver.*",
+        "**/AuthManager.*",
     )
     val fileFilter = coverageExclusions
     val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
